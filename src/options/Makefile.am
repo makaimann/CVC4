@@ -21,7 +21,11 @@
 # see src/options/Makefile.am
 
 VPATH = $(if $(COVERAGE_ON), $(realpath @srcdir@), @srcdir@)
-top_srcdir = $(if $(COVERAGE_ON), $(realpath @top_srcdir@), @top_srcdir@)
+if COVERAGE_ENABLED
+top_srcdir = $(realpath @top_srcdir@)
+else
+top_srcdir = @top_srcdir@
+endif
 
 OPTIONS_SRC_FILES = \
 	arith_options \
