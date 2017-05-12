@@ -20,11 +20,8 @@
 # Note: variable declarations may be moved in generated Makefile
 # see src/options/Makefile.am
 
-if COVERAGE_ENABLED
-VPATH = $(realpath @srcdir@)
-abs_top_srcdir = $(realpath @abs_top_srcdir@)
-top_srcdir = $(realpath @top_srcdir@)
-endif
+VPATH = $(if $(COVERAGE_ON), $(realpath @srcdir@), @srcdir@)
+abs_top_srcdir = $(if $(COVERAGE_ON), $(realpath @abs_top_srcdir@), @abs_top_srcdir@)
 
 OPTIONS_SRC_FILES = \
 	arith_options \

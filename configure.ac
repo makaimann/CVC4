@@ -914,9 +914,9 @@ AC_SUBST([DOXYGEN_EXTRACT_PRIVATE])
 AC_SUBST([DOXYGEN_EXTRACT_STATIC])
 
 DX_MAN_FEATURE(OFF)
-DX_PDF_FEATURE(ON)
+DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
-DX_DOT_FEATURE(ON)
+DX_DOT_FEATURE(OFF)
 DX_INIT_DOXYGEN($PACKAGE_NAME, config/doxygen.cfg, $srcdir/doc/doxygen)
 
 AC_ARG_ENABLE([unit-testing], AS_HELP_STRING([--disable-unit-testing], [don't build support for unit testing, even if available]), , [enable_unit_testing=check])

@@ -6,11 +6,8 @@
 # Note: variable declarations may be moved in generated Makefile
 # see src/expr/Makefile.am
 
-if COVERAGE_ENABLED
-VPATH = $(realpath @srcdir@)
-abs_top_srcdir = $(realpath @abs_top_srcdir@)
-top_srcdir = $(realpath @top_srcdir@)
-endif
+VPATH = $(if $(COVERAGE_ON), $(realpath @srcdir@), @srcdir@)
+abs_top_srcdir = $(if $(COVERAGE_ON), $(realpath @abs_top_srcdir@), @abs_top_srcdir@)
 
 AM_CPPFLAGS = \
 	-D__BUILDING_CVC4LIB \
