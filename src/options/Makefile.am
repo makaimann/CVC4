@@ -25,6 +25,7 @@ abs_top_srcdir = $(realpath @abs_top_srcdir@)
 top_srcdir = $(realpath @top_srcdir@)
 
 OPTIONS_SRC_FILES = \
+	matrix_options \
 	arith_options \
 	arrays_options \
 	base_options \
@@ -50,6 +51,7 @@ OPTIONS_SRC_FILES = \
 	uf_options
 
 OPTIONS_TEMPS = \
+	matrix_options.tmp \
 	arith_options.tmp \
 	arrays_options.tmp \
 	base_options.tmp \
@@ -75,6 +77,7 @@ OPTIONS_TEMPS = \
 	uf_options.tmp
 
 OPTIONS_OPTIONS_FILES = \
+	matrix_options.options \
 	arith_options.options \
 	arrays_options.options \
 	base_options.options \
@@ -100,6 +103,7 @@ OPTIONS_OPTIONS_FILES = \
 	uf_options.options
 
 OPTIONS_SEDS = \
+	matrix_options.sed \
 	arith_options.sed \
 	arrays_options.sed \
 	base_options.sed \
@@ -125,6 +129,7 @@ OPTIONS_SEDS = \
 	uf_options.sed
 
 OPTIONS_HEADS = \
+	matrix_options.h \
 	arith_options.h \
 	arrays_options.h \
 	base_options.h \
@@ -150,6 +155,7 @@ OPTIONS_HEADS = \
 	uf_options.h
 
 OPTIONS_CPPS = \
+	matrix_options.cpp \
 	arith_options.cpp \
 	arrays_options.cpp \
 	base_options.cpp \
@@ -440,3 +446,8 @@ $(DOCUMENTATION_FILES) : % : %_template %_template.sed mkoptions summary.sed
 # directories that are cleaned first.  Without this rule, "distclean"
 # fails.
 %.Plo:; $(MKDIR_P) "$(dir $@)" && : > "$@"
+matrix_options:;
+.PHONY: matrix_options.tmp
+matrix_options.tmp:
+	echo "$@" "$(@:.tmp=)"
+	$(AM_V_GEN)(cp "@srcdir@/$(@:.tmp=)" "$@" || true)

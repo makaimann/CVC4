@@ -456,7 +456,11 @@ libcvc4_la_SOURCES = \
 	theory/uf/theory_uf_rewriter.h \
 	theory/uf/theory_uf_strong_solver.cpp \
 	theory/uf/theory_uf_strong_solver.h \
-	theory/uf/theory_uf_type_rules.h
+	theory/uf/theory_uf_type_rules.h \
+	theory/matrix/theory_matrix.h \
+	theory/matrix/theory_matrix.cpp \
+	theory/matrix/theory_matrix_rewriter.h \
+	theory/matrix/theory_matrix_type_rules.h
 
 nodist_libcvc4_la_SOURCES = \
 	theory/rewriter_tables.h \
@@ -550,7 +554,8 @@ EXTRA_DIST = \
 	theory/strings/kinds \
 	theory/theory_traits_template.h \
 	theory/type_enumerator_template.cpp \
-	theory/uf/kinds
+	theory/uf/kinds \
+	theory/matrix/kinds
 
 svn_versioninfo.cpp: svninfo
 	$(AM_V_GEN)( \

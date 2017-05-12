@@ -1,0 +1,65 @@
+# kinds                                                               -*- sh -*-
+#
+# For documentation on this file format, please refer to
+# src/theory/builtin/kinds.
+#
+
+theory THEORY_MATRIX ::CVC4::theory::matrix::TheoryMatrix "theory/matrix/theory_matrix.h"
+typechecker "theory/matrix/theory_matrix_type_rules.h"
+rewriter ::CVC4::theory::matrix::TheoryMatrixRewriter "theory/matrix/theory_matrix_rewriter.h"
+
+properties check
+
+# Theory content goes here.
+
+# constants...
+constant CONST_MATRIX \
+         ::CVC4::Matrix \
+         ::CVC4::MatrixHashFunction \
+         "util/matrix.h" \
+         "A matrix constant; payload is an instance of the CVC4::Matrix class"
+
+constant VECTOR_TYPE \
+         ::CVC4::VectorSize \
+         "CVC4::UnsignedHashFunction< ::CVC4::VectorSize >" \
+         "util/vector.h" \
+         "vector type"
+
+constant CONST_VECTOR \
+         ::CVC4::Vector \
+         ::CVC4::VectorHashFunction \
+         "util/vector.h" \
+         "a constant vector; payload is an instance of the CVC4::Vector class"
+
+constant MATRIX_INDEX_OP \
+         ::CVC4::MatrixIndex \
+         ::CVC4::MatrixIndexHashFunction \
+         "util/matrix.h" \
+         "operator for matrix indexing; payload is an instance of the CVC4::MatrixIndex class"
+
+constant VECTOR_INDEX_OP \
+         ::CVC4::VectorIndex \
+         ::CVC4::VectorIndexHashFunction \
+         "uitl/vector.h" \
+         "operator for vector indexing; payload is an instance of the CVC4::VectorIndex class"
+         
+# types...
+
+# operators...
+
+operator VECTOR_IN_RANGE 2 "is vector in the range of a matrix; first argument is a vector, second is a matrix"
+
+operator MATRIX_VECTOR_MULT 2 "multiply a matrix by a vector; first argument is a matrix, seocnd is a vector"
+
+operator MATRIX_ADD 2 "add two matrices; both are matrices of the same dimensions"
+
+paramaterized MATRIX_INDEX MATRIX_INDEX_OP 1 "matrix index; first parameter is a MATRIX_INDEX_OP, second is a Matrix term"
+
+parameterized VECTOR_INDEX VECTOR_INDEX_OP 1 "vector index; first parameter is a VECTOR_INDEX_OP, second is a Vector term"
+
+# typerules...
+typerule VECTOR_IN_RANGE ::CVC4::theory::matrix::LinearAlgebraTypeRule
+typerule MATRIX_VECTOR_MULT ::CVC4::theory::matrix::LinearAlgebraTypeRule
+typerule MATRIX_ADD ::CVC4::theory::matrix::LinearAlgebraTypeRule
+
+endtheory
