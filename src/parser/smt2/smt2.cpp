@@ -56,6 +56,14 @@ void Smt2::addArithmeticOperators() {
   Parser::addOperator(kind::GEQ);
 }
 
+void Smt2::addMatrixOperators() {
+  addOperator(kind::VECTOR_IN_RANGE, "vrange");
+  addOperator(kind::MATRIX_VECTOR_MULT, "mvmult");
+  addOperator(kind::MATRIX_ADD, "madd");
+  Parser::addOperator(MATRIX_INDEX);
+  Parser::addOperator(VECTOR_INDEX);
+}
+
 void Smt2::addBitvectorOperators() {
   addOperator(kind::BITVECTOR_CONCAT, "concat");
   addOperator(kind::BITVECTOR_NOT, "bvnot");
@@ -182,6 +190,12 @@ void Smt2::addTheory(Theory theory) {
   case THEORY_ARRAYS:
     addOperator(kind::SELECT, "select");
     addOperator(kind::STORE, "store");
+    break;
+
+  case THEORY_MATRIX:
+    addMatrixOperators();
+    defineType("Matrix", getExprManager()->matrixType());
+    defineType("Vector", getExprManager()->vectorType());
     break;
 
   case THEORY_BITVECTORS:

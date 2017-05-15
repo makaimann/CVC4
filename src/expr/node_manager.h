@@ -845,6 +845,10 @@ public:
   /** Make the type of bitvectors of size <code>size</code> */
   inline TypeNode mkBitVectorType(unsigned size);
 
+  // matrix mk
+  inline TypeNode mkVectorType(unsigned length);
+  // end matrix mk
+
   /** Make the type of arrays with the given parameterization */
   inline TypeNode mkArrayType(TypeNode indexType, TypeNode constituentType);
 

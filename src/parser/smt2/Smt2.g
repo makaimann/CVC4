@@ -1732,6 +1732,10 @@ simpleSymbolicExprNoKeyword[CVC4::SExpr& sexpr]
       std::string binString = AntlrInput::tokenTextSubstr($BINARY_LITERAL, 2);
       sexpr = SExpr(Integer(binString, 2));
     }
+  | MATRIX_LITERAL
+    { std::string matString = AntlrInput::tokenText($MATRIX_LITERAL);
+      sexpr = SExpr(Matrix(matString));
+    }
   | str[s,false]
     { sexpr = SExpr(s); }
 //  | LPAREN_TOK STRCST_TOK
@@ -2275,6 +2279,12 @@ term[CVC4::Expr& expr, CVC4::Expr& expr2]
     { assert( AntlrInput::tokenText($BINARY_LITERAL).find("#b") == 0 );
       std::string binString = AntlrInput::tokenTextSubstr($BINARY_LITERAL, 2);
       expr = MK_CONST( BitVector(binString, 2) ); }
+
+  | MATRIX_LITERAL
+    {
+      std::string matString = AntlrInput::tokenText($MATRIX_LITERAL);
+      expr = MK_CONST( Matrix(matString) );
+    }
 
   | str[s,false]
     { expr = MK_CONST( ::CVC4::String(s) ); }
@@ -3139,6 +3149,7 @@ FP_RTP_FULL_TOK : 'roundTowardPositive';
 FP_RTN_FULL_TOK : 'roundTowardNegative';
 FP_RTZ_FULL_TOK : 'roundTowardZero';
 
+
 /**
  * A sequence of printable ASCII characters (except backslash) that starts
  * and ends with | and does not otherwise contain |.
@@ -3227,6 +3238,13 @@ HEX_LITERAL
  */
 BINARY_LITERAL
   : '#b' ('0' | '1')+
+  ;
+
+/**
+ * Matches a matrix constant.
+*/
+MATRIX_LITERAL
+  : '{{' (DIGIT+ | ',' | '{' | '}')+ '}'
   ;
 
 /**

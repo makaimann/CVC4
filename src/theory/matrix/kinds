@@ -13,15 +13,24 @@ properties check
 # Theory content goes here.
 
 # constants...
+
+#Haven't implemented this one yet
+constant MATRIX_TYPE \
+         ::CVC4::MatrixDim \
+         "CVC4::MatrixDimHashFunction" \
+         "util/matrix.h" \
+         "matrix type"
+
 constant CONST_MATRIX \
          ::CVC4::Matrix \
          ::CVC4::MatrixHashFunction \
          "util/matrix.h" \
          "A matrix constant; payload is an instance of the CVC4::Matrix class"
 
+# maybe use a special function instead of parameterized function
 constant VECTOR_TYPE \
-         ::CVC4::VectorSize \
-         "CVC4::UnsignedHashFunction< ::CVC4::VectorSize >" \
+         ::CVC4::VectorLength \
+         "CVC4::UnsignedHashFunction< ::CVC4::VectorLength >" \
          "util/vector.h" \
          "vector type"
 
