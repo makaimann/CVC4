@@ -635,6 +635,18 @@ BitVectorType ExprManager::mkBitVectorType(unsigned size) const {
   return BitVectorType(Type(d_nodeManager, new TypeNode(d_nodeManager->mkBitVectorType(size))));
 }
 
+//matrix mk theory
+MatrixType ExprManager::mkMatrixType(unsigned rows, unsigned cols) const {
+  NodeManagerScope nms(d_nodeManager);
+  return MatrixType(Type(d_nodeManager, new TypeNode(d_nodeManager->mkMatrixType(rows, cols))));
+}
+
+VectorType ExprManager::mkVectorType(unsigned length) const {
+  NodeManagerScope nms(d_nodeManager);
+  return VectorType(Type(d_nodeManager, new TypeNode(d_nodeManager->mkVectorType(length))));
+}
+//end matrix mk theory
+
 ArrayType ExprManager::mkArrayType(Type indexType, Type constituentType) const {
   NodeManagerScope nms(d_nodeManager);
   return ArrayType(Type(d_nodeManager, new TypeNode(d_nodeManager->mkArrayType(*indexType.d_typeNode, *constituentType.d_typeNode))));

@@ -2808,6 +2808,16 @@ sortSymbol[CVC4::Type& t, CVC4::parser::DeclarationCheck check]
             PARSER_STATE->parseError("Illegal floating-point significand size");
           }
           t = EXPR_MANAGER->mkFloatingPointType(numerals[0],numerals[1]);
+        } else if ( name == "Matrix" ) {
+          if( numerals.size() != 2) {
+            PARSER_STATE->parseError("Illegal Matrix type.");
+          }
+          t = EXPR_MANAGER->mkMatrixType(numerals[0], numerals[1]);
+        } else if ( name == "Vector" ) {
+          if( numerals.size() != 1 ) {
+            PARSER_STATE->parseError("Illegal Vector type.");
+          }
+          t = EXPR_MANAGER->mkVectorType(numerals[0]);
         } else {
           std::stringstream ss;
           ss << "unknown indexed sort symbol `" << name << "'";

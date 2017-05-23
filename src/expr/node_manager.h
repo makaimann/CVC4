@@ -846,6 +846,7 @@ public:
   inline TypeNode mkBitVectorType(unsigned size);
 
   // matrix mk
+  inline TypeNode mkMatrixType(unsigned rows, unsigned cols);
   inline TypeNode mkVectorType(unsigned length);
   // end matrix mk
 

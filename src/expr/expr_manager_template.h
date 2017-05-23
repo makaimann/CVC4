@@ -367,6 +367,11 @@ public:
   /** Make a type representing a bit-vector of the given size. */
   BitVectorType mkBitVectorType(unsigned size) const;
 
+  // matrix mk
+  MatrixType mkMatrixType(unsigned rows, unsigned cols) const;
+  VectorType mkVectorType(unsigned length) const;
+  // end matrix mk
+
   /** Make the type of arrays with the given parameterization. */
   ArrayType mkArrayType(Type indexType, Type constituentType) const;
 

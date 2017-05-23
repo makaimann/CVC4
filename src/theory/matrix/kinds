@@ -49,7 +49,7 @@ constant MATRIX_INDEX_OP \
 constant VECTOR_INDEX_OP \
          ::CVC4::VectorIndex \
          ::CVC4::VectorIndexHashFunction \
-         "uitl/vector.h" \
+         "utill/vector.h" \
          "operator for vector indexing; payload is an instance of the CVC4::VectorIndex class"
          
 # types...
@@ -58,7 +58,7 @@ constant VECTOR_INDEX_OP \
 
 operator VECTOR_IN_RANGE 2 "is vector in the range of a matrix; first argument is a vector, second is a matrix"
 
-operator MATRIX_VECTOR_MULT 2 "multiply a matrix by a vector; first argument is a matrix, seocnd is a vector"
+operator MATRIX_VECTOR_MULT 2 "multiply a matrix by a vector; first argument is a matrix, second is a vector"
 
 operator MATRIX_ADD 2 "add two matrices; both are matrices of the same dimensions"
 

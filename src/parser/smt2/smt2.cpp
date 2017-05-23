@@ -60,8 +60,8 @@ void Smt2::addMatrixOperators() {
   addOperator(kind::VECTOR_IN_RANGE, "vrange");
   addOperator(kind::MATRIX_VECTOR_MULT, "mvmult");
   addOperator(kind::MATRIX_ADD, "madd");
-  Parser::addOperator(MATRIX_INDEX);
-  Parser::addOperator(VECTOR_INDEX);
+  Parser::addOperator(kind::MATRIX_INDEX);
+  Parser::addOperator(kind::VECTOR_INDEX);
 }
 
 void Smt2::addBitvectorOperators() {
@@ -194,8 +194,9 @@ void Smt2::addTheory(Theory theory) {
 
   case THEORY_MATRIX:
     addMatrixOperators();
-    defineType("Matrix", getExprManager()->matrixType());
-    defineType("Vector", getExprManager()->vectorType());
+    // I think these should be in Smt2.g
+    //    defineType("Matrix", getExprManager()->matrixType());
+    //    defineType("Vector", getExprManager()->vectorType());
     break;
 
   case THEORY_BITVECTORS:
