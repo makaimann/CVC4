@@ -49,7 +49,7 @@ constant MATRIX_INDEX_OP \
 constant VECTOR_INDEX_OP \
          ::CVC4::VectorIndex \
          ::CVC4::VectorIndexHashFunction \
-         "utill/vector.h" \
+         "util/vector.h" \
          "operator for vector indexing; payload is an instance of the CVC4::VectorIndex class"
          
 # types...
