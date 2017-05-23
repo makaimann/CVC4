@@ -17,15 +17,15 @@ public:
   {}
 
  Matrix(const Rational** vals):
-   d_rows((unsigned) vals.size()),
-   d_cols((unsigned) vals[0].size()),
+   d_rows((unsigned) vals->size()),
+   d_cols((unsigned) vals[0]->size()),
    d_values(vals)
    {}
 
  //I know it's bad form to put this in the header, but don't
  // want to create too many files yet
  Matrix(const std::string& mat) {
-  std::string s = mat
+  std::string s = mat;
   std::string open = "{";
   std::string close = "}";
   std::string delimiter = ",";
@@ -55,14 +55,16 @@ public:
   }
   // populate an array of Rationals
   Rational d_values[ratmat.size()][ratmat[0].size()];
-  for(unsigned i = 0; i < strmat.size(); ++i){
-    for(unsigned j= 0; j < strmat[i].size(); ++j) {
+  for(unsigned i = 0; i < ratmat.size(); ++i){
+    for(unsigned j= 0; j < ratmat[i].size(); ++j) {
       d_values[i][j] = ratmat[i][j];
     }
   }
   
-  // call constructor using array
-  Matrix(d_values);
+  // Not allowed? call constructor using array
+  //Matrix(d_values);
+  d_rows = ratmat.size();
+  d_cols = ratmat[0].size();
  }
 
 /* convenient methods */7
