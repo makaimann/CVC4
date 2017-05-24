@@ -11,16 +11,16 @@ namespace CVC4 {
   class CVC4_PUBLIC Vector {
   public:
 
-    Vector(const Rational* vals):
+  Vector(const std::vector<Rational> vals):
     d_length(vals.size()),
     d_values(vals)
       {}
 
 
-    Vector(const double* vals) {
+    Vector(const std::vector<double> vals) {
       unsigned d_length = vals.size();
       // should this be a reference?
-      Rational[] d_values = Rational[vals.size()];
+      vector<Rational> d_values;
       for(int i = 0; i < vals.size(); ++i) {
         d_values[i] = Rational(vals[i])
       }
@@ -28,7 +28,7 @@ namespace CVC4 {
 
   private:
     unsigned d_length;
-    Rational[] d_values;
+    vector<Rational> d_values;
     
   }; /* class Vector */
 
