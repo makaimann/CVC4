@@ -10,17 +10,19 @@ namespace CVC4 {
 class CVC4_PUBLIC Matrix {
 public:
   
- Matrix(unsigned rows, unsigned cols, Rational** vals):
-  d_rows(rows),
-  d_cols(cols),
-  d_values(vals)
-  {}
+  Matrix(unsigned rows, unsigned cols, std::vector< std::vector <Rational> > vals)
+  {
+    d_rows = rows;
+    d_cols = cols;
+    d_values = vals;
+  }
 
- Matrix(const Rational** vals):
-   d_rows((unsigned) vals->size()),
-   d_cols((unsigned) vals[0]->size()),
-   d_values(vals)
-   {}
+ Matrix(const std::vector< std::vector <Rational>> vals)
+   {
+     d_rows = vals.size();
+     d_cols = vals[0].size();
+     d_values = vals
+   }
 
  //I know it's bad form to put this in the header, but don't
  // want to create too many files yet
@@ -54,15 +56,17 @@ public:
     cindex = s.find(close);
   }
   // populate an array of Rationals
-  Rational d_values[ratmat.size()][ratmat[0].size()];
+  /*  Rational d_values[ratmat.size()][ratmat[0].size()];
   for(unsigned i = 0; i < ratmat.size(); ++i){
     for(unsigned j= 0; j < ratmat[i].size(); ++j) {
       d_values[i][j] = ratmat[i][j];
     }
   }
+  */
   
   // Not allowed? call constructor using array
   //Matrix(d_values);
+  d_values = ratmat;
   d_rows = ratmat.size();
   d_cols = ratmat[0].size();
  }
@@ -83,7 +87,7 @@ public:
 private:
   unsigned d_rows;
   unsigned d_cols;
-  Rational** d_values;
+  std::vector< std::vector <Rational>> d_values;
   
 };/*class Matrix*/
 
