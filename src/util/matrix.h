@@ -21,7 +21,7 @@ public:
    {
      d_rows = vals.size();
      d_cols = vals[0].size();
-     d_values = vals
+     d_values = vals;
    }
 
  //I know it's bad form to put this in the header, but don't
@@ -140,4 +140,4 @@ struct CVC4_PUBLIC MatrixIndex {
    }
  };/* struct MatrixDimHashFunction */
 
-};/* namespace CVC4 */
+}/* namespace CVC4 */

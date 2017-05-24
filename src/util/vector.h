@@ -20,7 +20,7 @@ namespace CVC4 {
     Vector(const std::vector<double> vals) {
       unsigned d_length = vals.size();
       // should this be a reference?
-      vector<Rational> d_values;
+      std::vector<Rational> d_values;
       for(int i = 0; i < vals.size(); ++i) {
         d_values[i] = Rational(vals[i])
       }
@@ -28,7 +28,7 @@ namespace CVC4 {
 
   private:
     unsigned d_length;
-    vector<Rational> d_values;
+    std::vector<Rational> d_values;
     
   }; /* class Vector */
 
