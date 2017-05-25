@@ -26,7 +26,7 @@ public:
 
  //I know it's bad form to put this in the header, but don't
  // want to create too many files yet
-/* Matrix(const std::string& mat) {
+Matrix(const std::string& mat) {
   std::string s = mat;
   std::string open = "{";
   std::string close = "}";
@@ -60,9 +60,9 @@ public:
   d_rows = ratmat.size();
   d_cols = ratmat[0].size();
  }
-*/
 
-/* convenient methods */7
+
+/* convenient methods */
  unsigned hash() const {
   // maybe not the best hash function but it works for now
    size_t hashval = 0;
