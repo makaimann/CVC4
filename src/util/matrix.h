@@ -1,5 +1,8 @@
 #include "cvc4_public.h"
 
+#ifndef __CVC4__MATRIX_H
+#define __CVC4__MATRIX_H
+
 #include <iosfwd>
 
 #include "base/exception.h"
@@ -132,3 +135,5 @@ struct CVC4_PUBLIC MatrixIndex {
  };/* struct MatrixDimHashFunction */
 
 }/* namespace CVC4 */
+
+#endif /* __CVC4__MATRIX_H */

@@ -1,9 +1,11 @@
 #include "cvc4_public.h"
 
+#ifndef __CVC4__VECTOR_H
+#define __CVC4__VECTOR_H
+
 #include <iosfwd>
 
 #include "base/exception.h"
-
 #include "util/rational.h"
 
 namespace CVC4 {
@@ -17,12 +19,12 @@ namespace CVC4 {
       {}
 
 
-    Vector(const std::vector<double> vals) {
+    Vector(const std::vector<signed int> vals) {
       unsigned d_length = vals.size();
       // should this be a reference?
       std::vector<Rational> d_values;
       for(int i = 0; i < vals.size(); ++i) {
-        d_values[i] = Rational(vals[i])
+        d_values[i] = Rational(vals[i]);
       }
     }
 
@@ -68,3 +70,5 @@ namespace CVC4 {
   }; /* struct VectorIndexHashFunction */
   
 } /* end namespace CVC4 */
+
+#endif /* __CVC4__VECTOR_H */
