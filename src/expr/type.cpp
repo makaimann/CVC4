@@ -523,6 +523,14 @@ unsigned BitVectorType::getSize() const {
   return d_typeNode->getBitVectorSize();
 }
 
+std::vector<unsigned> MatrixType::getDim() const {
+  return d_typeNode->getMatrixDim();
+}
+
+unsigned VectorType::getLength() const {
+  return d_typeNode->getVectorLength();
+}
+
 unsigned FloatingPointType::getExponentSize() const {
   return d_typeNode->getFloatingPointExponentSize();
 }

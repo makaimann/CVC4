@@ -122,6 +122,12 @@ struct CVC4_PUBLIC MatrixIndex {
    unsigned cols;
    MatrixDim(unsigned rows, unsigned cols)
    : rows(rows), cols(cols) {}
+   operator std::vector<unsigned> () const {
+     std::vector<unsigned> v;
+     v.push_back(rows);
+     v.push_back(cols);
+     return v;
+   }
  };/* struct MatrixDim */
 
 

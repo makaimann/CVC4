@@ -578,6 +578,12 @@ public:
   /** Is this a bit-vector type of size <code>size</code> */
   bool isBitVector(unsigned size) const;
 
+  /** Is this a matrix type */
+  bool isMatrix() const;
+
+  /** Is this a vector type */
+  bool isVector() const;
+
   /** Is this a datatype type */
   bool isDatatype() const;
 
@@ -613,6 +619,12 @@ public:
 
   /** Get the size of this bit-vector type */
   unsigned getBitVectorSize() const;
+
+  /** Get the dimensions of this matrix type */
+  std::vector<unsigned> getMatrixDim() const;
+
+  /** Get the length of this vector type */
+  unsigned getVectorLength() const;
 
   /** Is this a sort kind */
   bool isSort() const;
@@ -971,6 +983,17 @@ inline bool TypeNode::isBitVector() const {
     ( isPredicateSubtype() && getSubtypeParentType().isBitVector() );
 }
 
+/** Is this a matrix type */
+inline bool TypeNode::isMatrix() const {
+  return getKind() == kind::MATRIX_TYPE;
+  //Not sure if I need PredicateSubtype stuff
+}
+
+/** Is this a vector type */
+inline bool TypeNode::isVector() const {
+  return getKind() == kind::VECTOR_TYPE;
+}
+
 /** Is this a datatype type */
 inline bool TypeNode::isDatatype() const {
   return getKind() == kind::DATATYPE_TYPE || getKind() == kind::PARAMETRIC_DATATYPE ||
@@ -1052,6 +1075,18 @@ inline unsigned TypeNode::getFloatingPointSignificandSize() const {
 inline unsigned TypeNode::getBitVectorSize() const {
   Assert(isBitVector());
   return getConst<BitVectorSize>();
+}
+
+/** Get the dimensions of this matrix type */
+inline std::vector<unsigned> TypeNode::getMatrixDim() const {
+  Assert(isMatrix());
+  return getConst<MatrixDim>();
+}
+
+/** Get the length of this vector type */
+inline unsigned TypeNode::getVectorLength() const {
+  Assert(isVector());
+  return getConst<VectorLength>();
 }
 
 inline const SubrangeBounds& TypeNode::getSubrangeBounds() const {

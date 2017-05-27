@@ -1135,6 +1135,14 @@ inline TypeNode NodeManager::mkBitVectorType(unsigned size) {
   return TypeNode(mkTypeConst<BitVectorSize>(BitVectorSize(size)));
 }
 
+inline TypeNode NodeManager::mkMatrixType(unsigned rows, unsigned cols) {
+  return TypeNode(mkTypeConst<MatrixDim>(MatrixDim(rows, cols)));
+}
+
+inline TypeNode NodeManager::mkVectorType(unsigned length) {
+  return TypeNode(mkTypeConst<VectorLength>(VectorLength(length)));
+}
+
 inline TypeNode NodeManager::mkFloatingPointType(unsigned exp, unsigned sig) {
   return TypeNode(mkTypeConst<FloatingPointSize>(FloatingPointSize(exp,sig)));
 }
