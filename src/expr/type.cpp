@@ -449,6 +449,16 @@ BitVectorType::BitVectorType(const Type& t) throw(IllegalArgumentException) :
   PrettyCheckArgument(isNull() || isBitVector(), this);
 }
 
+MatrixType::MatrixType(const Type& t) throw(IllegalArgumentException) :
+  Type(t) {
+  PrettyCheckArgument(isNull() || isMatrix(), this);
+}
+
+VectorType::VectorType(const Type& t) throw(IllegalArgumentException) :
+  Type(t) {
+  PrettyCheckArgument(isNull() || isVector(), this);
+}    
+
 FloatingPointType::FloatingPointType(const Type& t) throw(IllegalArgumentException) :
   Type(t) {
   PrettyCheckArgument(isNull() || isFloatingPoint(), this);
