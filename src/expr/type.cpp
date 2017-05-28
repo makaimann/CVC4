@@ -242,6 +242,18 @@ bool Type::isBitVector() const {
   return d_typeNode->isBitVector();
 }
 
+/** Is this the matrix type? */
+bool Type::isMatrix() const {
+  NodeManagerScope nms(d_nodeManager);
+  return d_typeNode->isMatrix();
+}
+
+/** Is this the vector type? */
+bool Type::isVector() const {
+  NodeManagerScope nms(d_nodeManager);
+  return d_typeNode->isVector();
+}  
+
 /** Is this the floating-point type? */
 bool Type::isFloatingPoint() const {
   NodeManagerScope nms(d_nodeManager);

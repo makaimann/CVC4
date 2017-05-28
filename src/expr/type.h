@@ -279,6 +279,18 @@ public:
   bool isBitVector() const;
 
   /**
+   * Is this the matrix type?
+   * @return true if the type is a matrix type
+   */
+  bool isMatrix() const;
+
+  /**
+   * Is this the vector type?
+   * @return true if the type is a vector type
+   */
+  bool isVector() const;
+
+  /**
    * Is this the floating-point type?
    * @return true if the type is a floating-point type
    */
