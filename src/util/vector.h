@@ -19,14 +19,34 @@ namespace CVC4 {
       {}
 
 
-    Vector(const std::vector<signed int> vals) {
-      unsigned d_length = vals.size();
-      // should this be a reference?
-      std::vector<Rational> d_values;
-      for(int i = 0; i < vals.size(); ++i) {
-        d_values[i] = Rational(vals[i]);
-      }
+  Vector(const std::vector<signed int> vals) {
+    d_length = vals.size();
+    // should this be a reference?
+    for(unsigned i = 0; i < vals.size(); ++i) {
+      d_values.push_back(Rational(vals[i]));
     }
+  }
+
+  bool operator ==(const Vector& y) const {
+    if (d_length != y.d_length) return false;
+    // Not sure how equality of std::vector works
+    return d_values == y.d_values;
+  }
+
+  /* convenient methods */
+  unsigned hash() const {
+    //maybe not the best hash function but it works for now
+    unsigned hashval = 0;
+    for(unsigned i = 0; i < d_length; ++i) {
+      hashval += d_values[i].getNumerator().hash();
+      hashval += d_values[i].getDenominator().hash();
+    }
+    return hashval;
+  }
+
+  std::vector<Rational> getValues() const {
+    return d_values;
+  }
 
   private:
     unsigned d_length;
@@ -42,12 +62,12 @@ namespace CVC4 {
     operator unsigned () const {return length; }
   }; /* struct VectorLength */
 
-  template <typename T>
-  struct CVC4_PUBLIC UnsignedHashFunction {
-    inline size_t operator()(const T& x) const {
-      return (size_t) x;
+  /* Hash function for Vector constants */
+  struct CVC4_PUBLIC VectorHashFunction {
+    inline size_t operator()(const Vector& V) const {
+      return V.hash();
     }
-  };
+  }; /* struct VectorHashFunction*/
 
   struct CVC4_PUBLIC VectorIndex {
     unsigned index;
@@ -68,6 +88,22 @@ namespace CVC4 {
       return hash;
     }
   }; /* struct VectorIndexHashFunction */
+
+  inline std::ostream& operator <<(std::ostream& os, const Vector& v) CVC4_PUBLIC;
+  inline std::ostream& operator <<(std::ostream& os, const Vector& v) {
+    return os << v.getValues();
+  }
+
+  //Not sure why I have to define this here, but BitVectorSize doesn't overload <<
+  inline std::ostream& operator <<(std::ostream& os, const VectorLength& vl) CVC4_PUBLIC;
+  inline std::ostream& operator <<(std::ostream& os, const VectorLength& vl) {
+    return os << "VectorLength [" << vl.length << "]";
+  }
+
+  inline std::ostream& operator <<(std::ostream& os, const VectorIndex& vi) CVC4_PUBLIC;
+  inline std::ostream& operator <<(std::ostream& os, const VectorIndex& vi) {
+    return os << "VectorIndex [" << vi.index << "]";
+  }
   
 } /* end namespace CVC4 */
 

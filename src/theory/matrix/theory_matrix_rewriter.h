@@ -34,8 +34,15 @@ public:
    * rewritten by that theory's rewriter.
    */
   static RewriteResponse postRewrite(TNode node) {
+    NodeManager* nm = NodeManager::currentNM();
 
     // Implement me!
+    if(node.getKind() == kind::EQUAL) {
+      if (node[0] == node[1]) {
+        Trace("matrix-postrewrite") << "Matrix::postRewrite returning true" << std::endl;
+        return RewriteResponse(REWRITE_DONE, nm->mkConst(true));
+      }
+    }
 
     // This default implementation
     return RewriteResponse(REWRITE_DONE, node);

@@ -1734,7 +1734,7 @@ simpleSymbolicExprNoKeyword[CVC4::SExpr& sexpr]
     }
   | MATRIX_LITERAL
     { std::string matString = AntlrInput::tokenText($MATRIX_LITERAL);
-      sexpr = SExpr(Matrix(matString));
+      sexpr = SExpr(matString);
     }
   | str[s,false]
     { sexpr = SExpr(s); }

@@ -20,7 +20,7 @@ public:
     d_values = vals;
   }
 
- Matrix(const std::vector< std::vector <Rational>> vals)
+ Matrix(const std::vector< std::vector <Rational> > vals)
    {
      d_rows = vals.size();
      d_cols = vals[0].size();
@@ -38,12 +38,12 @@ Matrix(const std::string& mat) {
   size_t dindex = s.find(delimiter);
   size_t cindex = s.find(close);
   std::string valstring;
-  std::vector< std::vector <Rational>> ratmat;
+  std::vector< std::vector <Rational> > ratmat;
   while(dindex != std::string::npos) {
     std::vector<Rational> v;
     while(dindex < cindex) {
       valstring = s.substr(index, dindex-index);
-      v.push_back(Rational(stoi(valstring)));
+      v.push_back(Rational(std::atoi(valstring.c_str())));
       s = s.substr(dindex + 1, s.length() - dindex);
       index = 0;
       dindex = s.find(delimiter);
@@ -51,7 +51,7 @@ Matrix(const std::string& mat) {
     }
       //need to grab last value
     valstring = s.substr(index, cindex-index);
-    v.push_back(Rational(stoi(valstring)));
+    v.push_back(Rational(std::atoi(valstring.c_str())));
     ratmat.push_back(v);
     s = s.substr(dindex + 2, s.length() - dindex - 1);
     index = 0;
@@ -68,20 +68,30 @@ Matrix(const std::string& mat) {
 /* convenient methods */
  unsigned hash() const {
   // maybe not the best hash function but it works for now
-   size_t hashval = 0;
+   unsigned hashval = 0;
    for(unsigned r = 0; r < d_rows; ++r){
      for(unsigned c = 0; c < d_cols; ++c) {
        hashval += d_values[r][c].getNumerator().hash()
                +  d_values[r][c].getDenominator().hash();
      }
    }
+   return hashval;
+ }
+
+ bool operator ==(const Matrix& y) const {
+   if (d_rows != y.d_rows || d_cols != y.d_cols) return false;
+   return d_values == y.d_values;
+ }
+
+ std::vector< std::vector<Rational> > getValues() const {
+   return d_values;
  }
  
 // Not getting syntax highlighting?
 private:
   unsigned d_rows;
   unsigned d_cols;
-  std::vector< std::vector <Rational>> d_values;
+  std::vector< std::vector <Rational> > d_values;
   
 };/*class Matrix*/
 
@@ -128,6 +138,12 @@ struct CVC4_PUBLIC MatrixIndex {
      v.push_back(cols);
      return v;
    }
+
+   // build is complaining that this doesn't exist
+   // I hope it isn't theory equality? What is it for?
+   bool operator ==(const MatrixDim& y) const {
+     return rows == y.rows && cols == y.cols;
+   }
  };/* struct MatrixDim */
 
 
@@ -139,6 +155,21 @@ struct CVC4_PUBLIC MatrixIndex {
      return hash;
    }
  };/* struct MatrixDimHashFunction */
+
+ inline std::ostream& operator <<(std::ostream& os, const Matrix& M) CVC4_PUBLIC;
+ inline std::ostream& operator <<(std::ostream& os, const Matrix& M) {
+   return os << M.getValues();
+ }
+
+ inline std::ostream& operator <<(std::ostream& os, const MatrixDim& md) CVC4_PUBLIC;
+ inline std::ostream& operator <<(std::ostream& os, const MatrixDim& md) {
+   return os << "MatrixDim [" << md.rows << "," << md.cols << "]";
+ }
+
+ inline std::ostream& operator <<(std::ostream& os, const MatrixIndex& mi) CVC4_PUBLIC;
+ inline std::ostream& operator <<(std::ostream& os, const MatrixIndex& mi) {
+   return os << "MatrixIndex [" << mi.row << "," << mi.col << "]";
+ }
 
 }/* namespace CVC4 */
 

@@ -52,7 +52,8 @@ public:
     THEORY_STRINGS,
     THEORY_UF,
     THEORY_FP,
-    THEORY_SEP
+    THEORY_SEP,
+    THEORY_MATRIX
   };
 
 private:
@@ -353,6 +354,8 @@ private:
   void addArithmeticOperators();
 
   void addBitvectorOperators();
+
+  void addMatrixOperators();
 
   void addStringOperators();
 

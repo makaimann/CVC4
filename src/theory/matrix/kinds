@@ -67,8 +67,8 @@ paramaterized MATRIX_INDEX MATRIX_INDEX_OP 1 "matrix index; first parameter is a
 parameterized VECTOR_INDEX VECTOR_INDEX_OP 1 "vector index; first parameter is a VECTOR_INDEX_OP, second is a Vector term"
 
 # typerules...
-typerule VECTOR_IN_RANGE ::CVC4::theory::matrix::LinearAlgebraTypeRule
-typerule MATRIX_VECTOR_MULT ::CVC4::theory::matrix::LinearAlgebraTypeRule
-typerule MATRIX_ADD ::CVC4::theory::matrix::LinearAlgebraTypeRule
+#typerule VECTOR_IN_RANGE ::CVC4::theory::matrix::LinearAlgebraTypeRule
+#typerule MATRIX_VECTOR_MULT ::CVC4::theory::matrix::LinearAlgebraTypeRule
+#typerule MATRIX_ADD ::CVC4::theory::matrix::LinearAlgebraTypeRule
 
 endtheory

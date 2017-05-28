@@ -60,8 +60,8 @@ void Smt2::addMatrixOperators() {
   addOperator(kind::VECTOR_IN_RANGE, "vrange");
   addOperator(kind::MATRIX_VECTOR_MULT, "mvmult");
   addOperator(kind::MATRIX_ADD, "madd");
-  Parser::addOperator(kind::MATRIX_INDEX);
-  Parser::addOperator(kind::VECTOR_INDEX);
+  Parser::addOperator(kind::MATRIX_INDEX_OP);
+  Parser::addOperator(kind::VECTOR_INDEX_OP);
 }
 
 void Smt2::addBitvectorOperators() {
@@ -426,6 +426,10 @@ void Smt2::setLogic(std::string name) {
 
   if(d_logic.isTheoryEnabled(theory::THEORY_BV)) {
     addTheory(THEORY_BITVECTORS);
+  }
+
+  if(d_logic.isTheoryEnabled(theory::THEORY_MATRIX)) {
+    addTheory(THEORY_MATRIX);
   }
 
   if(d_logic.isTheoryEnabled(theory::THEORY_DATATYPES)) {

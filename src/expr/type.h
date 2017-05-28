@@ -50,6 +50,8 @@ class StringType;
 class RegExpType;
 class RoundingModeType;
 class BitVectorType;
+class MatrixType;
+class VectorType; 
 class ArrayType;
 class SetType;
 class DatatypeType;
@@ -619,6 +621,38 @@ public:
 
 };/* class BitVectorType */
 
+
+/**
+ * Classs encapsulating the matrix type.
+ */
+class CVC4_PUBLIC MatrixType : public Type {
+  public:
+
+  /** Construct from the base type */
+  MatrixType(const Type& type = Type()) throw(IllegalArgumentException);
+
+  /**
+   * Returns a vector with the dimensions of the matrix type
+   * @return the dimensions of the matrix type (>0, >0)
+   */
+  std::vector<unsigned> getDim() const;
+};/* class MatrixType */
+
+/**
+ * Class encapsulating the vector type.
+ */
+class CVC4_PUBLIC VectorType : public Type {
+  public:
+
+  /** Construct from the base type */
+  VectorType(const Type& type = Type()) throw(IllegalArgumentException);
+
+  /**
+   * Returns the length of the vector type.
+   * @return the length of the vector type (> 0)
+   */
+  unsigned getLength() const;
+}; /* class VectorType */
 
 /**
  * Class encapsulating the floating point type.
