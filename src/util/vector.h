@@ -27,6 +27,26 @@ namespace CVC4 {
     }
   }
 
+  Vector(const std::string& vec) {
+    std::string s = vec;
+    std::vector<Rational> ratvec;
+    std::string delimiter = ",";
+    size_t index = 2;
+    size_t dindex = s.find(delimiter);
+    while(dindex != std::string::npos) {
+      valstring = s.substr(index, dindex-index);
+      ratvec.push_back(Rational(std::atoi(valstring.c_str())));
+      s = s.substr(dindex + 1, s.length() - dindex);
+      index = 0;
+      dindex = s.find(delimiter);
+    }
+    valstring = s.substr(index, s.length()-1);
+    ratvec.push_back(Rational(std::atoi(valstring.c_str())));
+
+    d_length = ratvec.size();
+    d_values = ratvec;
+  }
+
   bool operator ==(const Vector& y) const {
     if (d_length != y.d_length) return false;
     // Not sure how equality of std::vector works

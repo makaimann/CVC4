@@ -59,7 +59,9 @@ void Smt2::addArithmeticOperators() {
 void Smt2::addMatrixOperators() {
   addOperator(kind::VECTOR_IN_RANGE, "vrange");
   addOperator(kind::MATRIX_VECTOR_MULT, "mvmult");
+  addOperator(kind::VECTOR_DOT, "vdot");
   addOperator(kind::MATRIX_ADD, "madd");
+  addOperator(kind::MATRIX_RANK, "mrank");
   Parser::addOperator(kind::MATRIX_INDEX_OP);
   Parser::addOperator(kind::VECTOR_INDEX_OP);
 }

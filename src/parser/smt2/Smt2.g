@@ -1736,6 +1736,10 @@ simpleSymbolicExprNoKeyword[CVC4::SExpr& sexpr]
     { std::string matString = AntlrInput::tokenText($MATRIX_LITERAL);
       sexpr = SExpr(matString);
     }
+  | VECTOR_LITERAL
+    { std::string vecString = AntlrInput::tokenText($VECTOR_LITERAL);
+      sexpr = SExpr(vecString);
+    }
   | str[s,false]
     { sexpr = SExpr(s); }
 //  | LPAREN_TOK STRCST_TOK
@@ -2286,6 +2290,12 @@ term[CVC4::Expr& expr, CVC4::Expr& expr2]
       expr = MK_CONST( Matrix(matString) );
     }
 
+  | VECTOR_LITERAL
+    {
+      std::string vecString = AntlrInput::tokenText($VECTOR_LITERAL);
+      expr = MK_CONST( Vector(vecString) );
+    }
+
   | str[s,false]
     { expr = MK_CONST( ::CVC4::String(s) ); }
   | FP_RNE_TOK      { expr = MK_CONST(roundNearestTiesToEven); }
@@ -2494,6 +2504,11 @@ indexedFunctionName[CVC4::Expr& op, CVC4::Kind& kind]
               "bv2nat and int2bv are not part of SMT-LIB, and aren't available "
               "in SMT-LIB strict compliance mode");
         } }
+    /* Matrix Theory matches */
+    | 'mindex' n1=INTEGER_LITERAL n2=INTEGER_LITERAL
+       {op = MK_CONST(MatrixIndex(AntlrInput::tokenToUnsigned($n1), AntlrInput::tokenToUnsigned($n2)));}
+    | 'vindex' n=INTEGER_LITERAL
+      {op = MK_CONST(VectorIndex(AntlrInput::tokenToUnsigned($n)));}
     | FP_PINF_TOK eb=INTEGER_LITERAL sb=INTEGER_LITERAL
       { op = MK_CONST(FloatingPoint(AntlrInput::tokenToUnsigned($eb),
                                     AntlrInput::tokenToUnsigned($sb),
@@ -3254,7 +3269,14 @@ BINARY_LITERAL
  * Matches a matrix constant.
 */
 MATRIX_LITERAL
-  : '{{' (DIGIT+ | ',' | '{' | '}')+ '}'
+  : '{{' (DIGIT | ',' | '{' | '}')+ '}'
+  ;
+
+/**
+ * Matches a vector constant.
+ */
+VECTOR_LITERAL
+  : '<' (DIGIT | ',')+ '>'
   ;
 
 /**
