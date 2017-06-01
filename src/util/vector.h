@@ -33,6 +33,7 @@ namespace CVC4 {
     std::string delimiter = ",";
     size_t index = 2;
     size_t dindex = s.find(delimiter);
+    std::string valstring;
     while(dindex != std::string::npos) {
       valstring = s.substr(index, dindex-index);
       ratvec.push_back(Rational(std::atoi(valstring.c_str())));
