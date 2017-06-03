@@ -65,24 +65,23 @@ public:
                                      bool check) {
     std::cout << "in MatrixVectorTypeRule computeType" << std::endl;
     TNode::iterator it = n.begin();
-    TNode M = *it;
+    TypeNode M = (*it).getType(check);
     ++it;
-    TNode v = *it;
-    TypeNode tM = M.getType(check);
-    TypeNode tv = v.getType(check);
+    TypeNode v = (*it).getType(check);
     std::cout << "in MatrixVectorTypeRule after getting matrix and vector" << std::endl;
     if (check) {
-      if (!tM.isMatrix()) {
+      if (!M.isMatrix()) {
         throw TypeCheckingExceptionPrivate(n, "expecting Matrix as first term");
       }
-      if (!tv.isVector()) {
+      if (!v.isVector()) {
         throw TypeCheckingExceptionPrivate(n, "expecting Vector as second term");
       }
     }
-    
-    std::vector<unsigned> dimensions = M.getConst<Matrix>().getDim();
-    unsigned length = v.getConst<Vector>().getLength();
+    std::cout << "After check" << std::endl;
+    std::vector<unsigned> dimensions = M.getMatrixDim();
+    unsigned length = v.getVectorLength();
 
+    std::cout << "After getting dimensions and length" << std::endl;
     if (check) {
       if (dimensions[1] != length) {
         throw TypeCheckingExceptionPrivate(n, "Matrix columns and Vector length mismatch");
