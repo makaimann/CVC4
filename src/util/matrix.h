@@ -36,6 +36,16 @@ Matrix(const std::string& mat) {
   std::string delimiter = ",";
   size_t index = 2;
   size_t dindex = s.find(delimiter);
+
+  // If it's a single element, set dindex
+  // to the position of {{x}}
+  //                       ^
+  // This will then grab the one element
+
+  if (dindex == std::string::npos) {
+    dindex = s.length() - 2;
+  }
+  
   size_t cindex = s.find(close);
   std::string valstring;
   std::vector< std::vector <Rational> > ratmat;
@@ -76,6 +86,13 @@ Matrix(const std::string& mat) {
      }
    }
    return hashval;
+ }
+
+ std::vector<unsigned> getDim() const {
+   std::vector<unsigned> dimensions;
+   dimensions.push_back(d_rows);
+   dimensions.push_back(d_cols);
+   return dimensions;
  }
 
  bool operator ==(const Matrix& y) const {

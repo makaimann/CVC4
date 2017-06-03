@@ -31,8 +31,9 @@ namespace CVC4 {
     std::string s = vec;
     std::vector<Rational> ratvec;
     std::string delimiter = ",";
-    size_t index = 2;
+    size_t index = 1;
     size_t dindex = s.find(delimiter);
+    
     std::string valstring;
     while(dindex != std::string::npos) {
       valstring = s.substr(index, dindex-index);
@@ -63,6 +64,10 @@ namespace CVC4 {
       hashval += d_values[i].getDenominator().hash();
     }
     return hashval;
+  }
+
+  unsigned getLength() const {
+    return d_length;
   }
 
   std::vector<Rational> getValues() const {

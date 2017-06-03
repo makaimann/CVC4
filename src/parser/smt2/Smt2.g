@@ -3276,7 +3276,7 @@ MATRIX_LITERAL
  * Matches a vector constant.
  */
 VECTOR_LITERAL
-  : '<' (DIGIT | ',')+ '>'
+  : '{' (DIGIT | ',')+ '}'
   ;
 
 /**

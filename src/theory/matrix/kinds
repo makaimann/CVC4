@@ -73,11 +73,13 @@ parameterized VECTOR_INDEX VECTOR_INDEX_OP 1 "vector index; first parameter is a
 # typerules...
 typerule CONST_MATRIX ::CVC4::theory::matrix::ConstMatrixTypeRule
 typerule CONST_VECTOR ::CVC4::theory::matrix::ConstVectorTypeRule
-typerule VECTOR_IN_RANGE ::CVC4::theory::matrix::LinearAlgebraTypeRule
-typerule MATRIX_VECTOR_MULT ::CVC4::theory::matrix::LinearAlgebraTypeRule
-typerule MATRIX_ADD ::CVC4::theory::matrix::LinearAlgebraTypeRule
-typerule MATRIX_INDEX_OP ::CVC4::theory::matrix::MatrixIndexTypeRule
-typerule VECTOR_INDEX_OP ::CVC4::theory::matrix::VectorIndexTypeRule
+typerule VECTOR_IN_RANGE ::CVC4::theory::matrix::MatrixVectorTypeRule
+typerule MATRIX_VECTOR_MULT ::CVC4::theory::matrix::MatrixVectorTypeRule
+typerule MATRIX_ADD ::CVC4::theory::matrix::MatrixSameDimTypeRule
+typerule MATRIX_INDEX ::CVC4::theory::matrix::MatrixIndexTypeRule
+typerule MATRIX_INDEX_OP ::CVC4::theory::matrix::MatrixIndexOpTypeRule
+typerule VECTOR_INDEX ::CVC4::theory::matrix::VectorIndexTypeRule
+typerule VECTOR_INDEX_OP ::CVC4::theory::matrix::VectorIndexOpTypeRule
 
 
 endtheory
