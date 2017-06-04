@@ -63,12 +63,10 @@ class MatrixVectorTypeRule {
 public:
   inline static TypeNode computeType(NodeManager* nodeManager, TNode n,
                                      bool check) {
-    std::cout << "in MatrixVectorTypeRule computeType" << std::endl;
     TNode::iterator it = n.begin();
     TypeNode M = (*it).getType(check);
     ++it;
     TypeNode v = (*it).getType(check);
-    std::cout << "in MatrixVectorTypeRule after getting matrix and vector" << std::endl;
     if (check) {
       if (!M.isMatrix()) {
         throw TypeCheckingExceptionPrivate(n, "expecting Matrix as first term");
@@ -77,11 +75,9 @@ public:
         throw TypeCheckingExceptionPrivate(n, "expecting Vector as second term");
       }
     }
-    std::cout << "After check" << std::endl;
     std::vector<unsigned> dimensions = M.getMatrixDim();
     unsigned length = v.getVectorLength();
 
-    std::cout << "After getting dimensions and length" << std::endl;
     if (check) {
       if (dimensions[1] != length) {
         throw TypeCheckingExceptionPrivate(n, "Matrix columns and Vector length mismatch");
@@ -101,6 +97,26 @@ public:
     }
   }
 };/* class MatrixVectorTypeRule */
+
+
+class VectorSameLengthTypeRule {
+public:
+  inline static TypeNode computeType(NodeManager* nodeManager, TNode n,
+                                     bool check) {
+    TypeNode v1 = n[0].getType(check);
+    TypeNode v2 = n[1].getType(check);
+
+    if (check) {
+      if (!v1.isVector() || !v2.isVector()) {
+        throw TypeCheckingExceptionPrivate(n, "expecting Vector terms");
+      }
+
+      if (v1.getVectorLength() != v2.getVectorLength()) {
+        throw TypeCheckingExceptionPrivate(n, "expecting Vectors of the same length");
+      }
+    }
+  }
+};/* class VectorSameLengthTypeRule */
 
 
 class MatrixSameDimTypeRule {
@@ -123,6 +139,15 @@ public:
     return t;
   }
 };/* class MatrixSameDimTypeRule */
+
+
+class MatrixRankTypeRule {
+public:
+  inline static TypeNode computeType(NodeManager* nodeManager, TNode n,
+                                     bool check) {
+    return nodeManager->integerType();
+  }
+};/* class MatrixRankTypeRule */
 
 
 class MatrixIndexTypeRule {

@@ -16,20 +16,26 @@ namespace CVC4 {
   Vector(const std::vector<Rational> vals):
     d_length(vals.size()),
     d_values(vals)
-      {}
+      {
+        for(unsigned i = 0; i < vals.size(); ++i) {
+          double_values.push_back(((double) vals[i].getNumerator().getSignedInt())/vals[i].getDenominator().getSignedInt());
+        }
+      }
 
 
-  Vector(const std::vector<signed int> vals) {
+  Vector(const std::vector<double> vals) {
     d_length = vals.size();
+    double_values = vals;
     // should this be a reference?
     for(unsigned i = 0; i < vals.size(); ++i) {
-      d_values.push_back(Rational(vals[i]));
+      d_values.push_back(Rational::fromDouble(vals[i]));
     }
   }
 
   Vector(const std::string& vec) {
     std::string s = vec;
     std::vector<Rational> ratvec;
+    std::vector<double> dvec;
     std::string delimiter = ",";
     size_t index = 1;
     size_t dindex = s.find(delimiter);
@@ -37,16 +43,18 @@ namespace CVC4 {
     std::string valstring;
     while(dindex != std::string::npos) {
       valstring = s.substr(index, dindex-index);
-      ratvec.push_back(Rational(std::atoi(valstring.c_str())));
+      ratvec.push_back(Rational(valstring.c_str()));
+      dvec.push_back(std::atof(valstring.c_str()));
       s = s.substr(dindex + 1, s.length() - dindex);
       index = 0;
       dindex = s.find(delimiter);
     }
     valstring = s.substr(index, s.length()-1);
-    ratvec.push_back(Rational(std::atoi(valstring.c_str())));
+    ratvec.push_back(Rational(valstring.c_str()));
 
     d_length = ratvec.size();
     d_values = ratvec;
+    double_values = dvec;
   }
 
   bool operator ==(const Vector& y) const {
@@ -74,9 +82,14 @@ namespace CVC4 {
     return d_values;
   }
 
+  std::vector<double> getDoubleValues() const {
+    return double_values;
+  }
+
   private:
     unsigned d_length;
     std::vector<Rational> d_values;
+    std::vector<double> double_values;
     
   }; /* class Vector */
 

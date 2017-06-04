@@ -45,6 +45,7 @@ static OutputLanguage variantToLanguage(Variant v) throw();
 static string smtKindString(Kind k) throw();
 
 static void printBvParameterizedOp(std::ostream& out, TNode n) throw();
+static void printMatrixParameterizedOp(std::ostream& out, TNode n) throw();
 static void printFpParameterizedOp(std::ostream& out, TNode n) throw();
 
 static void toStreamRational(std::ostream& out, const Rational& r, bool decimal) throw();
@@ -185,6 +186,17 @@ void Smt2Printer::toStream(std::ostream& out, TNode n,
       // }
       break;
     }
+    //Matrix theory
+    case kind::CONST_MATRIX:
+    {
+      out << n.getConst<Matrix>();
+    }
+
+    case kind::CONST_VECTOR:
+    {
+      out << n.getConst<Vector>();
+    }
+    
     case kind::CONST_FLOATINGPOINT:
       out << n.getConst<FloatingPoint>().getLiteral();
       break;
@@ -503,6 +515,14 @@ void Smt2Printer::toStream(std::ostream& out, TNode n,
     stillNeedToPrintParams = false;
     break;
 
+  //matrix
+  case kind::MATRIX_INDEX:
+  case kind::VECTOR_INDEX:
+    printMatrixParameterizedOp(out, n);
+    out << ' ';
+    stillNeedToPrintParams = false;
+    break;
+
     // sets
   case kind::UNION:
   case kind::INTERSECTION:
@@ -802,6 +822,16 @@ static string smtKindString(Kind k) throw() {
   case kind::BITVECTOR_ROTATE_LEFT: return "rotate_left";
   case kind::BITVECTOR_ROTATE_RIGHT: return "rotate_right";
 
+  //Matrix theory
+  case kind::VECTOR_IN_RANGE: return "vrange";
+  case kind::MATRIX_VECTOR_MULT: return "mvmult";
+  case kind::VECTOR_DOT: return "vdot";
+  case kind::MATRIX_ADD: return "madd";
+  case kind::MATRIX_RANK: return "rank";
+  case kind::MATRIX_INDEX: return "mindex";
+  case kind::VECTOR_INDEX: return "vindex";
+  
+
   case kind::UNION: return "union";
   case kind::INTERSECTION: return "intersection";
   case kind::SETMINUS: return "setminus";
@@ -923,6 +953,24 @@ static void printBvParameterizedOp(std::ostream& out, TNode n) throw() {
   case kind::INT_TO_BITVECTOR:
     out << "int2bv "
         << n.getOperator().getConst<IntToBitVector>().size;
+    break;
+  default:
+    out << n.getKind();
+  }
+  out << ")";
+}
+
+static void printMatrixParameterizedOp(std::ostream& out, TNode n) throw() {
+  out << "(_ ";
+  switch(n.getKind()) {
+  case kind::MATRIX_INDEX:
+    out << "mindex "
+        << n.getOperator().getConst<MatrixIndex>().row
+        << n.getOperator().getConst<MatrixIndex>().col;
+    break;
+  case kind::VECTOR_INDEX:
+    out << "vindex "
+        << n.getOperator().getConst<VectorIndex>().index;
     break;
   default:
     out << n.getKind();
