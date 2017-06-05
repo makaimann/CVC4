@@ -3269,14 +3269,14 @@ BINARY_LITERAL
  * Matches a matrix constant.
 */
 MATRIX_LITERAL
-  : '{{' (DIGIT | ',' | '{' | '}')+ '}'
+  : '{{' (DIGIT | '-' | ',' | '{' | '}')+ '}'
   ;
 
 /**
  * Matches a vector constant.
  */
 VECTOR_LITERAL
-  : '{' (DIGIT | ',')+ '}'
+  : '{' (DIGIT | '-' | ',')+ '}'
   ;
 
 /**

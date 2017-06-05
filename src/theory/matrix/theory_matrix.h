@@ -21,7 +21,9 @@ public:
 
   void check(Effort);
 
-  bool processEquals(std::map<TNode, std::vector< std::vector<double> > > &, TNode &);
+  bool processEquals(std::map<TNode, std::vector< std::vector<double> > > &,
+                     std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > &,
+                     TNode &);
 
   std::string identify() const {
     return "THEORY_MATRIX";
