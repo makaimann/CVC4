@@ -28,6 +28,8 @@ void TheoryMatrix::check(Effort level) {
   std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > indexTNodes;
   std::map<TNode, std::vector< std::vector<double> > > matrices;
 
+  //below is the main engine...trying without it now
+  /*
   while(!done()) {
     // Get all the assertions
     Assertion assertion = get();
@@ -39,12 +41,12 @@ void TheoryMatrix::check(Effort level) {
     // Do the work
     switch(fact.getKind()) {
 
-    /* cases for all the theory's kinds go here... */
+    // cases for all the theory's kinds go here...
     case kind::EQUAL:
     {
       bool keep = processIndexAssignments(matrices, indexTNodes, fact);
       if(keep) {
-        otherAssertionTNodes.push_back(assertion);
+        otherAssertionTNodes.push_back(fact);
       }
       break;
     }
@@ -63,7 +65,40 @@ void TheoryMatrix::check(Effort level) {
       Unhandled(fact.getKind());
     }
   }
+  */
 
+  //build matrices
+  for(assertions_iterator i = facts_begin(); i != facts_end(); ++i) {
+    TNode fact = (*i).assertion;
+    if(done()) {return;}
+    
+    switch(fact.getKind()) {
+
+    case kind::EQUAL:
+      {
+        bool keep = processIndexAssignments(matrices, indexTNodes, fact);
+        if(keep) {
+          otherAssertionTNodes.push_back(fact);
+        }
+        break;
+      }
+    case kind::NOT:
+      {
+        //Handle not matrix index assignments
+        if(fact[0].getKind() == kind::EQUAL) {
+          if(fact[0].getNumChildren() > 0 && fact[0][0].getKind() == kind::MATRIX_INDEX) {
+            //Just don't handle the not matrix assignments
+            break;
+          }
+        }
+        //End not matrix index assignments
+      }
+    default:
+      Unhandled(fact.getKind());
+    }
+  }
+
+    
   //check for conflicts in index assertions
   bool index_conflicts = false;
   NodeBuilder<> conjunction(kind::AND);
@@ -95,7 +130,14 @@ void TheoryMatrix::check(Effort level) {
     std::vector< std::vector<double> > m = matrix_it->second;
     for(unsigned int i = 0; i < m.size(); ++i) {
       for(unsigned int j = 0; j < m[0].size(); ++j) {
-        cout << m[i][j] << " ";
+        std::cout << m[i][j] << " ";
+
+        //stop checking if incomplete matrix
+        if(m[i][j] == 0x8000000000000)
+        {
+          std::cout << "\nExiting check because matrix currently incomplete" << std::endl;
+          return;
+        }
       }
       cout << endl;
     }
