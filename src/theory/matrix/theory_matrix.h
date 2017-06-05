@@ -21,9 +21,11 @@ public:
 
   void check(Effort);
 
-  bool processEquals(std::map<TNode, std::vector< std::vector<double> > > &,
+  bool processIndexAssignments(std::map<TNode, std::vector< std::vector<double> > > &,
                      std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > &,
                      TNode &);
+
+  unsigned computeRank(std::vector<std::vector <double> > &);
 
   std::string identify() const {
     return "THEORY_MATRIX";
