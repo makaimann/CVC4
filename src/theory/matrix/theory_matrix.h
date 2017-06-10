@@ -4,6 +4,7 @@
 #define __CVC4__THEORY__MATRIX__THEORY_MATRIX_H
 
 #include "theory/theory.h"
+#include <ginac/ginac.h>
 
 namespace CVC4 {
 namespace theory {
@@ -21,7 +22,7 @@ public:
 
   void check(Effort);
 
-  bool processIndexAssignments(std::map<TNode, std::vector< std::vector<double> > > &,
+  bool processIndexAssignments(std::map<TNode, GiNaC::matrix > &,
                      std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > &,
                      TNode &);
 

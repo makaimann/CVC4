@@ -26,7 +26,7 @@ void TheoryMatrix::check(Effort level) {
   std::vector<TNode> assignmentTNodes;
   std::vector<TNode> otherAssertionTNodes;
   std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > indexTNodes;
-  std::map<TNode, std::vector< std::vector<double> > > matrices;
+  std::map<TNode, GiNaC::matrix > matrices;
 
   //below is the main engine...trying without it now
   /*
@@ -123,17 +123,17 @@ void TheoryMatrix::check(Effort level) {
   //print matrix
   cout << "TheoryMatrix::check(): Printing parsed matrices " << endl;
   //print matrices here
-  std::map<TNode, std::vector< std::vector<double> > >::iterator matrix_it;
+  std::map<TNode, GiNaC::matrix >::iterator matrix_it;
   for(matrix_it = matrices.begin(); matrix_it != matrices.end(); ++matrix_it) {
     // not sure if the following line works...
     //    Debug("matrix") << "Printing matrix " << getAttribute(it->first, expr::VarNameAttr(), name) << endl;
-    std::vector< std::vector<double> > m = matrix_it->second;
-    for(unsigned int i = 0; i < m.size(); ++i) {
-      for(unsigned int j = 0; j < m[0].size(); ++j) {
-        std::cout << m[i][j] << " ";
+    GiNaC::matrix m = matrix_it->second;
+    for(unsigned int i = 0; i < m.rows(); ++i) {
+      for(unsigned int j = 0; j < m.cols(); ++j) {
+        std::cout << m(i, j) << " ";
 
         //stop checking if incomplete matrix
-        if(m[i][j] == 0x8000000000000)
+        if(m(i, j) == 0x8000000000000)
         {
           std::cout << "\nExiting check because matrix currently incomplete" << std::endl;
           return;
@@ -151,17 +151,23 @@ void TheoryMatrix::check(Effort level) {
     case kind::EQUAL: {
       if(n[1].getKind() == kind::MATRIX_RANK) {
         //get the constant matrix
-        std::vector< std::vector<double> > M;
+        GiNaC::matrix M;
         if(matrices.count(n[1][0]) == 1) {
           M = matrices[n[1][0]];
         }
         else if (n[1][0].getKind() == kind::CONST_MATRIX) {
-          M = n[1][0].getConst<Matrix>().getDoubleValues();
+          std::vector< std::vector<double> > Mvals = n[1][0].getConst<Matrix>().getDoubleValues();
+          M = GiNaC::matrix(Mvals.size(), Mvals[0].size());
+          for(unsigned i = 0; i < Mvals.size(); ++i) {
+            for(unsigned j = 0; j < Mvals[0].size(); ++j) {
+              M(i, j) = Mvals[i][j];
+            }
+          }
         }
         else {
           std::cout << "Matrix never assigned" << std::endl;
         }
-        unsigned r = computeRank(M);
+        unsigned r = M.rank();
         if (r != n[0].getConst<Rational>().getNumerator().getUnsignedInt()) {
           t_conflict = true;
         }
@@ -208,7 +214,7 @@ void TheoryMatrix::check(Effort level) {
 }/* TheoryMatrix::check() */
 
 
-bool TheoryMatrix::processIndexAssignments(std::map<TNode, std::vector< std::vector<double> > > & matrices,
+  bool TheoryMatrix::processIndexAssignments(std::map<TNode, GiNaC::matrix > & matrices,
                                  std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > & indexTNodes,
                                  TNode & n)
 {
@@ -218,50 +224,81 @@ bool TheoryMatrix::processIndexAssignments(std::map<TNode, std::vector< std::vec
   if(n[0].getKind() == kind::MATRIX_TYPE) {
     //if assigning whole matrix
     if(n[1].getKind() == kind::CONST_MATRIX) {
-      matrices[n[0]] = n[1].getConst<Matrix>().getDoubleValues();
+      std::vector< std::vector<double> > dm = n[1].getConst<Matrix>().getDoubleValues();
+      matrices[n[0]] = GiNaC::matrix(dm.size(), dm[0].size());
+      for(unsigned i = 0; i < dm.size(); ++i) {
+        for(unsigned j = 0; j < dm[0].size(); ++j) {
+          matrices[n[0]](i, j) = dm[i][j];
+        }
+      }
       return false;
     }
   }
   //if indexing
   else if (n[0].getKind() == kind::MATRIX_INDEX) {
     MatrixIndex mindex = n[0].getOperator().getConst<MatrixIndex>();
+    
     //already in matrices std::map
     if(matrices.count(n[0][0]) == 1) {
       // this should always just be a single value...
-      std::vector<std::vector<double> > val = n[1].getConst<Matrix>().getDoubleValues();
+      if(n[1].getKind() == kind::CONST_MATRIX) {
+        std::vector<std::vector<double> > val = n[1].getConst<Matrix>().getDoubleValues();
       
-      // need to check if this element already assigned
-      if(matrices[n[0][0]][mindex.row][mindex.col] != 0x8000000000000) {
-        //do something because asserted to indices were different numbers
-        if(matrices[n[0][0]][mindex.row][mindex.col] != val[0][0]) {
-          cout << "Asserting multiple values for same indices" << endl;
-          std::pair<unsigned, unsigned> p = std::make_pair(mindex.row, mindex.col);
-          indexTNodes[p].push_back(n);
-          return false;
+        // need to check if this element already assigned
+        if(matrices[n[0][0]](mindex.row,mindex.col) != 0x8000000000000) {
+          //do something because asserted to indices were different numbers
+          if(matrices[n[0][0]](mindex.row, mindex.col) != val[0][0]) {
+            cout << "Asserting multiple values for same indices" << endl;
+            std::pair<unsigned, unsigned> p = std::make_pair(mindex.row, mindex.col);
+            indexTNodes[p].push_back(n);
+            return false;
+          }
         }
+        matrices[n[0][0]](mindex.row, mindex.col) = val[0][0];
+        std::pair<unsigned, unsigned> p = std::make_pair(mindex.row, mindex.col);
+        std::vector<TNode> assertionSet; assertionSet.push_back(n);
+        indexTNodes.insert(std::make_pair(p, assertionSet));
+        return false;
       }
-      matrices[n[0][0]][mindex.row][mindex.col] = val[0][0];
-      std::pair<unsigned, unsigned> p = std::make_pair(mindex.row, mindex.col);
-      std::vector<TNode> assertionSet; assertionSet.push_back(n);
-      indexTNodes.insert(std::make_pair(p, assertionSet));
-      return false;
+      else if(n[1].getKind() == kind::MATRIX_INDEX) {
+        MatrixIndex mindex2 = n[1].getOperator().getConst<MatrixIndex>();
+        //        GiNaC::symbol a("a");
+        //        matrices[n[0][0]](mindex.row, mindex.col) = a;
+        //        matrices[n[0][0]](mindex2.row, mindex2.col) = a;
+        return false;
+      }
+
     }
+    //TODO: just create the matrix up above if doesn't exist
+    //--> then the rest of the code can be the same instead of in cases
     // matrix hasn't been created yet
     else {
-      std::vector< std::vector<double> > values;
       std::vector<unsigned> dimensions = n[0][0].getType(true).getMatrixDim();
+      GiNaC::matrix values(dimensions[0], dimensions[1]);
       for(unsigned i = 0; i < dimensions[0]; ++i) {
-        std::vector<double> v(dimensions[1], 0x8000000000000);
-        values.push_back(v);
+        for(unsigned j = 0; j < dimensions[1]; ++ j) {
+          values(i,j) = 0x8000000000000;
+        }
       }
-      matrices.insert(std::pair<TNode, std::vector< std::vector<double> > >(n[0][0], values));
-      //TODO: Add an element
-      std::vector<std::vector<double> > val = n[1].getConst<Matrix>().getDoubleValues();
-      matrices[n[0][0]][mindex.row][mindex.col] = val[0][0];
-      std::pair<unsigned, unsigned> p = std::make_pair(mindex.row, mindex.col);
-      std::vector<TNode> assertionSet; assertionSet.push_back(n);
-      indexTNodes.insert(std::make_pair(p, assertionSet));
-      return false;
+
+      //insert into map
+      matrices.insert(std::pair<TNode, GiNaC::matrix>(n[0][0], values));
+      
+      if(n[1].getKind() == kind::CONST_MATRIX) {
+        std::vector<std::vector<double> > val = n[1].getConst<Matrix>().getDoubleValues();
+        matrices[n[0][0]](mindex.row, mindex.col) = val[0][0];
+        std::pair<unsigned, unsigned> p = std::make_pair(mindex.row, mindex.col);
+        std::vector<TNode> assertionSet; assertionSet.push_back(n);
+        indexTNodes.insert(std::make_pair(p, assertionSet));
+        return false;
+      }
+      else if (n[1].getKind() == kind::MATRIX_INDEX) {
+        MatrixIndex mindex2 = n[1].getOperator().getConst<MatrixIndex>();
+        // Not what I should actually do...
+        GiNaC::symbol a("a");
+        matrices[n[0][0]](mindex.row, mindex.col) = a;
+        matrices[n[0][0]](mindex2.row, mindex2.col) = a;
+      }
     }
   }
   //else if (n[0].getKind() == kind::STD::VECTOR_TYPE)
