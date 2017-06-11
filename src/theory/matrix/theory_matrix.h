@@ -24,9 +24,15 @@ public:
 
   bool processIndexAssignments(std::map<TNode, GiNaC::matrix > &,
                      std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > &,
+                     std::map<TNode, GiNaC::matrix > &,
+                     std::map<unsigned, std::vector<TNode> > &,
                      TNode &);
 
-  unsigned computeRank(std::vector<std::vector <double> > &);
+  //  unsigned computeRank(std::vector<std::vector <double> > &);
+
+  bool checkRank(std::map<TNode, GiNaC::matrix > &, TNode &);
+
+  bool checkDet(std::map<TNode, GiNaC::matrix > &, TNode &);
 
   std::string identify() const {
     return "THEORY_MATRIX";

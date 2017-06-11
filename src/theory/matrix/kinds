@@ -66,6 +66,18 @@ operator MATRIX_ADD 2 "add two matrices; both are matrices of the same dimension
 
 operator MATRIX_RANK 1 "computes the rank of a matrix"
 
+operator MATRIX_DET 1 "computes the determinant of a matrix"
+
+operator MEQ 2 "equality for operations in matrix theory"
+
+operator MLT 2 "less than in the matrix theory"
+
+operator MLE 2 "less than or equal in the matrix theory"
+
+operator MGT 2 "greater than in the matrix theory"
+
+operator MGE 2 "greater than or equal in the matrix theory"
+
 parameterized MATRIX_INDEX MATRIX_INDEX_OP 1 "matrix index; first parameter is a MATRIX_INDEX_OP, second is a Matrix term"
 
 parameterized VECTOR_INDEX VECTOR_INDEX_OP 1 "vector index; first parameter is a VECTOR_INDEX_OP, second is a Vector term"
@@ -78,6 +90,12 @@ typerule MATRIX_VECTOR_MULT ::CVC4::theory::matrix::MatrixVectorTypeRule
 typerule VECTOR_DOT ::CVC4::theory::matrix::VectorSameLengthTypeRule
 typerule MATRIX_ADD ::CVC4::theory::matrix::MatrixSameDimTypeRule
 typerule MATRIX_RANK ::CVC4::theory::matrix::MatrixRankTypeRule
+typerule MATRIX_DET ::CVC4::theory::matrix::MatrixDetTypeRule
+typerule MEQ ::CVC4::theory::matrix::ComparisonTypeRule
+typerule MLT ::CVC4::theory::matrix::ComparisonTypeRule
+typerule MLE ::CVC4::theory::matrix::ComparisonTypeRule
+typerule MGT ::CVC4::theory::matrix::ComparisonTypeRule
+typerule MGE ::CVC4::theory::matrix::ComparisonTypeRule
 typerule MATRIX_INDEX ::CVC4::theory::matrix::MatrixIndexTypeRule
 typerule MATRIX_INDEX_OP ::CVC4::theory::matrix::MatrixIndexOpTypeRule
 typerule VECTOR_INDEX ::CVC4::theory::matrix::VectorIndexTypeRule

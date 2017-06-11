@@ -828,6 +828,7 @@ static string smtKindString(Kind k) throw() {
   case kind::VECTOR_DOT: return "vdot";
   case kind::MATRIX_ADD: return "madd";
   case kind::MATRIX_RANK: return "rank";
+  case kind::MATRIX_DET: return "det";
   case kind::MATRIX_INDEX: return "mindex";
   case kind::VECTOR_INDEX: return "vindex";
   

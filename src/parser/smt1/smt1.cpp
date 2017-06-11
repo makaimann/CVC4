@@ -64,6 +64,7 @@ std::hash_map<const std::string, Smt1::Logic, CVC4::StringHashFunction> Smt1::ne
   logicMap["ALL_SUPPORTED"] = ALL_SUPPORTED;
   logicMap["QF_ALL"] = QF_ALL_SUPPORTED;
   logicMap["ALL"] = ALL_SUPPORTED;
+  logicMap["QF_MATRIX"] = QF_MATRIX;
   return logicMap;
 }
 
@@ -237,6 +238,10 @@ void Smt1::setLogic(const std::string& name) {
 
   case QF_BV:
     addTheory(THEORY_BITVECTORS);
+    break;
+
+  case QF_MATRIX:
+    addTheory(THEORY_MATRIX);
     break;
 
   case QF_ABV:// nonstandard logic

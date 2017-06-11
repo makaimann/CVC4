@@ -62,6 +62,12 @@ void Smt2::addMatrixOperators() {
   addOperator(kind::VECTOR_DOT, "vdot");
   addOperator(kind::MATRIX_ADD, "madd");
   addOperator(kind::MATRIX_RANK, "rank");
+  addOperator(kind::MATRIX_DET, "det");
+  addOperator(kind::MEQ, "eq");
+  addOperator(kind::MLT, "mlt");
+  addOperator(kind::MLE, "mle");
+  addOperator(kind::MGT, "mgt");
+  addOperator(kind::MGE, "mge");
   Parser::addOperator(kind::MATRIX_INDEX_OP);
   Parser::addOperator(kind::VECTOR_INDEX_OP);
 }

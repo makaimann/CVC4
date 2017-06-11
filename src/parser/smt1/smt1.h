@@ -67,7 +67,8 @@ public:
     UFNIRA, // nonstandard
     UFNIA,
     QF_ALL_SUPPORTED, // nonstandard
-    ALL_SUPPORTED // nonstandard
+    ALL_SUPPORTED, // nonstandard
+    QF_MATRIX
   };
 
   enum Theory {
@@ -85,7 +86,8 @@ public:
     THEORY_REALS_INTS,
     THEORY_STRINGS,
     THEORY_QUANTIFIERS,
-    THEORY_CARDINALITY_CONSTRAINT
+    THEORY_CARDINALITY_CONSTRAINT,
+    THEORY_MATRIX
   };
 
 private:

@@ -150,6 +150,24 @@ public:
 };/* class MatrixRankTypeRule */
 
 
+class MatrixDetTypeRule {
+public:
+  inline static TypeNode computeType(NodeManager* nodeManager, TNode n,
+                                     bool check) {
+    return nodeManager->realType();
+  }
+};/* class MatrixDetTypeRule */
+
+
+class ComparisonTypeRule {
+public:
+  inline static TypeNode computeType(NodeManager* nodeManager, TNode n,
+                                     bool check) {
+    return nodeManager->booleanType();
+  }
+}; /* class ComparisonTypeRule */
+
+
 class MatrixIndexTypeRule {
 public:
   inline static TypeNode computeType(NodeManager* nodeManager, TNode n,

@@ -396,6 +396,11 @@ void LogicInfo::setLogicString(std::string logicString) throw(IllegalArgumentExc
         enableTheory(THEORY_BV);
         p += 2;
       }
+      //matrix logic
+      if(!d_theories[THEORY_MATRIX] && !strncmp(p, "MATRIX", 6)) {
+        enableTheory(THEORY_MATRIX);
+        p += 6;
+      }
       if(*p == 'S') {
         enableTheory(THEORY_STRINGS);
         ++p;

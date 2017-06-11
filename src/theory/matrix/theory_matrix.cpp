@@ -27,6 +27,8 @@ void TheoryMatrix::check(Effort level) {
   std::vector<TNode> otherAssertionTNodes;
   std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > indexTNodes;
   std::map<TNode, GiNaC::matrix > matrices;
+  std::map<unsigned, std::vector<TNode> > vectorindexTNodes;
+  std::map<TNode, GiNaC::matrix > vectors;
 
   //below is the main engine...trying without it now
   /*
@@ -76,7 +78,7 @@ void TheoryMatrix::check(Effort level) {
 
     case kind::EQUAL:
       {
-        bool keep = processIndexAssignments(matrices, indexTNodes, fact);
+        bool keep = processIndexAssignments(matrices, indexTNodes, vectors, vectorindexTNodes, fact);
         if(keep) {
           otherAssertionTNodes.push_back(fact);
         }
@@ -94,17 +96,29 @@ void TheoryMatrix::check(Effort level) {
         //End not matrix index assignments
       }
     default:
-      Unhandled(fact.getKind());
+      otherAssertionTNodes.push_back(fact);
+      //Unhandled(fact.getKind());
     }
   }
 
     
-  //check for conflicts in index assertions
+  //check for conflicts in matrix index assertions
   bool index_conflicts = false;
   NodeBuilder<> conjunction(kind::AND);
   std::map<std::pair<unsigned, unsigned>, std::vector<TNode> >::iterator it;
   for(it = indexTNodes.begin(); it != indexTNodes.end(); ++it) {
     std::vector<TNode> assertionSet = it->second;
+    if(assertionSet.size() > 1) {
+      index_conflicts = true;
+      for(unsigned i = 0; i < assertionSet.size(); ++i) {
+        conjunction << assertionSet[i];
+      }
+    }
+  }
+
+  std::map<unsigned, std::vector<TNode> >::iterator v_it;
+  for(v_it = vectorindexTNodes.begin(); v_it != vectorindexTNodes.end(); ++v_it) {
+    std::vector<TNode> assertionSet = v_it->second;
     if(assertionSet.size() > 1) {
       index_conflicts = true;
       for(unsigned i = 0; i < assertionSet.size(); ++i) {
@@ -144,9 +158,21 @@ void TheoryMatrix::check(Effort level) {
   }
   //end print matrix
 
-  bool t_conflict = false;
+  bool t_sat = true;
   for(unsigned i = 0; i < otherAssertionTNodes.size(); ++i) {
     TNode n = otherAssertionTNodes[i];
+    // instead of enumerating outer cases,
+    // check if it's a rank comparison then blow out cases
+    if(n.getNumChildren() > 1 && n[0].getKind() == kind::MATRIX_RANK) {
+      t_sat = checkRank(matrices, n);
+    }
+    else if (n.getNumChildren() > 1 && n[0].getKind() == kind::MATRIX_DET) {
+      t_sat = checkDet(matrices, n);
+    }
+    else {
+      Unhandled(n.getKind());
+    }
+/*    
     switch(n.getKind()) {
     case kind::EQUAL: {
       if(n[1].getKind() == kind::MATRIX_RANK) {
@@ -189,8 +215,8 @@ void TheoryMatrix::check(Effort level) {
     default:
       break;
     }
-
-    if(t_conflict) {
+*/
+    if(!t_sat) {
       NodeBuilder<> conjunction(kind::AND);
       // include all index assignments
       std::map<std::pair<unsigned, unsigned>, std::vector<TNode> >::iterator it;
@@ -214,9 +240,11 @@ void TheoryMatrix::check(Effort level) {
 }/* TheoryMatrix::check() */
 
 
-  bool TheoryMatrix::processIndexAssignments(std::map<TNode, GiNaC::matrix > & matrices,
-                                 std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > & indexTNodes,
-                                 TNode & n)
+bool TheoryMatrix::processIndexAssignments(std::map<TNode, GiNaC::matrix > & matrices,
+                                           std::map<std::pair<unsigned, unsigned>, std::vector<TNode> > & indexTNodes,
+                                           std::map<TNode, GiNaC::matrix > & vectors,
+                                           std::map<unsigned, std::vector<TNode> > & vectorindexTNodes,
+                                           TNode & n)
 {
   Debug("matrix") << "n[0] = " << n[0] << endl;
   Debug("matrix") << "n[0].getKind() = " << n[0].getKind() << endl;
@@ -262,6 +290,8 @@ void TheoryMatrix::check(Effort level) {
       }
       else if(n[1].getKind() == kind::MATRIX_INDEX) {
         MatrixIndex mindex2 = n[1].getOperator().getConst<MatrixIndex>();
+        // ignore this case -- still wait until have all indices
+        // this is just an extra clause added by CVC4 Equivalence Classes...
         //        GiNaC::symbol a("a");
         //        matrices[n[0][0]](mindex.row, mindex.col) = a;
         //        matrices[n[0][0]](mindex2.row, mindex2.col) = a;
@@ -295,13 +325,53 @@ void TheoryMatrix::check(Effort level) {
       else if (n[1].getKind() == kind::MATRIX_INDEX) {
         MatrixIndex mindex2 = n[1].getOperator().getConst<MatrixIndex>();
         // Not what I should actually do...
-        GiNaC::symbol a("a");
-        matrices[n[0][0]](mindex.row, mindex.col) = a;
-        matrices[n[0][0]](mindex2.row, mindex2.col) = a;
+        //        GiNaC::symbol a("a");
+        //        matrices[n[0][0]](mindex.row, mindex.col) = a;
+        //        matrices[n[0][0]](mindex2.row, mindex2.col) = a;
       }
     }
   }
-  //else if (n[0].getKind() == kind::STD::VECTOR_TYPE)
+  // handle vectors
+  else if (n[0].getKind() == kind::VECTOR_TYPE) {
+        //if assigning whole vector
+    if(n[1].getKind() == kind::CONST_VECTOR) {
+      std::vector<double> dv = n[1].getConst<Vector>().getDoubleValues();
+      vectors[n[0]] = GiNaC::matrix(dv.size(), 1);
+      for(unsigned i = 0; i < dv.size(); ++i) {
+          vectors[n[0]](i, 0) = dv[i];
+        }
+      }
+      return false;
+  }
+  else if (n[0].getKind() == kind::VECTOR_INDEX) {
+    VectorIndex vindex = n[0].getOperator().getConst<VectorIndex>();
+    // create if doesn't already exist
+    if (vectors.count(n[0][0]) == 1) {
+      unsigned length = n[0][0].getType(true).getVectorLength();
+      GiNaC::matrix values(length, 1);
+      for(unsigned i = 0; i < length; ++i) {
+          values(i,0) = 0x8000000000000;
+      }
+      
+      //insert into map
+      vectors.insert(std::pair<TNode, GiNaC::matrix>(n[0][0], values));
+     }
+      
+    if(n[1].getKind() == kind::CONST_VECTOR) {
+      std::vector<double> val = n[1].getConst<Vector>().getDoubleValues();
+      vectors[n[0][0]](vindex.index, 0) = val[0];
+      std::vector<TNode> assertionSet; assertionSet.push_back(n);
+      vectorindexTNodes.insert(std::make_pair(vindex.index, assertionSet));
+      return false;
+    }
+    else if (n[1].getKind() == kind::VECTOR_INDEX) {
+      VectorIndex vindex2 = n[1].getOperator().getConst<VectorIndex>();
+      // Not what I should actually do...
+      //        GiNaC::symbol a("a");
+      //        matrices[n[0][0]](mindex.row, mindex.col) = a;
+      //        matrices[n[0][0]](mindex2.row, mindex2.col) = a;
+    }
+  }
   else {
     return true;
   }
@@ -321,7 +391,8 @@ void TheoryMatrix::processMatrixPredicates(std::vector<TNode> assertions) {
   }
 }
   */
-  
+
+  /*
 unsigned TheoryMatrix::computeRank(std::vector<std::vector <double> > & M) {
   unsigned rows = M.size();
   unsigned cols = M[0].size();
@@ -333,6 +404,97 @@ unsigned TheoryMatrix::computeRank(std::vector<std::vector <double> > & M) {
   }
   return GM.rank();
 }
+  */
+
+bool TheoryMatrix::checkRank(std::map<TNode, GiNaC::matrix > & matrices, TNode & n) {
+  //get the constant matrix
+  GiNaC::matrix M;
+  if(matrices.count(n[0][0]) == 1) {
+    M = matrices[n[0][0]];
+  }
+  else if (n[0][0].getKind() == kind::CONST_MATRIX) {
+    std::vector< std::vector<double> > Mvals = n[0][0].getConst<Matrix>().getDoubleValues();
+    M = GiNaC::matrix(Mvals.size(), Mvals[0].size());
+    for(unsigned i = 0; i < Mvals.size(); ++i) {
+      for(unsigned j = 0; j < Mvals[0].size(); ++j) {
+        M(i, j) = Mvals[i][j];
+      }
+    }
+  }
+  else {
+    std::cout << "Matrix never assigned" << std::endl;
+  }
+  unsigned r = M.rank();
+  unsigned r_assertion = n[1].getConst<Rational>().getNumerator().getUnsignedInt();
+  
+  switch(n.getKind()) {
+  case kind::MEQ: {
+    return r == r_assertion;
+  }
+  case kind::MLE: {
+    return r <= r_assertion;
+  }
+  case kind::MLT: {
+    return r < r_assertion;
+  }
+  case kind::MGE: {
+    return r >= r_assertion;
+  }
+  case kind::MGT: {
+    return r > r_assertion;
+  }
+  default:
+    Unhandled(n.getKind());
+  }
+} /* TheoryMatrix::checkRank */
+
+bool TheoryMatrix::checkDet(std::map<TNode, GiNaC::matrix > & matrices, TNode & n) {
+    //get the constant matrix
+  GiNaC::matrix M;
+  if(matrices.count(n[0][0]) == 1) {
+    M = matrices[n[0][0]];
+  }
+  else if (n[0][0].getKind() == kind::CONST_MATRIX) {
+    std::vector< std::vector<double> > Mvals = n[0][0].getConst<Matrix>().getDoubleValues();
+    M = GiNaC::matrix(Mvals.size(), Mvals[0].size());
+    for(unsigned i = 0; i < Mvals.size(); ++i) {
+      for(unsigned j = 0; j < Mvals[0].size(); ++j) {
+        M(i, j) = Mvals[i][j];
+      }
+    }
+  }
+  else {
+    std::cout << "Matrix never assigned" << std::endl;
+  }
+
+  GiNaC::ex d = M.determinant();
+  
+  long d_assertion_long = n[1].getConst<Rational>().getDouble();
+
+  GiNaC::ex d_assertion;
+  d_assertion += d_assertion_long;
+
+  switch(n.getKind()) {
+  case kind::MEQ: {
+    return d == d_assertion;
+  }
+  case kind::MLE: {
+    return d <= d_assertion;
+  }
+  case kind::MLT: {
+    return d < d_assertion;
+  }
+  case kind::MGE: {
+    return d >= d_assertion;
+  }
+  case kind::MGT: {
+    return d > d_assertion;
+  }
+  default:
+    Unhandled(n.getKind());
+  }
+  
+}/* TheoryMatrix::checkDet */
 
 }/* CVC4::theory::matrix namespace */
 }/* CVC4::theory namespace */
