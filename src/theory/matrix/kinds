@@ -62,6 +62,8 @@ operator MATRIX_VECTOR_MULT 2 "multiply a matrix by a vector; first argument is 
 
 operator VECTOR_DOT 2 "takes the dot product of two vectors; both are vectors of the same dimension"
 
+operator MATRIX_MULT 2 "multiplies two matrices; mxn times nxp"
+
 operator MATRIX_ADD 2 "add two matrices; both are matrices of the same dimensions"
 
 operator MATRIX_RANK 1 "computes the rank of a matrix"
@@ -88,6 +90,7 @@ typerule CONST_VECTOR ::CVC4::theory::matrix::ConstVectorTypeRule
 typerule VECTOR_IN_RANGE ::CVC4::theory::matrix::MatrixVectorTypeRule
 typerule MATRIX_VECTOR_MULT ::CVC4::theory::matrix::MatrixVectorTypeRule
 typerule VECTOR_DOT ::CVC4::theory::matrix::VectorSameLengthTypeRule
+typerule MATRIX_MULT ::CVC4::theory::matrix::MatrixMultTypeRule
 typerule MATRIX_ADD ::CVC4::theory::matrix::MatrixSameDimTypeRule
 typerule MATRIX_RANK ::CVC4::theory::matrix::MatrixRankTypeRule
 typerule MATRIX_DET ::CVC4::theory::matrix::MatrixDetTypeRule

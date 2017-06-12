@@ -63,6 +63,7 @@ void Smt2::addMatrixOperators() {
   addOperator(kind::MATRIX_ADD, "madd");
   addOperator(kind::MATRIX_RANK, "rank");
   addOperator(kind::MATRIX_DET, "det");
+  addOperator(kind::MATRIX_MULT, "mmult");
   addOperator(kind::MEQ, "eq");
   addOperator(kind::MLT, "mlt");
   addOperator(kind::MLE, "mle");

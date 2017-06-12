@@ -30,45 +30,6 @@ void TheoryMatrix::check(Effort level) {
   std::map<unsigned, std::vector<TNode> > vectorindexTNodes;
   std::map<TNode, GiNaC::matrix > vectors;
 
-  //below is the main engine...trying without it now
-  /*
-  while(!done()) {
-    // Get all the assertions
-    Assertion assertion = get();
-    TNode fact = assertion.assertion;
-
-    Debug("matrix") << "TheoryMatrix::check(): processing " << fact << endl;
-    Debug("matrix") << "TheoryMatrix::check(): kind =  " << fact.getKind() << endl;
-
-    // Do the work
-    switch(fact.getKind()) {
-
-    // cases for all the theory's kinds go here...
-    case kind::EQUAL:
-    {
-      bool keep = processIndexAssignments(matrices, indexTNodes, fact);
-      if(keep) {
-        otherAssertionTNodes.push_back(fact);
-      }
-      break;
-    }
-    case kind::NOT:
-    {
-      //Handle not matrix index assignments
-      if(fact[0].getKind() == kind::EQUAL) {
-        if(fact[0].getNumChildren() > 0 && fact[0][0].getKind() == kind::MATRIX_INDEX) {
-          //Just don't handle the not matrix assignments
-          break;
-        }
-      }
-      //End not matrix index assignments
-    }
-    default:
-      Unhandled(fact.getKind());
-    }
-  }
-  */
-
   //build matrices
   for(assertions_iterator i = facts_begin(); i != facts_end(); ++i) {
     TNode fact = (*i).assertion;
@@ -134,30 +95,30 @@ void TheoryMatrix::check(Effort level) {
     return;
   }
 
+  
   //print matrix
-  cout << "TheoryMatrix::check(): Printing parsed matrices " << endl;
+  Debug("matrix") << "TheoryMatrix::check(): Printing parsed matrices " << endl;
   //print matrices here
   std::map<TNode, GiNaC::matrix >::iterator matrix_it;
   for(matrix_it = matrices.begin(); matrix_it != matrices.end(); ++matrix_it) {
-    // not sure if the following line works...
-    //    Debug("matrix") << "Printing matrix " << getAttribute(it->first, expr::VarNameAttr(), name) << endl;
     GiNaC::matrix m = matrix_it->second;
     for(unsigned int i = 0; i < m.rows(); ++i) {
       for(unsigned int j = 0; j < m.cols(); ++j) {
-        std::cout << m(i, j) << " ";
+        Debug("matrix")  << m(i, j) << " ";
 
         //stop checking if incomplete matrix
         if(m(i, j) == 0x8000000000000)
         {
-          std::cout << "\nExiting check because matrix currently incomplete" << std::endl;
+          Debug("matrix") << "\nExiting check because matrix currently incomplete" << std::endl;
           return;
         }
       }
-      cout << endl;
+      Debug("matrix") << endl;
     }
   }
   //end print matrix
-
+  
+  
   bool t_sat = true;
   for(unsigned i = 0; i < otherAssertionTNodes.size(); ++i) {
     TNode n = otherAssertionTNodes[i];
@@ -169,53 +130,13 @@ void TheoryMatrix::check(Effort level) {
     else if (n.getNumChildren() > 1 && n[0].getKind() == kind::MATRIX_DET) {
       t_sat = checkDet(matrices, n);
     }
+    else if (n.getKind() == kind::VECTOR_IN_RANGE) {
+      t_sat = checkVrange(matrices, vectors, n);
+    }
     else {
       Unhandled(n.getKind());
     }
-/*    
-    switch(n.getKind()) {
-    case kind::EQUAL: {
-      if(n[1].getKind() == kind::MATRIX_RANK) {
-        //get the constant matrix
-        GiNaC::matrix M;
-        if(matrices.count(n[1][0]) == 1) {
-          M = matrices[n[1][0]];
-        }
-        else if (n[1][0].getKind() == kind::CONST_MATRIX) {
-          std::vector< std::vector<double> > Mvals = n[1][0].getConst<Matrix>().getDoubleValues();
-          M = GiNaC::matrix(Mvals.size(), Mvals[0].size());
-          for(unsigned i = 0; i < Mvals.size(); ++i) {
-            for(unsigned j = 0; j < Mvals[0].size(); ++j) {
-              M(i, j) = Mvals[i][j];
-            }
-          }
-        }
-        else {
-          std::cout << "Matrix never assigned" << std::endl;
-        }
-        unsigned r = M.rank();
-        if (r != n[0].getConst<Rational>().getNumerator().getUnsignedInt()) {
-          t_conflict = true;
-        }
-      }
-      break;
-    }
-    case kind::LEQ: {
 
-    }
-    case kind::LT: {
-
-    }
-    case kind::GEQ: {
-
-    }
-    case kind::GT: {
-
-    }
-    default:
-      break;
-    }
-*/
     if(!t_sat) {
       NodeBuilder<> conjunction(kind::AND);
       // include all index assignments
@@ -299,9 +220,6 @@ bool TheoryMatrix::processIndexAssignments(std::map<TNode, GiNaC::matrix > & mat
       }
 
     }
-    //TODO: just create the matrix up above if doesn't exist
-    //--> then the rest of the code can be the same instead of in cases
-    // matrix hasn't been created yet
     else {
       std::vector<unsigned> dimensions = n[0][0].getType(true).getMatrixDim();
       GiNaC::matrix values(dimensions[0], dimensions[1]);
@@ -346,7 +264,7 @@ bool TheoryMatrix::processIndexAssignments(std::map<TNode, GiNaC::matrix > & mat
   else if (n[0].getKind() == kind::VECTOR_INDEX) {
     VectorIndex vindex = n[0].getOperator().getConst<VectorIndex>();
     // create if doesn't already exist
-    if (vectors.count(n[0][0]) == 1) {
+    if (vectors.count(n[0][0]) == 0) {
       unsigned length = n[0][0].getType(true).getVectorLength();
       GiNaC::matrix values(length, 1);
       for(unsigned i = 0; i < length; ++i) {
@@ -377,53 +295,10 @@ bool TheoryMatrix::processIndexAssignments(std::map<TNode, GiNaC::matrix > & mat
   }
 } /*processIndexAssignments*/
 
-  /*
-void TheoryMatrix::processMatrixPredicates(std::vector<TNode> assertions) {
-  for(unsigned i = 0; i < assertions.size(); ++i) {
-    TNode n = assertions[i];
-    switch(n.getKind()) {
-    case kind::EQUAL:
-      break;
-    case kind::LEQ:
-      break;
-    case kind::
-    }
-  }
-}
-  */
-
-  /*
-unsigned TheoryMatrix::computeRank(std::vector<std::vector <double> > & M) {
-  unsigned rows = M.size();
-  unsigned cols = M[0].size();
-  GiNaC::matrix GM(rows, cols);
-  for(unsigned i = 0; i < rows; ++i) {
-    for(unsigned j = 0; j < cols; ++j) {
-      GM(i, j) = M[i][j];
-    }
-  }
-  return GM.rank();
-}
-  */
-
 bool TheoryMatrix::checkRank(std::map<TNode, GiNaC::matrix > & matrices, TNode & n) {
   //get the constant matrix
-  GiNaC::matrix M;
-  if(matrices.count(n[0][0]) == 1) {
-    M = matrices[n[0][0]];
-  }
-  else if (n[0][0].getKind() == kind::CONST_MATRIX) {
-    std::vector< std::vector<double> > Mvals = n[0][0].getConst<Matrix>().getDoubleValues();
-    M = GiNaC::matrix(Mvals.size(), Mvals[0].size());
-    for(unsigned i = 0; i < Mvals.size(); ++i) {
-      for(unsigned j = 0; j < Mvals[0].size(); ++j) {
-        M(i, j) = Mvals[i][j];
-      }
-    }
-  }
-  else {
-    std::cout << "Matrix never assigned" << std::endl;
-  }
+  TNode n00 = n[0][0];
+  GiNaC::matrix M = getMatrix(matrices, n00);
   unsigned r = M.rank();
   unsigned r_assertion = n[1].getConst<Rational>().getNumerator().getUnsignedInt();
   
@@ -450,22 +325,8 @@ bool TheoryMatrix::checkRank(std::map<TNode, GiNaC::matrix > & matrices, TNode &
 
 bool TheoryMatrix::checkDet(std::map<TNode, GiNaC::matrix > & matrices, TNode & n) {
     //get the constant matrix
-  GiNaC::matrix M;
-  if(matrices.count(n[0][0]) == 1) {
-    M = matrices[n[0][0]];
-  }
-  else if (n[0][0].getKind() == kind::CONST_MATRIX) {
-    std::vector< std::vector<double> > Mvals = n[0][0].getConst<Matrix>().getDoubleValues();
-    M = GiNaC::matrix(Mvals.size(), Mvals[0].size());
-    for(unsigned i = 0; i < Mvals.size(); ++i) {
-      for(unsigned j = 0; j < Mvals[0].size(); ++j) {
-        M(i, j) = Mvals[i][j];
-      }
-    }
-  }
-  else {
-    std::cout << "Matrix never assigned" << std::endl;
-  }
+  TNode n00 = n[0][0];
+  GiNaC::matrix M = getMatrix(matrices, n00);
 
   GiNaC::ex d = M.determinant();
   
@@ -495,6 +356,84 @@ bool TheoryMatrix::checkDet(std::map<TNode, GiNaC::matrix > & matrices, TNode & 
   }
   
 }/* TheoryMatrix::checkDet */
+
+bool TheoryMatrix::checkVrange(std::map<TNode, GiNaC::matrix > & matrices, std::map<TNode, GiNaC::matrix > & vectors, TNode & n) {
+  TNode n0 = n[0];
+  GiNaC::matrix M = getMatrix(matrices, n0);
+  
+  GiNaC::matrix v;
+  if(vectors.count(n[1]) == 1) {
+    v = vectors[n[1]];
+  }
+  else if (n[1].getKind() == kind::CONST_VECTOR) {
+    std::vector<double> vvals = n[1].getConst<Vector>().getDoubleValues();
+    v = GiNaC::matrix(vvals.size(), 1);
+    for(unsigned i = 0; i < vvals.size(); ++i) {
+        v(i, 0) = vvals[i];
+      }
+  }
+  else {
+    std::cout << "Vector never assigned" << std::endl;
+  }
+
+  //create matrix of vars
+  GiNaC::matrix vars(M.cols(), 1);
+  for(unsigned i = 0; i < M.cols(); ++i) {
+    std::stringstream sstm;
+    sstm << "x" << i;
+    std::string label = sstm.str();
+    GiNaC::symbol x(label);
+    vars(i, 0) = x;
+  }
+
+  //check if vector in range
+  try {
+    GiNaC::matrix sol = M.solve(vars, v);
+    return true;
+  }
+  catch(...) {
+    //if get any exception, return false
+    return false;
+  }
+  
+}
+
+GiNaC::matrix TheoryMatrix::getMatrix(std::map<TNode, GiNaC::matrix > & matrices, TNode & n) {
+  GiNaC::matrix M;
+  if (matrices.count(n) == 1) {
+    return matrices[n];
+  }
+  else if (n.getKind() == kind::CONST_MATRIX) {
+    std::vector< std::vector<double> > Mvals = n.getConst<Matrix>().getDoubleValues();
+    M = GiNaC::matrix(Mvals.size(), Mvals[0].size());
+    for(unsigned i = 0; i < Mvals.size(); ++i) {
+      for(unsigned j = 0; j < Mvals[0].size(); ++j) {
+        M(i, j) = Mvals[i][j];
+      }
+    }
+    return M;
+  }
+  else if (n.getKind() == kind::MATRIX_MULT) {
+    // try a recursion here
+    TNode n0 = n[0];
+    TNode n1 = n[1];
+    GiNaC::matrix M1 = getMatrix(matrices, n0);
+    GiNaC::matrix M2 = getMatrix(matrices, n1);
+    return M1.mul(M2);
+  }
+
+  else if (n.getKind() == kind::MATRIX_ADD) {
+    TNode n0 = n[0];
+    TNode n1 = n[1];
+    GiNaC::matrix M1 = getMatrix(matrices, n0);
+    GiNaC::matrix M2 = getMatrix(matrices, n1);
+
+    return M1.add(M2);
+  }
+  else {
+    cout << "Matrix was never assigned..." << endl;
+  }
+}
 
 }/* CVC4::theory::matrix namespace */
 }/* CVC4::theory namespace */

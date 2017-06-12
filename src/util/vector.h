@@ -49,8 +49,9 @@ namespace CVC4 {
       index = 0;
       dindex = s.find(delimiter);
     }
-    valstring = s.substr(index, s.length()-1);
+    valstring = s.substr(index, s.length() - index - 1);
     ratvec.push_back(Rational(valstring.c_str()));
+    dvec.push_back(std::atof(valstring.c_str()));
 
     d_length = ratvec.size();
     d_values = ratvec;

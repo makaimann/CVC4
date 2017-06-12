@@ -34,6 +34,10 @@ public:
 
   bool checkDet(std::map<TNode, GiNaC::matrix > &, TNode &);
 
+  bool checkVrange(std::map<TNode, GiNaC::matrix > &, std::map<TNode, GiNaC::matrix > &, TNode &);
+
+  GiNaC::matrix getMatrix(std::map<TNode, GiNaC::matrix > &, TNode &);
+
   std::string identify() const {
     return "THEORY_MATRIX";
   }

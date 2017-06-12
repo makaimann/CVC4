@@ -119,6 +119,34 @@ public:
 };/* class VectorSameLengthTypeRule */
 
 
+class MatrixMultTypeRule {
+ public:
+  inline static TypeNode computeType(NodeManager* nodeManager, TNode n,
+                                     bool check) {
+
+    TypeNode t = n[0].getType(check);
+    TypeNode t2 = n[1].getType(check);
+
+    std::vector< unsigned > d1 = t.getMatrixDim();
+    std::vector< unsigned > d2 = t.getMatrixDim();
+
+
+    if(check) {
+      if(!t.isMatrix() || !t2.isMatrix()) {
+        throw TypeCheckingExceptionPrivate(n, "expecting Matrix terms");
+      }
+      
+      if(d1[1] != d2[0]) {
+        throw TypeCheckingExceptionPrivate(n, "Matrix 1 must have the same number of columns as Matrix 2 has rows.");
+      }
+    }
+
+    return nodeManager->mkMatrixType(d1[1], d2[0]);
+  }
+
+}; /* class MatrixMultTypeRule */
+
+
 class MatrixSameDimTypeRule {
 public:
   inline static TypeNode computeType(NodeManager* nodeManager, TNode n,
