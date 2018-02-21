@@ -366,7 +366,11 @@ bool CircuitPropagator::propagate() {
     Debug("circuit-prop") << "CircuitPropagator::propagate(): assigned to " << (assignment ? "true" : "false") << std::endl;
 
     // Is this an atom
-    bool atom = Theory::theoryOf(current) != THEORY_BOOL || current.isVar();
+    // Equality is owned by the theory that owns the domain but, to make the
+    // formula simpler, want to include equalities over bools (i.e. anything)
+    bool atom = Theory::theoryOf(current) != THEORY_BOOL ||
+			          current.getKind() == kind::EQUAL ||
+			          current.isVar();
 
     // If an atom, add to the list for simplification
     if (atom) {

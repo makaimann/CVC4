@@ -32,23 +32,52 @@ namespace theory {
 namespace booleans {
 
 Theory::PPAssertStatus TheoryBool::ppAssert(TNode in, SubstitutionMap& outSubstitutions) {
-
-  if (in.getKind() == kind::CONST_BOOLEAN && !in.getConst<bool>()) {
+  if (in.getKind() == kind::CONST_BOOLEAN && !in.getConst<bool>())
+  {
     // If we get a false literal, we're in conflict
     return PP_ASSERT_STATUS_CONFLICT;
   }
 
-  // Add the substitution from the variable to its value
-  if (in.getKind() == kind::NOT) {
-    if (in[0].getKind() == kind::VARIABLE) {
-      outSubstitutions.addSubstitution(in[0], NodeManager::currentNM()->mkConst<bool>(false));
-    } else {
+  if (in.getKind() == kind::EQUAL)
+  {
+    if (in[0].isVar() && !in[1].hasSubterm(in[0]))
+    {
+      outSubstitutions.addSubstitution(in[0], in[1]);
+      return PP_ASSERT_STATUS_SOLVED;
+    }
+    else if (in[1].isVar() && !in[0].hasSubterm(in[1]))
+    {
+      outSubstitutions.addSubstitution(in[1], in[0]);
+      return PP_ASSERT_STATUS_SOLVED;
+    }
+    else
+    {
       return PP_ASSERT_STATUS_UNSOLVED;
     }
-  } else {
-    if (in.getKind() == kind::VARIABLE) {
-      outSubstitutions.addSubstitution(in, NodeManager::currentNM()->mkConst<bool>(true));
-    } else {
+  }
+
+  // Add the substitution from the variable to its value
+  if (in.getKind() == kind::NOT)
+  {
+    if (in[0].getKind() == kind::VARIABLE)
+    {
+      outSubstitutions.addSubstitution(
+          in[0], NodeManager::currentNM()->mkConst<bool>(false));
+    }
+    else
+    {
+      return PP_ASSERT_STATUS_UNSOLVED;
+    }
+  }
+  else
+  {
+    if (in.getKind() == kind::VARIABLE)
+    {
+      outSubstitutions.addSubstitution(
+          in, NodeManager::currentNM()->mkConst<bool>(true));
+    }
+    else
+    {
       return PP_ASSERT_STATUS_UNSOLVED;
     }
   }
@@ -69,7 +98,7 @@ void TheoryBool::check(Effort level) {
   }
   if( Theory::fullEffort(level) ){
   }
-}  
+}
 */
 
 }/* CVC4::theory::booleans namespace */
