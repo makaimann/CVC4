@@ -31,7 +31,8 @@ namespace CVC4 {
 namespace theory {
 namespace bv {
 
-enum RewriteRuleId {
+enum RewriteRuleId
+{
 
   /// core normalization rules
   EmptyRule,
@@ -148,6 +149,8 @@ enum RewriteRuleId {
   ZeroExtendEqConst,
   SignExtendUltConst,
   ZeroExtendUltConst,
+  NeqBitZero,
+  NeqBitOne,
 
   /// normalization rules
   ExtractBitwise,
@@ -312,7 +315,9 @@ inline std::ostream& operator << (std::ostream& out, RewriteRuleId ruleId) {
   case ZeroExtendEqConst: out << "ZeroExtendEqConst"; return out;
   case SignExtendUltConst: out << "SignExtendUltConst"; return out;
   case ZeroExtendUltConst: out << "ZeroExtendUltConst"; return out;
-    
+  case NeqBitZero: out << "NeqBitZero"; return out;
+  case NeqBitOne: out << "NeqBitOne"; return out;
+
   case UleEliminate : out << "UleEliminate"; return out;
   case BitwiseSlicing : out << "BitwiseSlicing"; return out;
   case ExtractSignExtend : out << "ExtractSignExtend"; return out;
@@ -548,6 +553,8 @@ struct AllRewriteRules {
   RewriteRule<SignExtendUltConst> rule126;
   RewriteRule<ZeroExtendUltConst> rule127;
   RewriteRule<MultSltMult> rule128;
+  RewriteRule<NeqBitZero> rule129;
+  RewriteRule<NeqBitOne> rule130;
 };
 
 template<> inline

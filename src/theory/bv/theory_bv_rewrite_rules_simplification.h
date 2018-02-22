@@ -621,6 +621,46 @@ inline Node RewriteRule<SltZero>::apply(TNode node)
 }
 
 /**
+ * NeqBitZero
+ *
+ * (not (= a (bv0 1))) ==> (= a (bv1 1))
+ */
+template <>
+inline bool RewriteRule<NeqBitZero>::applies(TNode node)
+{
+  return (node.getKind() == kind::NOT && node[0].getKind() == kind::EQUAL
+          && node[0][0].getKind() == kind::BITVECTOR_TYPE
+          && utils::getSize(node[0][0]) == 1 && node[0][1] == utils::mkZero(1));
+}
+
+template <>
+inline Node RewriteRule<NeqBitZero>::apply(TNode node)
+{
+  Debug("bv-rewrite") << "RewriteRule<NeqBitZero>(" << node << ")" << std::endl;
+  return utils::mkNode(kind::EQUAL, node[0][0], utils::mkOne(1));
+}
+
+/**
+ * NeqBitOne
+ *
+ * (not (= a (bv1 1))) ==> (= a (bv0 1))
+ */
+template <>
+inline bool RewriteRule<NeqBitOne>::applies(TNode node)
+{
+  return (node.getKind() == kind::NOT && node[0].getKind() == kind::EQUAL
+          && node[0][0].getKind() == kind::BITVECTOR_TYPE
+          && utils::getSize(node[0][0]) == 1 && node[0][1] == utils::mkOne(1));
+}
+
+template <>
+inline Node RewriteRule<NeqBitOne>::apply(TNode node)
+{
+  Debug("bv-rewrite") << "RewriteRule<NeqBitOne>(" << node << ")" << std::endl;
+  return utils::mkNode(kind::EQUAL, node[0][0], utils::mkZero(1));
+}
+
+/**
  * UltSelf
  *
  * a < a ==> false

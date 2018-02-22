@@ -853,6 +853,14 @@ Node TheoryBV::ppRewrite(TNode t)
   } else if (RewriteRule<ZeroExtendEqConst>::applies(t)) {
     res = RewriteRule<ZeroExtendEqConst>::run<false>(t);
   }
+  else if (RewriteRule<NeqBitZero>::applies(t))
+  {
+    res = RewriteRule<NeqBitZero>::run<false>(t);
+  }
+  else if (RewriteRule<NeqBitOne>::applies(t))
+  {
+    res = RewriteRule<NeqBitOne>::run<false>(t);
+  }
 
   // if(t.getKind() == kind::EQUAL &&
   //    ((t[0].getKind() == kind::BITVECTOR_MULT && t[1].getKind() ==

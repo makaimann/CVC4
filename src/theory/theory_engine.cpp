@@ -1121,6 +1121,19 @@ Node TheoryEngine::preprocess(TNode assertion) {
       d_ppCache[current] = ppRewritten;
       Assert(Rewriter::rewrite(d_ppCache[current]) == d_ppCache[current]);
       continue;
+    }  // If it's a negation of a term that can be rewritten, pass to theory
+       // ppRewriter
+    else if (current.getKind() == kind::NOT
+             && Theory::theoryOf(current[0]) != THEORY_BOOL)
+    {
+      // call ppTheoryRewrite for recursive rewrites of subterms, then pass
+      // whole node to theory of subterm
+      Node ppTheoryRewritten =
+          theoryOf(current[0])->ppRewrite(ppTheoryRewrite(current));
+      d_ppCache[current] = Rewriter::rewrite(ppTheoryRewritten);
+      // Should have reached a fixpoint for rewrites
+      Assert(Rewriter::rewrite(d_ppCache[current]) == d_ppCache[current]);
+      continue;
     }
 
     // Not yet substituted, so process
