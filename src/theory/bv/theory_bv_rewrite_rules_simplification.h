@@ -637,7 +637,8 @@ template <>
 inline Node RewriteRule<NeqBitZero>::apply(TNode node)
 {
   Debug("bv-rewrite") << "RewriteRule<NeqBitZero>(" << node << ")" << std::endl;
-  return utils::mkNode(kind::EQUAL, node[0][0], utils::mkOne(1));
+  NodeManager *nm = NodeManager::currentNM();
+  return nm->mkNode(kind::EQUAL, node[0][0], utils::mkOne(1));
 }
 
 /**
@@ -657,7 +658,8 @@ template <>
 inline Node RewriteRule<NeqBitOne>::apply(TNode node)
 {
   Debug("bv-rewrite") << "RewriteRule<NeqBitOne>(" << node << ")" << std::endl;
-  return utils::mkNode(kind::EQUAL, node[0][0], utils::mkZero(1));
+  NodeManager *nm = NodeManager::currentNM();
+  return nm->mkNode(kind::EQUAL, node[0][0], utils::mkZero(1));
 }
 
 /**
