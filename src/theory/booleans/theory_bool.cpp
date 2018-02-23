@@ -38,47 +38,56 @@ Theory::PPAssertStatus TheoryBool::ppAssert(TNode in, SubstitutionMap& outSubsti
     return PP_ASSERT_STATUS_CONFLICT;
   }
 
-  if (in.getKind() == kind::EQUAL)
+  switch (in.getKind())
   {
-    if (in[0].isVar() && !in[1].hasSubterm(in[0]))
+    case kind::EQUAL:
     {
-      outSubstitutions.addSubstitution(in[0], in[1]);
-      return PP_ASSERT_STATUS_SOLVED;
+      if (in[0].isVar() && !in[1].hasSubterm(in[0]))
+      {
+        outSubstitutions.addSubstitution(in[0], in[1]);
+        return PP_ASSERT_STATUS_SOLVED;
+      }
+      else if (in[1].isVar() && !in[0].hasSubterm(in[1]))
+      {
+        outSubstitutions.addSubstitution(in[1], in[0]);
+        return PP_ASSERT_STATUS_SOLVED;
+      }
+      else
+      {
+        return PP_ASSERT_STATUS_UNSOLVED;
+      }
+      break;
     }
-    else if (in[1].isVar() && !in[0].hasSubterm(in[1]))
+    case kind::NOT:
     {
-      outSubstitutions.addSubstitution(in[1], in[0]);
-      return PP_ASSERT_STATUS_SOLVED;
+      if (in[0].getKind() == kind::VARIABLE)
+      {
+        outSubstitutions.addSubstitution(
+            in[0], NodeManager::currentNM()->mkConst<bool>(false));
+      }
+      else
+      {
+        return PP_ASSERT_STATUS_UNSOLVED;
+      }
+      break;
     }
-    else
+    case kind::VARIABLE:
+    {
+      if (in.getKind() == kind::VARIABLE)
+      {
+        outSubstitutions.addSubstitution(
+            in, NodeManager::currentNM()->mkConst<bool>(true));
+      }
+      else
+      {
+        return PP_ASSERT_STATUS_UNSOLVED;
+      }
+      break;
+    }
+    default:
     {
       return PP_ASSERT_STATUS_UNSOLVED;
-    }
-  }
-
-  // Add the substitution from the variable to its value
-  if (in.getKind() == kind::NOT)
-  {
-    if (in[0].getKind() == kind::VARIABLE)
-    {
-      outSubstitutions.addSubstitution(
-          in[0], NodeManager::currentNM()->mkConst<bool>(false));
-    }
-    else
-    {
-      return PP_ASSERT_STATUS_UNSOLVED;
-    }
-  }
-  else
-  {
-    if (in.getKind() == kind::VARIABLE)
-    {
-      outSubstitutions.addSubstitution(
-          in, NodeManager::currentNM()->mkConst<bool>(true));
-    }
-    else
-    {
-      return PP_ASSERT_STATUS_UNSOLVED;
+      break;
     }
   }
 
