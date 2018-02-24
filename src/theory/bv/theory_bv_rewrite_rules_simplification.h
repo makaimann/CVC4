@@ -629,7 +629,7 @@ template <>
 inline bool RewriteRule<NeqBitZero>::applies(TNode node)
 {
   return (node.getKind() == kind::NOT && node[0].getKind() == kind::EQUAL
-          && node[0][0].getKind() == kind::VARIABLE
+          && (node[0][0].getKind() == kind::VARIABLE || node[0][0].getKind() == kind::SKOLEM)
           && utils::getSize(node[0][0]) == 1 && node[0][1] == utils::mkZero(1));
 }
 
@@ -650,7 +650,7 @@ template <>
 inline bool RewriteRule<NeqBitOne>::applies(TNode node)
 {
   return (node.getKind() == kind::NOT && node[0].getKind() == kind::EQUAL
-          && node[0][0].getKind() == kind::VARIABLE
+          && (node[0][0].getKind() == kind::VARIABLE || node[0][0].getKind() == kind::SKOLEM)
           && utils::getSize(node[0][0]) == 1 && node[0][1] == utils::mkOne(1));
 }
 
