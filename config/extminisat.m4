@@ -27,14 +27,14 @@ elif test -n "$with_extminisat"; then
     ]
   )
 
-  # Check if cryptominisat5 was installed via contrib/get-cryptominisat
-  # AC_MSG_CHECKING([whether cryptominisat5 was already installed via contrib/get-cryptominisat])
-  # if test -z "$EXTMINISAT_HOME" && test -e "$ac_abs_confdir/cryptominisat5/install/bin/cryptominisat5"; then
-  #   EXTMINISAT_HOME="$ac_abs_confdir/cryptominisat5"
-  #   AC_MSG_RESULT([yes, $EXTMINISAT_HOME])
-  # else
-  #   AC_MSG_RESULT([no])
-  # fi
+  # Check if extminisat was installed via contrib/get-extminisat
+  AC_MSG_CHECKING([whether extminisat was already installed via contrib/get-extminisat])
+  if test -z "$EXTMINISAT_HOME" && test -e "$ac_abs_confdir/minisat/bin/minisat"; then
+    EXTMINISAT_HOME="$ac_abs_confdir/minisat"
+    AC_MSG_RESULT([yes, $EXTMINISAT_HOME])
+  else
+    AC_MSG_RESULT([no])
+  fi
 
   if ! test -d "$EXTMINISAT_HOME" || ! test -x "$EXTMINISAT_HOME/bin/minisat" ; then
     AC_MSG_FAILURE([either $EXTMINISAT_HOME is not a minisat install tree or it's not yet built])
@@ -51,21 +51,21 @@ elif test -n "$with_extminisat"; then
     AC_MSG_FAILURE([cannot link against libextminisat!])
   else
     AC_MSG_RESULT([$EXTMINISAT_LIBS])
-    have_libcryptominisat=1
+    have_libextminisat=1
   fi
 
   EXTMINISAT_LDFLAGS="-L$EXTMINISAT_HOME/install/lib"
 
 else
-  AC_MSG_RESULT([no, user didn't request cryptominisat])
-  with_cryptominisat=no
+  AC_MSG_RESULT([no, user didn't request extminisat])
+  with_extminisat=no
 fi
 
 ])# CVC4_CHECK_FOR_EXTMINISAT
 
 # CVC4_TRY_STATIC_EXTMINISAT_WITH(LIBS)
 # ------------------------------
-# Try AC_CHECK_LIB(cryptominisat) with the given linking libraries
+# Try AC_CHECK_LIB(extminisat) with the given linking libraries
 AC_DEFUN([CVC4_TRY_EXTMINISAT_WITH], [
 if test -z "$EXTMINISAT_LIBS"; then
   AC_LANG_PUSH([C++])
