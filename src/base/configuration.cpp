@@ -136,7 +136,8 @@ std::string Configuration::copyright() {
   if (Configuration::isBuiltWithAbc()
       || Configuration::isBuiltWithLfsc()
       || Configuration::isBuiltWithCadical()
-      || Configuration::isBuiltWithCryptominisat())
+      || Configuration::isBuiltWithCryptominisat()
+      || Configuration::isBuiltWithExtMinisat())
   {
     ss << "This version of CVC4 is linked against the following non-(L)GPL'ed\n"
        << "third party libraries.\n\n";
@@ -162,6 +163,12 @@ std::string Configuration::copyright() {
          << "  See https://github.com/msoos/cryptominisat for copyright "
          << "information.\n\n";
     }
+    if (Configuration::isBuiltWithCryptominisat())
+      {
+        ss << "  MiniSat - A minimalistic and high-performance SAT solve\n"
+           << "  See https://github.com/niklasso/minisat for copyright "
+           << "information.\n\n";
+      }
   }
 
   if (Configuration::isBuiltWithGmp())
@@ -242,6 +249,10 @@ bool Configuration::isBuiltWithCadical() { return IS_CADICAL_BUILD; }
 
 bool Configuration::isBuiltWithCryptominisat() {
   return IS_CRYPTOMINISAT_BUILD;
+}
+
+bool Configuration::isBuiltWithExtMinisat() {
+  return IS_EXTMINISAT_BUILD;
 }
 
 bool Configuration::isBuiltWithReadline() {

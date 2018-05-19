@@ -1042,12 +1042,12 @@ void OptionsHandler::abcEnabledBuild(std::string option, std::string value)
 
 void OptionsHandler::satSolverEnabledBuild(std::string option, bool value)
 {
-#if !defined(CVC4_USE_CRYPTOMINISAT) && !defined(CVC4_USE_CADICAL)
+#if !defined(CVC4_USE_CRYPTOMINISAT) && !defined(CVC4_USE_CADICAL) && !defined(CVC4_USE_EXTMINISAT)
   if (value)
   {
     std::stringstream ss;
     ss << "option `" << option
-       << "' requires a CVC4 to be built with CryptoMiniSat or CaDiCaL";
+       << "' requires a CVC4 to be built with CryptoMiniSat, CaDiCaL or external version of MiniSat";
     throw OptionException(ss.str());
   }
 #endif
@@ -1056,12 +1056,12 @@ void OptionsHandler::satSolverEnabledBuild(std::string option, bool value)
 void OptionsHandler::satSolverEnabledBuild(std::string option,
                                            std::string value)
 {
-#if !defined(CVC4_USE_CRYPTOMINISAT) && !defined(CVC4_USE_CADICAL)
+#if !defined(CVC4_USE_CRYPTOMINISAT) && !defined(CVC4_USE_CADICAL) && !defined(CVC4_USE_EXTMINISAT)
   if (!value.empty())
   {
     std::stringstream ss;
     ss << "option `" << option
-       << "' requires a CVC4 to be built with CryptoMiniSat or CaDiCaL";
+       << "' requires a CVC4 to be built with CryptoMiniSat, CaDiCaL or external version of MiniSat";
     throw OptionException(ss.str());
   }
 #endif
@@ -1075,6 +1075,8 @@ minisat (default)\n\
 cadical\n\
 \n\
 cryptominisat\n\
+\n\
+minisat (ext)\n\
 ";
 
 theory::bv::SatSolverMode OptionsHandler::stringToSatSolver(std::string option,
@@ -1094,8 +1096,31 @@ theory::bv::SatSolverMode OptionsHandler::stringToSatSolver(std::string option,
       options::bitvectorToBool.set(true);
     }
     return theory::bv::SAT_SOLVER_CRYPTOMINISAT;
-  }
-  else if (optarg == "cadical")
+  } else if(optarg == "extminisat") {
+
+    if (options::incrementalSolving() &&
+        options::incrementalSolving.wasSetByUser()) {
+      throw OptionException(std::string("Unmodified minisat does not support incremental mode. \n\
+                                         Try --bv-sat-solver=minisat"));
+    }
+
+    if (options::bitblastMode() == theory::bv::BITBLAST_MODE_LAZY &&
+        options::bitblastMode.wasSetByUser()) {
+      throw OptionException(
+                            std::string("Unmodified minisat does not support lazy bit-blasting. \n\
+                                         Try --bv-sat-solver=minisat"));
+    }
+    if (!options::bitvectorToBool.wasSetByUser()) {
+      options::bitvectorToBool.set(true);
+    }
+
+    // if (!options::bvAbstraction.wasSetByUser() &&
+    //     !options::skolemizeArguments.wasSetByUser()) {
+    //   options::bvAbstraction.set(true);
+    //   options::skolemizeArguments.set(true);
+    // }
+    return theory::bv::SAT_SOLVER_EXTMINISAT;
+  } else if (optarg == "cadical")
   {
     if (options::incrementalSolving()
         && options::incrementalSolving.wasSetByUser())
@@ -1673,6 +1698,7 @@ void OptionsHandler::showConfiguration(std::string option) {
   print_config_cond("glpk", Configuration::isBuiltWithGlpk());
   print_config_cond("cadical", Configuration::isBuiltWithCadical());
   print_config_cond("cryptominisat", Configuration::isBuiltWithCryptominisat());
+  print_config_cond("extminisat", Configuration::isBuiltWithExtMinisat());
   print_config_cond("gmp", Configuration::isBuiltWithGmp());
   print_config_cond("lfsc", Configuration::isBuiltWithLfsc());
   print_config_cond("readline", Configuration::isBuiltWithReadline());

@@ -126,6 +126,12 @@ namespace CVC4 {
 #  define IS_CRYPTOMINISAT_BUILD false
 #endif /* CVC4_USE_CRYPTOMINISAT */
 
+#if CVC4_USE_EXTMINISAT
+#  define IS_EXTMINISAT_BUILD true
+#else /* CVC4_USE_EXTMINISAT */
+#  define IS_EXTMINISAT_BUILD false
+#endif /* CVC4_USE_EXTMINISAT */
+
 #if CVC4_USE_LFSC
 #define IS_LFSC_BUILD true
 #else /* CVC4_USE_LFSC */

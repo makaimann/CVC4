@@ -142,6 +142,8 @@ libcvc4_la_SOURCES = \
 	prop/cnf_stream.h \
 	prop/cryptominisat.cpp \
 	prop/cryptominisat.h \
+	prop/extminisat.cpp \
+	prop/extminisat.h \
 	prop/prop_engine.cpp \
 	prop/prop_engine.h \
 	prop/registrar.h \
@@ -600,6 +602,11 @@ endif
 if CVC4_USE_CRYPTOMINISAT
 libcvc4_la_LIBADD += $(CRYPTOMINISAT_LIBS)
 libcvc4_la_LDFLAGS += $(CRYPTOMINISAT_LDFLAGS)
+endif
+
+if CVC4_USE_EXTMINISAT
+libcvc4_la_LIBADD += $(EXTMINISAT_LIBS)
+libcvc4_la_LDFLAGS += $(EXTMINISAT_LDFLAGS)
 endif
 
 if CVC4_USE_LFSC

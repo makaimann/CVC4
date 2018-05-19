@@ -99,6 +99,8 @@ public:
 
   static bool isBuiltWithCryptominisat();
 
+  static bool isBuiltWithExtMinisat();
+
   static bool isBuiltWithReadline();
 
   static bool isBuiltWithTlsSupport();
