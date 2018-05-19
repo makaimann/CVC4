@@ -927,16 +927,16 @@ AC_SUBST([CRYPTOMINISAT_LIBS])
 
 # Build with libextminisat
 AC_ARG_WITH([extminisat],
-  [AS_HELP_STRING([--with-extminisat],
-    [use the (unmodified) MINISAT sat solver])], [], [with_extminisat=])
+[AS_HELP_STRING([--with-extminisat],
+[use the EXTMINISAT sat solver])], [], [with_extminisat=])
 CVC4_CHECK_FOR_EXTMINISAT
 if test $have_libextminisat -eq 1; then
-  CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-DCVC4_USE_EXTMINISAT"
-  CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-I$EXTMINISAT_HOME/install/include"
+   CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-DCVC4_USE_EXTMINISAT"
+   CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-I$EXTMINISAT_HOME/include"
 fi
 AM_CONDITIONAL([CVC4_USE_EXTMINISAT], [test $have_libextminisat -eq 1])
 AC_SUBST([EXTMINISAT_LDFLAGS])
-AC_SUBST[(EXTMINISAT_LIBS])
+AC_SUBST([EXTMINISAT_LIBS])
 
 # Build with LFSC
 AC_ARG_WITH([lfsc],
