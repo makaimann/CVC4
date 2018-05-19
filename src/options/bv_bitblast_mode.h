@@ -66,6 +66,7 @@ enum SatSolverMode
   SAT_SOLVER_MINISAT,
   SAT_SOLVER_CRYPTOMINISAT,
   SAT_SOLVER_CADICAL,
+  SAT_SOLVER_EXTMINISAT,
 }; /* enum SatSolver */
 
 }/* CVC4::theory::bv namespace */

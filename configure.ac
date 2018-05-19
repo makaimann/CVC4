@@ -133,6 +133,7 @@ if test -z "${enable_optimized+set}" -a \
         -z "${with_abc+set}" -a \
         -z "${with_cadical+set}" -a \
         -z "${with_cryptominisat+set}" -a \
+        -z "${with_extminisat+set}" -a \
         -z "${with_lfsc+set}" -a \
         -z "${with_symfpu+set}"; then
   custom_build_profile=no
@@ -246,6 +247,11 @@ fi
 if test -n "${with_cryptominisat+set}"; then
   if test "$with_cryptominisat" = yes; then
     btargs="$btargs cryptominisat"
+  fi
+fi
+if test -n "${with_extminisat+set}"; then
+  if test "$with_extminisat" = yes; then
+    btargs="$btargs extminisat"
   fi
 fi
 if test -n "${with_lfsc+set}"; then
@@ -918,6 +924,19 @@ fi
 AM_CONDITIONAL([CVC4_USE_CRYPTOMINISAT], [test $have_libcryptominisat -eq 1])
 AC_SUBST([CRYPTOMINISAT_LDFLAGS])
 AC_SUBST([CRYPTOMINISAT_LIBS])
+
+# Build with libextminisat
+AC_ARG_WITH([extminisat],
+  [AS_HELP_STRING([--with-extminisat],
+    [use the (unmodified) MINISAT sat solver])], [], [with_extminisat=])
+CVC4_CHECK_FOR_EXTMINISAT
+if test $have_libextminisat -eq 1; then
+  CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-DCVC4_USE_EXTMINISAT"
+  CVC4CPPFLAGS="${CVC4CPPFLAGS:+$CVC4CPPFLAGS }-I$EXTMINISAT_HOME/install/include"
+fi
+AM_CONDITIONAL([CVC4_USE_EXTMINISAT], [test $have_libextminisat -eq 1])
+AC_SUBST([EXTMINISAT_LDFLAGS])
+AC_SUBST[(EXTMINISAT_LIBS])
 
 # Build with LFSC
 AC_ARG_WITH([lfsc],
@@ -1604,6 +1623,7 @@ Portfolio    : $with_portfolio
 ABC          : $with_abc
 CaDiCaL      : $with_cadical
 Cryptominisat: $with_cryptominisat
+Minisat (ext): $with_extminisat
 GLPK         : $with_glpk
 LFSC         : $with_lfsc
 MP library   : $mplibrary

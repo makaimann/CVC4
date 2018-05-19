@@ -62,6 +62,10 @@ EagerBitblaster::EagerBitblaster(TheoryBV* theory_bv)
       solver = prop::SatSolverFactory::createCryptoMinisat(
           smtStatisticsRegistry(), "EagerBitblaster");
       break;
+    case SAT_SOLVER_EXTMINISAT:
+      solver = prop::SatSolverFactory::createExtMinisat(
+          smtStatisticsRegistry(), "EagerBitblaster");
+      break;
     default: Unreachable("Unknown SAT solver type");
   }
   d_satSolver.reset(solver);

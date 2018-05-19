@@ -19,6 +19,7 @@
 #include "prop/bvminisat/bvminisat.h"
 #include "prop/cadical.h"
 #include "prop/cryptominisat.h"
+#include "prop/extminisat.h"
 #include "prop/minisat/minisat.h"
 
 namespace CVC4 {
@@ -45,6 +46,16 @@ SatSolver* SatSolverFactory::createCryptoMinisat(StatisticsRegistry* registry,
   return new CryptoMinisatSolver(registry, name);
 #else
   Unreachable("CVC4 was not compiled with Cryptominisat support.");
+#endif
+}
+
+SatSolver* SatSolverFactory::createExtMinisat(StatisticsRegistry* registry,
+                                                   const std::string& name)
+{
+#ifdef CVC4_USE_EXTMINISAT
+    return new ExtMinisatSolver(registry, name);
+#else
+    Unreachable("CVC4 was not compiled with ExtMinisat support.");
 #endif
 }
 

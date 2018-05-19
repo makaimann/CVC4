@@ -42,6 +42,9 @@ class SatSolverFactory
   static SatSolver* createCryptoMinisat(StatisticsRegistry* registry,
                                         const std::string& name = "");
 
+  static SatSolver* createExtMinisat(StatisticsRegistry* registry,
+                                     const std::string& name = "");
+
   static SatSolver* createCadical(StatisticsRegistry* registry,
                                   const std::string& name = "");
 
