@@ -5,6 +5,7 @@ AC_DEFUN([CVC4_CHECK_FOR_EXTMINISAT], [
 AC_MSG_CHECKING([whether user requested external minisat support])
 
 have_libextminisat=0
+EXTMINISAT_HOME=/home/makai/repos/forks/CVC4/minisat/
 EXTMINISAT_LIBS=
 EXTMINISAT_LDFLAGS=
 
@@ -48,13 +49,13 @@ elif test -n "$with_extminisat"; then
   CVC4_TRY_EXTMINISAT_WITH([-pthread -lm4ri])
 
   if test -z "$EXTMINISAT_LIBS"; then
-    AC_MSG_FAILURE([cannot link against libextminisat!])
+    AC_MSG_FAILURE([cannot link against libminisat!])
   else
     AC_MSG_RESULT([$EXTMINISAT_LIBS])
     have_libextminisat=1
   fi
 
-  EXTMINISAT_LDFLAGS="-L$EXTMINISAT_HOME/install/lib"
+  EXTMINISAT_LDFLAGS="-L$EXTMINISAT_HOME/lib"
 
 else
   AC_MSG_RESULT([no, user didn't request extminisat])
@@ -79,7 +80,7 @@ if test -z "$EXTMINISAT_LIBS"; then
   LIBS="-lminisat $1"
 
   AC_LINK_IFELSE(
-    [AC_LANG_PROGRAM([[#include <minisat/include/simp/SimpSolver.h>]],
+    [AC_LANG_PROGRAM([[#include <minisast/simp/SimpSolver.h>]],
       [[Minisat::SimpSolver test()]])], [EXTMINISAT_LIBS="-lminisat $1"],
     [EXTMINISAT_LIBS=])
 

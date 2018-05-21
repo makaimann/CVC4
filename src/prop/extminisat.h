@@ -23,9 +23,11 @@
 
 #include "prop/sat_solver.h"
 
+namespace Ext {
 namespace Minisat {
   // don't want to clash with other minisat names
   class SimpSolver;
+}
 }
 
 namespace CVC4 {
@@ -34,7 +36,7 @@ namespace prop {
 class ExtMinisatSolver : public SatSolver
 {
  private:
-  std::unique_ptr<CMSat::SATSolver> d_solver;
+  std::unique_ptr<::Ext::Minisat::SimpSolver> d_solver;
   unsigned d_numVariables;
   bool d_okay;
   SatVariable d_true;
@@ -45,7 +47,7 @@ class ExtMinisatSolver : public SatSolver
   ~ExtMinisatSolver() override;
 
   ClauseId addClause(SatClause& cluase, bool removable) override;
-  ClauseId addXorClause(SatClause& clause, bool rhs, bool removable) overrid;
+  ClauseId addXorClause(SatClause& clause, bool rhs, bool removable) override;
 
   bool nativeXor() override {return false;}
 
@@ -81,6 +83,8 @@ class ExtMinisatSolver : public SatSolver
 
   Statistics d_statistics;
 };
+}
+}
 
 #endif  // CVC4_USE_EXTMINISAT
 #endif  // __CVC4__PROP__EXTMINISAT_H
