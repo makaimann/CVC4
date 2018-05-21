@@ -251,7 +251,7 @@ if test -n "${with_cryptominisat+set}"; then
 fi
 if test -n "${with_extminisat+set}"; then
   if test "$with_extminisat" = yes; then
-    btargs="$btargs extminisat"
+    btargs="$btargs minisat"
   fi
 fi
 if test -n "${with_lfsc+set}"; then
