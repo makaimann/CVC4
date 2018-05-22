@@ -21,31 +21,29 @@
 #include "proof/clause_id.h"
 #include "proof/sat_proof.h"
 
-// include something from minisat for API
-namespace Ext {
+// include things from minisat
 #include <minisat/simp/SimpSolver.h>
 #include <minisat/core/SolverTypes.h>
-}
 
 namespace CVC4 {
 namespace prop {
 
 namespace {
 
-::Ext::Minisat::Lit toInternalLit(SatLiteral lit)
+::Minisat::Lit toInternalLit(SatLiteral lit)
 {
   if (lit == undefSatLiteral)
     {
-      return ::Ext::Minisat::lit_Undef;
+      return ::Minisat::lit_Undef;
     }
-  return ::Ext::Minisat::mkLit(lit.getSatVariable(), lit.isNegated());
+  return ::Minisat::mkLit(lit.getSatVariable(), lit.isNegated());
 }
 
-  SatValue toSatLiteralValue(::Ext::Minisat::lbool res)
+  SatValue toSatLiteralValue(::Minisat::lbool res)
   {
-    if (res == ::Ext::Minisat::l_True) return SAT_VALUE_TRUE;
-    if (res == ::Ext::Minisat::l_Undef) return SAT_VALUE_UNKNOWN;
-    Assert(res == ::Ext::Minisat::l_False);
+    if (res == ::Minisat::l_True) return SAT_VALUE_TRUE;
+    if (res == ::Minisat::l_Undef) return SAT_VALUE_UNKNOWN;
+    Assert(res == ::Minisat::l_False);
     return SAT_VALUE_FALSE;
   }
 
@@ -56,7 +54,7 @@ namespace {
   }
 
   void toInternalClause(SatClause& clause,
-                        ::Ext::Minisat::vec<::Ext::Minisat::Lit>& internal_clause)
+                        ::Minisat::vec<::Minisat::Lit>& internal_clause)
   {
     for (unsigned i = 0; i < clause.size(); ++i)
       {
@@ -69,20 +67,16 @@ namespace {
 
 ExtMinisatSolver::ExtMinisatSolver(StatisticsRegistry* registry,
                                    const std::string& name)
-  : d_solver(new ::Ext::Minisat::SimpSolver()), //or whatever it's called in minisat
+  : d_solver(new ::Minisat::SimpSolver()),
   d_numVariables(0),
   d_okay(true),
   d_statistics(registry, name)
 {
-  d_true = d_solver->newVar();
-  d_false = d_solver->newVar();
+  d_true = d_solver->newVar(::Minisat::l_True);
+  d_false = d_solver->newVar(::Minisat::l_True);
 
-  ::Ext::Minisat::vec<::Ext::Minisat::Lit> clause(1);
-  clause[0] = ::Ext::Minisat::mkLit(d_true, false);
-  d_solver->addClause(clause);
-
-  clause[0] = ::Ext::Minisat::mkLit(d_false, true);
-  d_solver->addClause(clause);
+  d_solver->addClause(::Minisat::mkLit(d_true, false));
+  d_solver->addClause(::Minisat::mkLit(d_false, true));
 }
 
 ExtMinisatSolver::~ExtMinisatSolver() {}
@@ -97,11 +91,15 @@ ClauseId ExtMinisatSolver::addClause(SatClause& clause, bool removable){
 
   ++(d_statistics.d_clausesAdded);
 
-  ::Ext::Minisat::vec<::Ext::Minisat::Lit> internal_clause;
+  ::Minisat::vec<::Minisat::Lit> internal_clause;
   toInternalClause(clause, internal_clause);
   bool res = d_solver->addClause(internal_clause);
   d_okay &= res;
   return ClauseIdError;
+}
+
+bool ExtMinisatSolver::ok() const {
+  return d_okay;
 }
 
 ClauseId ExtMinisatSolver::addXorClause(SatClause& clause,
@@ -112,7 +110,7 @@ ClauseId ExtMinisatSolver::addXorClause(SatClause& clause,
 }
 
 SatVariable ExtMinisatSolver::newVar(bool isTheoryAtom, bool preRegister, bool canErase){
-  d_solver->newVar();
+  d_solver->newVar(::Minisat::l_True);
   ++d_numVariables;
   Assert (d_numVariables == d_solver->nVars());
   return d_numVariables - 1;
@@ -127,7 +125,7 @@ SatVariable ExtMinisatSolver::falseVar() {
 }
 
 void ExtMinisatSolver::markUnremovable(SatLiteral lit) {
-  d_solver->setFrozen(::Ext::Minisat::var(toInternalLit(lit)), true);
+  d_solver->setFrozen(::Minisat::var(toInternalLit(lit)), true);
 }
 
 void ExtMinisatSolver::interrupt(){
@@ -142,20 +140,22 @@ SatValue ExtMinisatSolver::solve()
 }
 
 SatValue ExtMinisatSolver::solve(long unsigned int& resource){
-  Trace("limit") << "ExtMinisatSolver::solve(): have limit of " << resource << " conflicts" << std::endl;
-  TimerStat::CodeTimer solveTimer(d_statistics.d_solveTime);
-  ++d_statistics.d_statCallsToSolve;
-  if(resource == 0) {
-    d_solver->budgetOff();
-  } else {
-    d_solver->setConfBudget(resource);
-  }
+  // Trace("limit") << "ExtMinisatSolver::solve(): have limit of " << resource << " conflicts" << std::endl;
+  // TimerStat::CodeTimer solveTimer(d_statistics.d_solveTime);
+  // ++d_statistics.d_statCallsToSolve;
+  // if(resource == 0) {
+  //   d_solver->budgetOff();
+  // } else {
+  //   d_solver->setConfBudget(resource);
+  // }
   //  BVMinisat::vec<BVMinisat::Lit> empty;
   // unsigned long conflictsBefore = d_solver->conflicts;
   // SatValue result = toSatLiteralValue(d_solver->solveLimited());
   // d_solver->clearInterrupt();
   // resource = d_solver->conflicts - conflictsBefore;
   // Trace("limit") << "<ExtMinisatSolver::solve(): it took " << resource << " conflicts" << std::endl;
+
+  Unreachable("Not sure if implementation above was correct.");
   return toSatLiteralValue(d_solver->solve());;
 }
 
@@ -168,12 +168,8 @@ SatValue ExtMinisatSolver::modelValue(SatLiteral l) {
 }
 
 unsigned ExtMinisatSolver::getAssertionLevel() const {
-  Unreachable("No interface to get assertion level in Cryptominisat");
+  Unreachable("Not sure if standard for minisat or not");
   return -1;
-}
-
-bool ExtMinisatSolver::ok() const {
-  return d_okay;
 }
 
 // TODO: double check if possible -- probably modified version only
@@ -245,7 +241,7 @@ ExtMinisatSolver::Statistics::~Statistics() {
 //   d_registry->unregisterStat(&d_statTotLiterals);
 // }
 
-// void ExtMinisatSolver::Statistics::init(::Ext::Minisat::SimpSolver* d_minisat){
+// void ExtMinisatSolver::Statistics::init(::Minisat::SimpSolver* d_minisat){
 //   d_statStarts.setData(d_minisat->starts);
 //   d_statDecisions.setData(d_minisat->decisions);
 //   d_statRndDecisions.setData(d_minisat->rnd_decisions);
