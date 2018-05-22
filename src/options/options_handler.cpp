@@ -1098,12 +1098,6 @@ theory::bv::SatSolverMode OptionsHandler::stringToSatSolver(std::string option,
     return theory::bv::SAT_SOLVER_CRYPTOMINISAT;
   } else if(optarg == "extminisat") {
 
-    if (options::incrementalSolving() &&
-        options::incrementalSolving.wasSetByUser()) {
-      throw OptionException(std::string("Unmodified minisat does not support incremental mode. \n\
-                                         Try --bv-sat-solver=minisat"));
-    }
-
     if (options::bitblastMode() == theory::bv::BITBLAST_MODE_LAZY &&
         options::bitblastMode.wasSetByUser()) {
       throw OptionException(
