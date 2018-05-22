@@ -6,8 +6,12 @@ AC_MSG_CHECKING([whether user requested external minisat support])
 
 have_libextminisat=0
 EXTMINISAT_HOME=/home/makai/repos/forks/CVC4/minisat/
-EXTMINISAT_LIBS=
-EXTMINISAT_LDFLAGS=
+EXTMINISAT_LIBS="-lminisat $1"
+EXTMINISAT_LDFLAGS=/home/makai/repos/forks/CVC4/minisat/lib
+
+LDFLAGS="-L$EXTMINISAT_HOME/lib $LDFLAGS"
+CPPFLAGS="$CPPFLAGS -I$EXTMINISAT_HOME/include $CPPFLAGS"
+LIBS="-lminisat $1 $LIBS"
 
 have_libextminisat=0
 if test "$with_extminisat" = no; then
@@ -23,7 +27,7 @@ elif test -n "$with_extminisat"; then
     ),
     EXTMINISAT_HOME="$withval",
     [ if test -z "$EXTMINISAT_HOME" && ! test -e "$ac_abs_confdir/minisat/bin/minisat"; then
-        AC_MSG_FAILURE([must give --with-extminisat-dir=PATH, define environment variable EXTMINISAT_HOME, or use contrib/get-extminisat to setup extminisat5 for CVC4!])
+        AC_MSG_FAILURE([must give --with-extminisat-dir=PATH, define environment variable EXTMINISAT_HOME, or use contrib/get-extminisat to setup external minisat for CVC4!])
       fi
     ]
   )

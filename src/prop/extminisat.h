@@ -23,11 +23,9 @@
 
 #include "prop/sat_solver.h"
 
-namespace Ext {
 namespace Minisat {
   // don't want to clash with other minisat names
   class SimpSolver;
-}
 }
 
 namespace CVC4 {
@@ -36,7 +34,7 @@ namespace prop {
 class ExtMinisatSolver : public SatSolver
 {
  private:
-  std::unique_ptr<::Ext::Minisat::SimpSolver> d_solver;
+  std::unique_ptr<::Minisat::SimpSolver> d_solver;
   unsigned d_numVariables;
   bool d_okay;
   SatVariable d_true;
