@@ -72,8 +72,8 @@ ExtMinisatSolver::ExtMinisatSolver(StatisticsRegistry* registry,
   d_okay(true),
   d_statistics(registry, name)
 {
-  d_true = d_solver->newVar(::Minisat::l_True);
-  d_false = d_solver->newVar(::Minisat::l_True);
+  d_true = newVar();
+  d_false = newVar();
 
   d_solver->addClause(::Minisat::mkLit(d_true, false));
   d_solver->addClause(::Minisat::mkLit(d_false, true));
@@ -110,7 +110,7 @@ ClauseId ExtMinisatSolver::addXorClause(SatClause& clause,
 }
 
 SatVariable ExtMinisatSolver::newVar(bool isTheoryAtom, bool preRegister, bool canErase){
-  d_solver->newVar(::Minisat::l_True);
+  d_solver->newVar();
   ++d_numVariables;
   Assert (d_numVariables == d_solver->nVars());
   return d_numVariables - 1;
@@ -159,8 +159,20 @@ SatValue ExtMinisatSolver::solve(long unsigned int& resource){
   return toSatLiteralValue(d_solver->solve());;
 }
 
+SatValue ExtMinisatSolver::solve(const std::vector<SatLiteral>& assumptions)
+{
+  TimerStat::CodeTimer codeTimer(d_statistics.d_solveTime);
+  ::Minisat::vec<::Minisat::Lit> assumpts;
+  for (const SatLiteral& lit : assumptions)
+    {
+      assumpts.push(toInternalLit(lit);
+    }
+  ++d_statistics.d_statCallsToSolve;
+  return toSatLiteralValue(d_solver->solve(&assumpts));
+}
+
 SatValue ExtMinisatSolver::value(SatLiteral l){
-  return toSatLiteralValue(d_solver->value(toInternalLit(l)));
+  return toSatLiteralValue(d_solver->modelValue(toInternalLit(l)));
 }
 
 SatValue ExtMinisatSolver::modelValue(SatLiteral l) {
