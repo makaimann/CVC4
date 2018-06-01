@@ -44,7 +44,7 @@ class ExtMinisatSolver : public SatSolver
 
   ~ExtMinisatSolver() override;
 
-  ClauseId addClause(SatClause& cluase, bool removable) override;
+  ClauseId addClause(SatClause& clause, bool removable) override;
   ClauseId addXorClause(SatClause& clause, bool rhs, bool removable) override;
 
   bool nativeXor() override {return false;}

@@ -94,6 +94,13 @@ ClauseId ExtMinisatSolver::addClause(SatClause& clause, bool removable){
   ::Minisat::vec<::Minisat::Lit> internal_clause;
   toInternalClause(clause, internal_clause);
   bool res = d_solver->addClause(internal_clause);
+  // This fixes the incremental soundness issue
+  // TODO: handle this elsewhere with markUnremovable -- doesn't seem to be called in eager_bitblaster
+  for (unsigned i = 0; i < internal_clause.size(); ++i)
+    {
+      // if ever being accessed again, in assumptions etc.. need to be frozen
+      d_solver->setFrozen(::Minisat::var(internal_clause[i]), true);
+    }
   d_okay &= res;
   return ClauseIdError;
 }
@@ -163,12 +170,14 @@ SatValue ExtMinisatSolver::solve(const std::vector<SatLiteral>& assumptions)
 {
   TimerStat::CodeTimer codeTimer(d_statistics.d_solveTime);
   ::Minisat::vec<::Minisat::Lit> assumpts;
-  for (const SatLiteral& lit : assumptions)
+  for (unsigned i = 0; i < assumptions.size(); ++i)
     {
-      assumpts.push(toInternalLit(lit);
+      assumpts.push(toInternalLit(assumptions[i]));
     }
+  Assert(assumptions.size() == (unsigned)assumpts.size());
   ++d_statistics.d_statCallsToSolve;
-  return toSatLiteralValue(d_solver->solve(&assumpts));
+  Assert(d_solver->okay());
+  return toSatLiteralValue(d_solver->solve(assumpts));
 }
 
 SatValue ExtMinisatSolver::value(SatLiteral l){
