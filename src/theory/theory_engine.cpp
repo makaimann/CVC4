@@ -207,6 +207,10 @@ void TheoryEngine::EngineOutputChannel::conflict(TNode conflictNode,
   Trace("theory::conflict")
       << "EngineOutputChannel<" << d_theory << ">::conflict(" << conflictNode
       << ")" << std::endl;
+
+  // Makai: Adding for emacs org-mode decision tree viewer
+  Trace("dt-view") << ":CONFLICT: " << conflictNode << std::endl;
+
   Assert(!proof);  // Theory shouldn't be producing proofs yet
   ++d_statistics.conflicts;
   d_engine->d_outputChannelUsed = true;
@@ -1354,6 +1358,9 @@ void TheoryEngine::assertToTheory(TNode assertion, TNode originalAssertion, theo
 void TheoryEngine::assertFact(TNode literal)
 {
   Trace("theory") << "TheoryEngine::assertFact(" << literal << ")" << endl;
+
+  // Makai: adding for emacs org-mode assertion viewer
+  Trace("assertion-tree") << string(d_context->getLevel(), '*') << " " << literal << endl;
 
   // spendResource();
 

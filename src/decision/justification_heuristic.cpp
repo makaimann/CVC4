@@ -26,12 +26,15 @@
 #include "smt/smt_statistics_registry.h"
 #include "util/random.h"
 
+#include <string>
+
 namespace CVC4 {
 
 JustificationHeuristic::JustificationHeuristic(CVC4::DecisionEngine* de,
                                                context::UserContext *uc,
                                                context::Context *c):
   ITEDecisionStrategy(de, c),
+  d_context(c),
   d_justified(c),
   d_exploredThreshold(c),
   d_prvsIndex(c, 0),
@@ -487,6 +490,9 @@ JustificationHeuristic::findSplitterRec(TNode node, SatValue desiredVal)
       Trace("decision-node") << "[decision-node] requesting split on " << d_curDecision
                              << ", node: " << node
                              << ", polarity: " << (desiredVal == SAT_VALUE_TRUE ? "true" : "false") << std::endl;
+
+      // Mkaai: Adding for emacs org-mode decision tree viewer
+      Trace("dt-view") << std::string(d_context->getLevel(), '*') << " " << node << ":DECISION: " << (desiredVal == SAT_VALUE_TRUE ? "true" : "false") << std::endl;
       return FOUND_SPLITTER;
     }
   }
