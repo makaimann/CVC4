@@ -51,6 +51,8 @@ class JustificationHeuristic : public ITEDecisionStrategy {
   // being 'justified' is monotonic with respect to decisions
   typedef context::CDHashSet<Node,NodeHashFunction> JustifiedSet;
   JustifiedSet d_justified;
+  // a pointer to the SAT context, for getting decision level
+  context::Context* d_context;
   typedef context::CDHashMap<Node,DecisionWeight,NodeHashFunction> ExploredThreshold;
   ExploredThreshold d_exploredThreshold;
   context::CDO<unsigned>  d_prvsIndex;
