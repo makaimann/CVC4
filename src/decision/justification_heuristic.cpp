@@ -491,8 +491,10 @@ JustificationHeuristic::findSplitterRec(TNode node, SatValue desiredVal)
                              << ", node: " << node
                              << ", polarity: " << (desiredVal == SAT_VALUE_TRUE ? "true" : "false") << std::endl;
 
-      // Mkaai: Adding for emacs org-mode decision tree viewer
-      Trace("dt-view") << std::string(d_context->getLevel(), '*') << " " << node << ":DECISION: " << (desiredVal == SAT_VALUE_TRUE ? "true" : "false") << std::endl;
+      // Makai: Adding for emacs org-mode decision tree viewer
+      Trace("dtview") << std::string(d_context->getLevel(), '*') << " " << node << " :DECISION: " << (desiredVal == SAT_VALUE_TRUE ? "true" : "false") << std::endl;
+      // If asking for propagations, hide them in a sub-bullet
+      Trace("dtview::prop") << std::string(d_context->getLevel() + 1, '*') << " Propagations [Last Decision Repeated]" << std::endl;
       return FOUND_SPLITTER;
     }
   }

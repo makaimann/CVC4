@@ -34,6 +34,10 @@ RemoveTermFormulas::~RemoveTermFormulas() {}
 void RemoveTermFormulas::run(std::vector<Node>& output, IteSkolemMap& iteSkolemMap, bool reportDeps)
 {
   size_t n = output.size();
+  if (n > 1) {
+    // only print out for termITE replacements
+    Trace("dtview::ite") << "* Term ITEs" << endl;
+  }
   for (unsigned i = 0, i_end = output.size(); i < i_end; ++ i) {
     // Do this in two steps to avoid Node problems(?)
     // Appears related to bug 512, splitting this into two lines
@@ -187,6 +191,7 @@ Node RemoveTermFormulas::run(TNode node, std::vector<Node>& output,
     {
       Debug("ite") << "*** term formula removal introduced " << skolem
                    << " for " << node << std::endl;
+      Trace("dtview::ite") << "** " << skolem << " := " << node << endl;
 
       // Remove ITEs from the new assertion, rewrite it and push it to the
       // output
