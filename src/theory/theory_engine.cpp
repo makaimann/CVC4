@@ -209,7 +209,7 @@ void TheoryEngine::EngineOutputChannel::conflict(TNode conflictNode,
       << ")" << std::endl;
 
   // Makai: Adding for emacs org-mode decision tree viewer
-  Trace("dt-view") << ":CONFLICT: " << conflictNode << std::endl;
+  Trace("dtview::conflict") << ":CONFLICT: " << conflictNode << std::endl;
 
   Assert(!proof);  // Theory shouldn't be producing proofs yet
   ++d_statistics.conflicts;
@@ -1360,7 +1360,9 @@ void TheoryEngine::assertFact(TNode literal)
   Trace("theory") << "TheoryEngine::assertFact(" << literal << ")" << endl;
 
   // Makai: adding for emacs org-mode assertion viewer
-  Trace("assertion-tree") << string(d_context->getLevel(), '*') << " " << literal << endl;
+  // They're nested in a sub-bullet
+  //Trace("dtview::prop") << string(d_context->getLevel()+2, '*') << " " << literal << endl;
+  Trace("dtview::prop") << literal << endl;
 
   // spendResource();
 
