@@ -57,11 +57,10 @@ void DumpC::setDumpFromString(const std::string& optarg) {
       if(!strcmp(p, "everything")) {
       } else if(!strcmp(p, "definition-expansion")) {
       } else if(!strcmp(p, "boolean-terms")) {
-      } else if(!strcmp(p, "constrain-subtypes")) {
+      } else if(!strcmp(p, "unconstrained-simp")) {
       } else if(!strcmp(p, "substitution")) {
       } else if(!strcmp(p, "bv-to-bool")) {
       } else if(!strcmp(p, "bool-to-bv")) {
-      } else if(!strcmp(p, "strings-pp")) {
       } else if(!strcmp(p, "skolem-quant")) {
       } else if(!strcmp(p, "simplify")) {
       } else if(!strcmp(p, "static-learning")) {
@@ -165,8 +164,8 @@ assertions\n\
 + Output the assertions after preprocessing and before clausification.\n\
   Can also specify \"assertions:pre-PASS\" or \"assertions:post-PASS\",\n\
   where PASS is one of the preprocessing passes: definition-expansion\n\
-  boolean-terms constrain-subtypes substitution bv-to-bool bool-to-bv\n\
-  strings-pp skolem-quant simplify static-learning ite-removal\n\
+  boolean-terms unconstrained-simp substitution bv-to-bool bool-to-bv\n\
+  skolem-quant simplify static-learning ite-removal\n\
   repeat-simplify rewrite-apply-to-const theory-preprocessing.\n\
   PASS can also be the special value \"everything\", in which case the\n\
   assertions are printed before any preprocessing (with\n\
