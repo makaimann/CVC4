@@ -1266,6 +1266,8 @@ lbool Solver::search(int nof_conflicts)
             conflicts++; conflictC++;
 
             if (decisionLevel() == 0) {
+                // TODO: This is where we should print the conflict
+                // get clause from ref with ca
                 PROOF( ProofManager::getSatProof()->finalizeProof(confl); )
                 return l_False;
             }
@@ -1383,6 +1385,13 @@ lbool Solver::search(int nof_conflicts)
             if (next == lit_Undef) {
                 // New variable decision:
                 next = pickBranchLit();
+
+                // org-mode printing for viewing decision tree
+                if (next != lit_Undef) {
+                  Trace("dtview") << std::string(context->getLevel(), '*') << " " << proxy->getNode(MinisatSatSolver::toSatLiteral(next)) << " :SAT-DECISION:" << std::endl;
+                  // If asking for propagations, hide them in a sub-bullet
+                  Trace("dtview::prop") << std::string(context->getLevel() + 1, '*') << " Propagations [Last Decision Repeated]" << std::endl;
+                }
 
                 if (next == lit_Undef) {
                     // We need to do a full theory check to confirm
