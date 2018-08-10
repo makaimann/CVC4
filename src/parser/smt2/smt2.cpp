@@ -106,6 +106,8 @@ void Smt2::addBitvectorOperators() {
   addOperator(kind::BITVECTOR_SGE, "bvsge");
   addOperator(kind::BITVECTOR_REDOR, "bvredor");
   addOperator(kind::BITVECTOR_REDAND, "bvredand");
+  // make BITVECTOR_ITE accessible via smt-lib2
+  addOperator(kind::BITVECTOR_ITE, "bvite");
 
   Parser::addOperator(kind::BITVECTOR_BITOF);
   Parser::addOperator(kind::BITVECTOR_EXTRACT);
