@@ -1,5 +1,10 @@
-all:
+all: kinds solver
+
+kinds:
 	python setup-kind.py build_ext --inplace
+
+solver:
+	python setup-solver.py build_ext --inplace
 
 clean:
 	rm -rf build

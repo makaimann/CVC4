@@ -5,15 +5,7 @@ from Kind cimport *
 
 import sys
 
-# cdef class kind:
-#     cdef Kind k
-#     def __cinit__(self, string name):
-#         self.k = <Kind> kind_dict[name]
-#         self.name = name
-
-#     def __str__(self):
-#         return self.name
-
+# map C++ kinds to python names
 cdef kind_dict = {
     <int> INTERNAL_KIND: "InternalKind",
     <int> UNDEFINED_KIND: "UndefinedKind",
@@ -301,7 +293,6 @@ cdef class kind:
         self.name = kind_dict[val]
 
     def __str__(self):
-        #        cdef c = {<int> INTERNAL_KIND: "internal_kind", <int> UNDEFINED_KIND: "undefined_kind", <int> NULL_EXPR : "null_expr"}
         return self.name
 
     def __repr__(self):
@@ -316,3 +307,8 @@ for kind_int, name in kind_dict.items():
         raise RuntimeError("Redefinition of Python kind %s."%name)
 
     setattr(mod_ref, name, new_kind)
+
+del mod_ref
+del new_kind
+del kind_int
+del name
