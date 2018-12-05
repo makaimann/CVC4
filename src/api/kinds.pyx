@@ -286,8 +286,8 @@ cdef kind_dict = {
 }
 
 cdef class kind:
-    cdef Kind k
-    cdef str name
+#    cdef Kind k
+#    cdef str name
     def __cinit__(self, int val):
         self.k = <Kind> val
         self.name = kind_dict[val]

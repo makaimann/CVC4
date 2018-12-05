@@ -8,5 +8,7 @@ solver:
 
 clean:
 	rm -rf build
-	rm kinds.cpp
-	rm kinds.cpython-*
+	rm -f kinds.cpp
+	rm -f kinds.cpython-*
+	rm -f cvc4.cpp
+	rm -f cvc4.cpython-*
