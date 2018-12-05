@@ -14,7 +14,7 @@ from Kind cimport Kind as c_Kind
 
 from cython.operator cimport dereference as dref
 
-from libc.stdint cimport uint32_t, uint64_t
+from libc.stdint cimport int32_t, int64_t, uint32_t, uint64_t
 
 from libcpp.pair cimport pair
 from libcpp.string cimport string
@@ -34,8 +34,11 @@ from collections import Sequence
 # For now, leaving most things as are in case Aina/Mathias have a better way to do it
 # Just going to get the term building to work
 
-########################### Convenient Decorators #################################
 
+
+########################### Convenient Decorators #################################
+# TODO: Decide if this is necessary, user shouldn't actually be able to shoot themselves in the foot
+#       Maybe don't let them construct the Sort object directly
 def check_for_null(f):
     def run_if_not_null(self, *args):
         if self.__isnull__():
@@ -331,11 +334,7 @@ cdef class Solver:
 
     def mkSetSort(self, Sort elemSort):
         cdef Sort sort = Sort()
-        cdef c_Sort csort
-
-        csort = self.s.mkSetSort(elemSort.s[0])
-        sort.s = &csort
-
+        sort.s = new c_Sort(self.s.mkSetSort(elemSort.s[0]).getType())
         return sort
 
     def mkUninterpretedSort(self, str name):
@@ -370,12 +369,10 @@ cdef class Solver:
         return sort
 
     def mkTerm(self, Kind kind, *args):
-        cdef c_Term t
         cdef Term term = Term()
 
         if len(args) == 1 and isinstance(args[0], Sort):
-            t = self.s.mkTerm(kind.k, (<Sort?> args[0]).s[0])
-            term.t = &t
+            term.t = new c_Term(self.s.mkTerm(kind.k, (<Sort?> args[0]).s[0]).getExpr())
             return term
 
         if isinstance(args[0], Sequence):
@@ -388,8 +385,7 @@ cdef class Solver:
         for a in args:
             v.push_back((<Term> a).t[0])
 
-        t = self.s.mkTerm(kind.k, <const vector[c_Term]&> v)
-        term.t = &t
+        term.t = new c_Term(self.s.mkTerm(kind.k, <const vector[c_Term]&> v).getExpr())
 
         return term
 
@@ -417,7 +413,108 @@ cdef class Solver:
         term.t = &t
         return term
 
-    # TODO: Fill in missing functions
+    def mkInteger(self, name_or_val, base=10):
+        cdef c_Term t
+        cdef Term term = Term()
+
+        if isinstance(name_or_val, str):
+            try:
+                t = self.s.mkInteger(name_or_val.encode(), <uint32_t> base)
+            except ValueError as e:
+                if "mpq_set_str" in str(e):
+                    raise ValueError("Expecting string representing a number but got: %s"%name_or_val)
+                else:
+                    raise e
+
+        elif isinstance(name_or_val, int):
+            # TODO: Figure out if this even makes sense to do
+            if name_or_val < 0:
+                t = self.s.mkInteger(<int32_t> name_or_val)
+            else:
+                t = self.s.mkInteger(<uint64_t> name_or_val)
+        else:
+            raise ValueError("Unexpected inputs: {}".format((name_or_val, base)))
+
+        term.t = new c_Term(t.getExpr())
+        return term
+
+    def mkPi(self):
+        cdef Term term = Term()
+        term.t = new c_Term(self.s.mkPi().getExpr())
+        return term
+
+    def mkReal(self, name_val_num, base_or_den=None):
+        cdef c_Term t
+        cdef Term term = Term()
+
+        if isinstance(name_val_num, str):
+            if base_or_den is None:
+                base_or_den = 10
+            try:
+                t = self.s.mkReal(<string &> name_val_num.encode(), <uint32_t> base_or_den)
+            except ValueError as e:
+                if "mpq_set_str" in str(e):
+                    raise ValueError("Expecting string representing a number but got: %s"%name_val_num)
+                else:
+                    raise e
+        elif isinstance(name_val_num, int):
+            if base_or_den is None:
+                # TODO: Figure out if this makes sense
+                if name_val_num < 0:
+                    t = self.s.mkReal(<int64_t> name_val_num)
+                else:
+                    t = self.s.mkReal(<uint64_t> name_val_num)
+            else:
+                t = self.s.mkReal(<int64_t> name_val_num, <int64_t> base_or_den)
+        else:
+            raise ValueError("Unexpected inputs: {}".format((name_val_num, base_or_den)))
+
+        term.t = new c_Term(t.getExpr())
+        return term
+
+    # TODO: Look into this error
+    #       Commented out in unit tests -- pretty sure it's not my fault
+    def mkRegexpEmpty(self):
+        cdef Term term = Term()
+        term.t = new c_Term(self.s.mkRegexpEmpty().getExpr())
+        return term
+
+    def mkRegexpSigma(self):
+        cdef Term term = Term()
+        term.t = new c_Term(self.s.mkRegexpSigma().getExpr())
+        return term
+
+    def mkEmptySet(self, Sort s):
+        cdef Term term = Term()
+        term.t = new c_Term(self.s.mkEmptySet(s.s[0]).getExpr())
+        return term
+
+    def mkSepNil(self, Sort sort):
+        cdef Term term = Term()
+        term.t = new c_Term(self.s.mkSepNil(sort.s[0]).getExpr())
+        return term
+
+    def mkString(self, str_or_vec):
+        cdef Term term = Term()
+
+        cdef vector[unsigned] v
+
+        if isinstance(str_or_vec, str):
+            term.t = new c_Term(self.s.mkString(<string &> str_or_vec.encode()).getExpr())
+        elif isinstance(str_or_vec, Sequence):
+            for u in str_or_vec:
+                if not isinstance(u, int):
+                    raise ValueError("List should contain ints but got: {}".format(str_or_vec))
+                v.push_back(<unsigned> u)
+            term.t = new c_Term(self.s.mkString(<const vector[unsigned]&> v).getExpr())
+        else:
+            raise ValueError("Unexpected inputs: {}".format(str_or_vec))
+        return term
+
+    def mkUniverseSet(self, Sort sort):
+        cdef Term term = Term()
+        term.t = new c_Term(self.s.mkUniverseSet(sort.s[0]).getExpr())
+        return term
 
     def mkBitVector(self, int size, val = None):
         cdef c_Term t
@@ -432,16 +529,42 @@ cdef class Solver:
         else:
             raise RuntimeError("Unsupported value type: {}".format(type(val)))
 
-        term.t = &t
+        term.t = new c_Term(t.getExpr())
         return term
 
-    # TODO: Fill in a bunch of missing functions
+    # TODO: Fill in a bunch of missing functions -- skipped mkConst (lots of overloaded versions)
+
+    def mkVar(self, symbol_or_sort, sort=None):
+        cdef Term term = Term()
+
+        if sort is None:
+            term.t = new c_Term(self.s.mkVar((<Sort?> symbol_or_sort).s[0]).getExpr())
+        else:
+            term.t = new c_Term(self.s.mkVar((<str?> symbol_or_sort).encode(), (<Sort?> sort).s[0]).getExpr())
+
+        return term
+
+    def mkBoundVar(self, symbol_or_sort, sort=None):
+        cdef Term term = Term()
+
+        if sort is None:
+            term.t = new c_Term(self.s.mkBoundVar((<Sort?> symbol_or_sort).s[0]).getExpr())
+        else:
+            term.t = new c_Term(self.s.mkBoundVar((<str?> symbol_or_sort).encode(), (<Sort?> sort).s[0]).getExpr())
+
+        return term
+
+    def simplify(self, Term t):
+        cdef Term term = Term()
+        term.t = new c_Term(self.s.simplify(t.t[0]).getExpr())
+        return term
+
+    def assertFormula(self, Term term):
+        self.s.assertFormula(term.t[0])
 
     def declareConst(self, str symbol, Sort sort):
         cdef Term term = Term()
-
         term.t = new c_Term(self.s.declareConst(symbol.encode(), sort.s[0]).getExpr())
-
         return term
 
     def declareFun(self, str symbol, sorts, Sort sort):
@@ -454,13 +577,6 @@ cdef class Solver:
         term.t = new c_Term(self.s.declareFun(symbol.encode(), <const vector[c_Sort]&> v, sort.s[0]).getExpr())
 
         return term
-
-    def mkVar(self, str symbol, Sort sort):
-        cdef Term term = Term()
-        term.t = new c_Term(self.s.mkVar(symbol.encode(), sort.s[0]).getExpr())
-
-        return term
-
 
 cdef class Term:
     cdef c_Term* t

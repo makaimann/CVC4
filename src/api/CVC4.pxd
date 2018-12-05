@@ -1,6 +1,6 @@
 # import dereference and increment operators
 from cython.operator cimport dereference as deref, preincrement as inc
-from libc.stdint cimport uint32_t, uint64_t
+from libc.stdint cimport int32_t, int64_t, uint32_t, uint64_t
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
@@ -97,20 +97,43 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         # TODO: fill in missing mkTerm(OpTerm) functions
         Term mkTrue() except +
         Term mkFalse() except +
-        Term mkBoolean(bint) except +
-        # TODO: missing some here
+        Term mkBoolean(bint val) except +
+        # Note: Not including all overloaded functions
+        Term mkInteger(const string & s, uint32_t base) except +
+        Term mkInteger(int32_t val) except +
+        Term mkInteger(uint64_t val) except +
+        Term mkPi() except +
+        Term mkReal(const string & s, uint32_t base) except +
+        Term mkReal(int64_t val) except +
+        Term mkReal(int64_t num, int64_t den) except +
+        Term mkRegexpEmpty() except +
+        Term mkRegexpSigma() except +
+        Term mkEmptySet(Sort s) except +
+        Term mkSepNil(Sort sort) except +
+        Term mkString(const string& s) except +
+        Term mkString(const vector[unsigned]& s) except +
+        Term mkUniverseSet(Sort sort) except +
         Term mkBitVector(uint32_t size) except +
         # Do we need this one
         Term mkBitVector(uint32_t size, uint32_t val) except +
         Term mkBitVector(uint32_t size, uint64_t val) except +
-        # TODO: fill in missing functions
+        # TODO: fill in missing functions (skipped all the overloaded mkConsts)
+        Term mkVar(const string & symbol, Sort sort) except +
+        Term mkVar(Sort sort) except +
+        Term mkBoundVar(const string & symbol, Sort sort) except +
+        Term mkBoundVar(Sort sort) except +
+        Term simplify(const Term& t) except +
+        void assertFormula(Term term) except +
+        # TODO: Finish these
+        # Result checkSat() except +
+        # Result checkSatAssuming(Term assumption) except +
+        # Result checkSatAssuming(const vector[Term]& assumptions) except +
+        # TODO: Missing some functions
         Term declareConst(const string& symbol, Sort sort) except +
         # left out declareDatatype for now
         Term declareFun(const string& symbol, Sort sort) except +
         Term declareFun(const string& symbol, const vector[Sort] & sorts, Sort sort) except +
         # TODO: missing some more functions
-        Term mkVar(const string & symbol, Sort sort) except +
-        Term mkVar(Sort sort) except +
 
     cdef cppclass Term:
         Term();
