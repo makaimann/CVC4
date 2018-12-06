@@ -28,8 +28,6 @@ cdef extern from "cvc4cpp.h" namespace "CVC4":
         pass
     cdef cppclass Random:
         pass
-    cdef cppclass Result:
-        pass
 
 cdef extern from "cvc4cpp.h" namespace "CVC4::api":
     cdef cppclass DatatypeDecl:
@@ -125,9 +123,12 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term simplify(const Term& t) except +
         void assertFormula(Term term) except +
         # TODO: Finish these
-        # Result checkSat() except +
-        # Result checkSatAssuming(Term assumption) except +
-        # Result checkSatAssuming(const vector[Term]& assumptions) except +
+        Result checkSat() except +
+        Result checkSatAssuming(Term assumption) except +
+        Result checkSatAssuming(const vector[Term]& assumptions) except +
+        Result checkValid() except +
+        Result checkValidAssuming(Term assumption) except +
+        Result checkValidAssuming(const vector[Term]& assumptions) except +
         # TODO: Missing some functions
         Term declareConst(const string& symbol, Sort sort) except +
         # left out declareDatatype for now
@@ -135,8 +136,19 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term declareFun(const string& symbol, const vector[Sort] & sorts, Sort sort) except +
         # TODO: missing some more functions
 
+    cdef cppclass Result:
+        # Note: don't even need constructor
+        bint isSat() except +
+        bint isUnsat() except +
+        bint isSatUnknown() except +
+        bint isValid() except +
+        bint isInvalid() except +
+        bint isValidUnknown() except +
+        string getUnknownExplanation() except +
+        string toString() except +
+
     cdef cppclass Term:
-        Term();
+        Term()
         Term(const Expr&) except +
         bint operator==(const Term&) except +
         bint operator!=(const Term&) except +

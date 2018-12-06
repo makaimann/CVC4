@@ -6,6 +6,7 @@
 from CVC4 cimport DatatypeDecl as c_DatatypeDecl
 from CVC4 cimport Solver as c_Solver
 from CVC4 cimport Sort as c_Sort
+from CVC4 cimport Result as c_Result
 from CVC4 cimport Term as c_Term
 
 from kinds cimport kind as Kind
@@ -562,6 +563,68 @@ cdef class Solver:
     def assertFormula(self, Term term):
         self.s.assertFormula(term.t[0])
 
+    def checkSat(self):
+        cdef c_Result r = self.s.checkSat()
+        name = r.toString().decode()
+        explanation = ""
+        if r.isSatUnknown():
+            explanation = r.getUnknownExplanation().decode()
+        pyres = Result(name, explanation)
+        return pyres
+
+    def checkSatAssuming(self, assumptions):
+        cdef c_Result r
+
+        # used if assumptions is a list of terms
+        cdef vector[c_Term] v
+
+        if isinstance(assumptions, Term):
+            r = self.s.checkSatAssuming((<Term?> assumptions).t[0])
+        elif isinstance(assumptions, Sequence):
+            for a in assumptions:
+                v.push_back((<Term?> a).t[0])
+            r = self.s.checkSatAssuming(<const vector[c_Term]&> v)
+        else:
+            raise RuntimeError("Expecting a list of Terms")
+
+        name = r.toString().decode()
+        explanation = ""
+        if r.isSatUnknown():
+            explanation = r.getUnknownExplanation().decode()
+        pyres = Result(name, explanation)
+        return pyres
+
+    def checkValid(self):
+        cdef c_Result r = self.s.checkValid()
+        name = r.toString().decode()
+        explanation = ""
+        if r.isValidUnknown():
+            explanation = r.getUnknownExplanation().decode()
+        pyres = Result(name, explanation)
+        return pyres
+
+    def checkValidAssuming(self, assumptions):
+        cdef c_Result r
+
+        # used if assumptions is a list of terms
+        cdef vector[c_Term] v
+
+        if isinstance(assumptions, Term):
+            r = self.s.checkValidAssuming((<Term?> assumptions).t[0])
+        elif isinstance(assumptions, Sequence):
+            for a in assumptions:
+                v.push_back((<Term?> a).t[0])
+            r = self.s.checkValidAssuming(<const vector[c_Term]&> v)
+        else:
+            raise RuntimeError("Expecting a list of Terms")
+
+        name = r.toString().decode()
+        explanation = ""
+        if r.isValidUnknown():
+            explanation = r.getUnknownExplanation().decode()
+        pyres = Result(name, explanation)
+        return pyres
+
     def declareConst(self, str symbol, Sort sort):
         cdef Term term = Term()
         term.t = new c_Term(self.s.declareConst(symbol.encode(), sort.s[0]).getExpr())
@@ -577,6 +640,51 @@ cdef class Solver:
         term.t = new c_Term(self.s.declareFun(symbol.encode(), <const vector[c_Sort]&> v, sort.s[0]).getExpr())
 
         return term
+
+class Result:
+    _name = None
+    _explanation = None
+
+    def __init__(self, name, explanation=""):
+        assert name in {"sat", "unsat", "valid", "invalid", "unknown"}
+        self._name = name
+        self._explanation = explanation
+
+    def __bool__(self):
+        if self._name in {"sat", "valid"}:
+            return True
+        elif self._name in {"unsat", "invalid"}:
+            return False
+        elif self._name == "unknown":
+            raise RuntimeError("Cannot interpret 'unknown' result as a Boolean")
+        else:
+            assert False, "Unhandled result=%s"%self._name
+
+    def __eq__(self, other):
+        if not isinstance(other, Result):
+            return False
+
+        return self._name == other._name
+
+    def __ne__(self, other):
+        if not isinstance(other, Result):
+            return True
+
+        return self._name != other._name
+
+    def __str__(self):
+        return self._name
+
+    def __repr__(self):
+        return self._name
+
+    def isUnknown(self):
+        return self._name == "unknown"
+
+    @property
+    def explanation(self):
+        return self._explanation
+
 
 cdef class Term:
     cdef c_Term* t
