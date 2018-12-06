@@ -30,7 +30,7 @@ from collections import Sequence
 ################# !!!!!IMPORTANT!!!! ###############
 # FIXME
 # TODO: Fix all the Term/Sort constructions
-#       using the sort.s = &s   approach invokes a move/copy constructor that doesn't copy all the data correctly!
+#       using the sort.csort = &s   approach invokes a move/copy constructor that doesn't copy all the data correctly!
 #
 # For now, leaving most things as are in case Aina/Mathias have a better way to do it
 # Just going to get the term building to work
@@ -49,9 +49,9 @@ def check_for_null(f):
     return run_if_not_null
 
 cdef class Sort:
-    cdef c_Sort* s
+    cdef c_Sort* csort
     def __cinit__(self):
-        self.s = NULL
+        self.csort = NULL
 
     def __eq__(self, Sort other):
         if self.__isnull__() and other.__isnull__():
@@ -59,104 +59,104 @@ cdef class Sort:
         elif self.__isnull__() or other.__isnull__():
             return False
         else:
-            return self.s[0] == other.s[0]
+            return self.csort[0] == other.csort[0]
 
     def __ne__(self, Sort other):
         # TODO: Decide on semantics -- might be better to return True on null
         return not self.__eq__(other)
 
     def __isnull__(self):
-        return self.s == NULL
+        return self.csort == NULL
 
     def __str__(self):
-        return self.s.toString().decode()
+        return self.csort.toString().decode()
 
     def __repr__(self):
-        return self.s.toString().decode()
+        return self.csort.toString().decode()
 
     @check_for_null
     def isBoolean(self):
-        return self.s.isBoolean()
+        return self.csort.isBoolean()
 
     @check_for_null
     def isInteger(self):
-        return self.s.isInteger()
+        return self.csort.isInteger()
 
     @check_for_null
     def isReal(self):
-        return self.s.isReal()
+        return self.csort.isReal()
 
     @check_for_null
     def isString(self):
-        return self.s.isString()
+        return self.csort.isString()
 
     @check_for_null
     def isRegExp(self):
-        return self.s.isRegExp()
+        return self.csort.isRegExp()
 
     @check_for_null
     def isRoundingMode(self):
-        return self.s.isRoundingMode()
+        return self.csort.isRoundingMode()
 
     @check_for_null
     def isBitVector(self):
-        return self.s.isBitVector()
+        return self.csort.isBitVector()
 
     @check_for_null
     def isFloatingPoint(self):
-        return self.s.isFloatingPoint()
+        return self.csort.isFloatingPoint()
 
     @check_for_null
     def isDatatype(self):
-        return self.s.isDatatype()
+        return self.csort.isDatatype()
 
     @check_for_null
     def isParametricDatatype(self):
-        return self.s.isParametricDatatype()
+        return self.csort.isParametricDatatype()
 
     @check_for_null
     def isFunction(self):
-        return self.s.isFunction()
+        return self.csort.isFunction()
 
     @check_for_null
     def isPredicate(self):
-        return self.s.isPredicate()
+        return self.csort.isPredicate()
 
     @check_for_null
     def isTuple(self):
-        return self.s.isTuple()
+        return self.csort.isTuple()
 
     @check_for_null
     def isRecord(self):
-        return self.s.isRecord()
+        return self.csort.isRecord()
 
     @check_for_null
     def isArray(self):
-        return self.s.isArray()
+        return self.csort.isArray()
 
     @check_for_null
     def isSet(self):
-        return self.s.isSet()
+        return self.csort.isSet()
 
     @check_for_null
     def isUninterpretedSort(self):
-        return self.s.isUninterpretedSort()
+        return self.csort.isUninterpretedSort()
 
     @check_for_null
     def isSortConstructor(self):
-        return self.s.isSortConstructor()
+        return self.csort.isSortConstructor()
 
     @check_for_null
     def isFirstClass(self):
-        return self.s.isFirstClass()
+        return self.csort.isFirstClass()
 
     @check_for_null
     def isFunctionLike(self):
-        return self.s.isFunctionLike()
+        return self.csort.isFunctionLike()
 
     @check_for_null
     def isUninterpretedSortParameterized(self):
-        return self.s.isUninterpretedSortParameterized()
+        return self.csort.isUninterpretedSortParameterized()
 
 
 cdef class DatatypeDecl:
@@ -183,10 +183,10 @@ cdef class DatatypeDecl:
         if sorts_or_bool is None:
             self.d = new c_DatatypeDecl(<const string &> name, <bint> isCoDatatype)
         elif isinstance(sorts_or_bool, Sort):
-            self.d = new c_DatatypeDecl(<const string &> name, (<Sort?> sorts_or_bool).s[0], <bint> isCoDatatype)
+            self.d = new c_DatatypeDecl(<const string &> name, (<Sort?> sorts_or_bool).csort[0], <bint> isCoDatatype)
         elif isinstance(sorts_or_bool, list):
             for s in sorts_or_bool:
-                v.push_back((<Sort?> s).s[0])
+                v.push_back((<Sort?> s).csort[0])
             self.d = new c_DatatypeDecl(<const string &> name, <const vector[c_Sort]&> v, <bint> isCoDatatype)
         else:
             raise RuntimeError("Unhandled input types {}".format(list(map(type, (name, sorts_or_bool, isCoDatatype)))))
@@ -199,11 +199,11 @@ cdef class DatatypeDecl:
 
 
 cdef class Solver:
-    cdef c_Solver* s
+    cdef c_Solver* csolver
 
     def __cinit__(self):
         # TODO: pass options through
-        self.s = new c_Solver(NULL)
+        self.csolver = new c_Solver(NULL)
 
     # TODO: Go through the functions below and update the sort construction
 
@@ -219,58 +219,58 @@ cdef class Solver:
         # the nullary constructor
         # probably because I didn't define a move/copy constructor
         # so it tries to dereference at some point
-        # s = new Sort(self.s.getBooleanSort().getType())
-        # val.s[0] = self.s.getBooleanSort()
-        # val.s = new Sort(dref(self.s).getBooleanSort().getType())
+        # s = new Sort(self.csolver.getBooleanSort().getType())
+        # val.csort[0] = self.csolver.getBooleanSort()
+        # val.csort = new Sort(dref(self.csolver).getBooleanSort().getType())
 
-        sort.s = new c_Sort(self.s.getBooleanSort().getType())
+        sort.csort = new c_Sort(self.csolver.getBooleanSort().getType())
         return sort
 
     def getIntegerSort(self):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.getIntegerSort().getType())
+        sort.csort = new c_Sort(self.csolver.getIntegerSort().getType())
         return sort
 
     def getRealSort(self):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.getRealSort().getType())
+        sort.csort = new c_Sort(self.csolver.getRealSort().getType())
         return sort
 
     def getRegExpSort(self):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.getRegExpSort().getType())
+        sort.csort = new c_Sort(self.csolver.getRegExpSort().getType())
         return sort
 
     def getRoundingmodeSort(self):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.getRoundingmodeSort().getType())
+        sort.csort = new c_Sort(self.csolver.getRoundingmodeSort().getType())
         return sort
 
     def getStringSort(self):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.getStringSort().getType())
+        sort.csort = new c_Sort(self.csolver.getStringSort().getType())
         return sort
 
     def mkArraySort(self, Sort indexSort, Sort elemSort):
         cdef Sort sort = Sort()
         # TODO: Decide if there should be a null-check on inputs...
-        sort.s = new c_Sort(self.s.mkArraySort(indexSort.s[0], elemSort.s[0]).getType())
+        sort.csort = new c_Sort(self.csolver.mkArraySort(indexSort.csort[0], elemSort.csort[0]).getType())
         return sort
 
     def mkBitVectorSort(self, uint32_t size):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.mkBitVectorSort(size).getType())
+        sort.csort = new c_Sort(self.csolver.mkBitVectorSort(size).getType())
         return sort
 
     def mkFloatingPointSort(self, uint32_t exp, uint32_t sig):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.mkFloatingPointSort(exp, sig).getType())
+        sort.csort = new c_Sort(self.csolver.mkFloatingPointSort(exp, sig).getType())
         return sort
 
     # FIXME: Complains about expecting at least one constructor?
     def mkDatatypeSort(self, DatatypeDecl dtypedecl):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.mkDatatypeSort(dtypedecl.d[0]).getType())
+        sort.csort = new c_Sort(self.csolver.mkDatatypeSort(dtypedecl.d[0]).getType())
         return sort
 
     def mkFunctionSort(self, sorts, Sort codomain):
@@ -280,13 +280,13 @@ cdef class Solver:
         cdef vector[c_Sort] v
 
         if isinstance(sorts, Sort):
-            sort.s = new c_Sort(self.s.mkFunctionSort((<Sort?> sorts).s[0], codomain.s[0]).getType())
+            sort.csort = new c_Sort(self.csolver.mkFunctionSort((<Sort?> sorts).csort[0], codomain.csort[0]).getType())
         elif isinstance(sorts, list):
             for s in sorts:
-                v.push_back((<Sort?>s).s[0])
+                v.push_back((<Sort?>s).csort[0])
 
-            sort.s = new c_Sort(self.s.mkFunctionSort(<const vector[c_Sort]&> v, \
-                                                      codomain.s[0]).getType())
+            sort.csort = new c_Sort(self.csolver.mkFunctionSort(<const vector[c_Sort]&> v, \
+                                                      codomain.csort[0]).getType())
 
         return sort
 
@@ -297,8 +297,8 @@ cdef class Solver:
         # encode string as bytes
         symbolname = symbolname.encode()
 
-        csort = self.s.mkParamSort(symbolname)
-        sort.s = &csort
+        csort = self.csolver.mkParamSort(symbolname)
+        sort.csort = &csort
         return sort
 
     def mkPredicateSort(self, sorts):
@@ -309,10 +309,10 @@ cdef class Solver:
         cdef vector[c_Sort] v
 
         for s in sorts:
-            v.push_back((<Sort?> s).s[0])
+            v.push_back((<Sort?> s).csort[0])
 
-        csort = self.s.mkPredicateSort(<const vector[c_Sort]&> v)
-        sort.s = &csort
+        csort = self.csolver.mkPredicateSort(<const vector[c_Sort]&> v)
+        sort.csort = &csort
 
         return sort
 
@@ -326,24 +326,24 @@ cdef class Solver:
         for f in fields:
             name, sortarg = f
             name = name.encode()
-            p = pair[string, c_Sort](<string?> name, (<Sort?> sortarg).s[0])
+            p = pair[string, c_Sort](<string?> name, (<Sort?> sortarg).csort[0])
             v.push_back(p)
 
-        csort = self.s.mkRecordSort(<const vector[pair[string, c_Sort]] &> v)
-        sort.s = &csort
+        csort = self.csolver.mkRecordSort(<const vector[pair[string, c_Sort]] &> v)
+        sort.csort = &csort
         return sort
 
     def mkSetSort(self, Sort elemSort):
         cdef Sort sort = Sort()
-        sort.s = new c_Sort(self.s.mkSetSort(elemSort.s[0]).getType())
+        sort.csort = new c_Sort(self.csolver.mkSetSort(elemSort.csort[0]).getType())
         return sort
 
     def mkUninterpretedSort(self, str name):
         cdef Sort sort = Sort()
         cdef c_Sort csort
 
-        csort = self.s.mkUninterpretedSort(name.encode())
-        sort.s = &csort
+        csort = self.csolver.mkUninterpretedSort(name.encode())
+        sort.csort = &csort
 
         return sort
 
@@ -351,8 +351,8 @@ cdef class Solver:
         cdef Sort sort = Sort()
         cdef c_Sort csort
 
-        csort = self.s.mkSortConstructorSort(symbol.encode(), arity)
-        sort.s = &csort
+        csort = self.csolver.mkSortConstructorSort(symbol.encode(), arity)
+        sort.csort = &csort
 
         return sort
 
@@ -362,10 +362,10 @@ cdef class Solver:
 
         cdef vector[c_Sort] v
         for s in sorts:
-            v.push_back((<Sort?> s).s[0])
+            v.push_back((<Sort?> s).csort[0])
 
-        csort = self.s.mkTupleSort(v)
-        sort.s = &csort
+        csort = self.csolver.mkTupleSort(v)
+        sort.csort = &csort
 
         return sort
 
@@ -373,7 +373,7 @@ cdef class Solver:
         cdef Term term = Term()
 
         if len(args) == 1 and isinstance(args[0], Sort):
-            term.t = new c_Term(self.s.mkTerm(kind.k, (<Sort?> args[0]).s[0]).getExpr())
+            term.cterm = new c_Term(self.csolver.mkTerm(kind.k, (<Sort?> args[0]).csort[0]).getExpr())
             return term
 
         if isinstance(args[0], Sequence):
@@ -384,9 +384,9 @@ cdef class Solver:
 
         cdef vector[c_Term] v
         for a in args:
-            v.push_back((<Term> a).t[0])
+            v.push_back((<Term> a).cterm[0])
 
-        term.t = new c_Term(self.s.mkTerm(kind.k, <const vector[c_Term]&> v).getExpr())
+        term.cterm = new c_Term(self.csolver.mkTerm(kind.k, <const vector[c_Term]&> v).getExpr())
 
         return term
 
@@ -394,24 +394,24 @@ cdef class Solver:
         cdef c_Term t
         cdef Term term = Term()
 
-        t = self.s.mkTrue()
-        term.t = &t
+        t = self.csolver.mkTrue()
+        term.cterm = &t
         return term
 
     def mkFalse(self):
         cdef c_Term t
         cdef Term term = Term()
 
-        t = self.s.mkFalse()
-        term.t = &t
+        t = self.csolver.mkFalse()
+        term.cterm = &t
         return term
 
     def mkBoolean(self, bint val):
         cdef c_Term t
         cdef Term term = Term()
 
-        t = self.s.mkBoolean(val)
-        term.t = &t
+        t = self.csolver.mkBoolean(val)
+        term.cterm = &t
         return term
 
     def mkInteger(self, name_or_val, base=10):
@@ -420,7 +420,7 @@ cdef class Solver:
 
         if isinstance(name_or_val, str):
             try:
-                t = self.s.mkInteger(name_or_val.encode(), <uint32_t> base)
+                t = self.csolver.mkInteger(name_or_val.encode(), <uint32_t> base)
             except ValueError as e:
                 if "mpq_set_str" in str(e):
                     raise ValueError("Expecting string representing a number but got: %s"%name_or_val)
@@ -430,18 +430,18 @@ cdef class Solver:
         elif isinstance(name_or_val, int):
             # TODO: Figure out if this even makes sense to do
             if name_or_val < 0:
-                t = self.s.mkInteger(<int32_t> name_or_val)
+                t = self.csolver.mkInteger(<int32_t> name_or_val)
             else:
-                t = self.s.mkInteger(<uint64_t> name_or_val)
+                t = self.csolver.mkInteger(<uint64_t> name_or_val)
         else:
             raise ValueError("Unexpected inputs: {}".format((name_or_val, base)))
 
-        term.t = new c_Term(t.getExpr())
+        term.cterm = new c_Term(t.getExpr())
         return term
 
     def mkPi(self):
         cdef Term term = Term()
-        term.t = new c_Term(self.s.mkPi().getExpr())
+        term.cterm = new c_Term(self.csolver.mkPi().getExpr())
         return term
 
     def mkReal(self, name_val_num, base_or_den=None):
@@ -452,7 +452,7 @@ cdef class Solver:
             if base_or_den is None:
                 base_or_den = 10
             try:
-                t = self.s.mkReal(<string &> name_val_num.encode(), <uint32_t> base_or_den)
+                t = self.csolver.mkReal(<string &> name_val_num.encode(), <uint32_t> base_or_den)
             except ValueError as e:
                 if "mpq_set_str" in str(e):
                     raise ValueError("Expecting string representing a number but got: %s"%name_val_num)
@@ -462,37 +462,37 @@ cdef class Solver:
             if base_or_den is None:
                 # TODO: Figure out if this makes sense
                 if name_val_num < 0:
-                    t = self.s.mkReal(<int64_t> name_val_num)
+                    t = self.csolver.mkReal(<int64_t> name_val_num)
                 else:
-                    t = self.s.mkReal(<uint64_t> name_val_num)
+                    t = self.csolver.mkReal(<uint64_t> name_val_num)
             else:
-                t = self.s.mkReal(<int64_t> name_val_num, <int64_t> base_or_den)
+                t = self.csolver.mkReal(<int64_t> name_val_num, <int64_t> base_or_den)
         else:
             raise ValueError("Unexpected inputs: {}".format((name_val_num, base_or_den)))
 
-        term.t = new c_Term(t.getExpr())
+        term.cterm = new c_Term(t.getExpr())
         return term
 
     # TODO: Look into this error
     #       Commented out in unit tests -- pretty sure it's not my fault
     def mkRegexpEmpty(self):
         cdef Term term = Term()
-        term.t = new c_Term(self.s.mkRegexpEmpty().getExpr())
+        term.cterm = new c_Term(self.csolver.mkRegexpEmpty().getExpr())
         return term
 
     def mkRegexpSigma(self):
         cdef Term term = Term()
-        term.t = new c_Term(self.s.mkRegexpSigma().getExpr())
+        term.cterm = new c_Term(self.csolver.mkRegexpSigma().getExpr())
         return term
 
     def mkEmptySet(self, Sort s):
         cdef Term term = Term()
-        term.t = new c_Term(self.s.mkEmptySet(s.s[0]).getExpr())
+        term.cterm = new c_Term(self.csolver.mkEmptySet(s.csort[0]).getExpr())
         return term
 
     def mkSepNil(self, Sort sort):
         cdef Term term = Term()
-        term.t = new c_Term(self.s.mkSepNil(sort.s[0]).getExpr())
+        term.cterm = new c_Term(self.csolver.mkSepNil(sort.csort[0]).getExpr())
         return term
 
     def mkString(self, str_or_vec):
@@ -501,20 +501,20 @@ cdef class Solver:
         cdef vector[unsigned] v
 
         if isinstance(str_or_vec, str):
-            term.t = new c_Term(self.s.mkString(<string &> str_or_vec.encode()).getExpr())
+            term.cterm = new c_Term(self.csolver.mkString(<string &> str_or_vec.encode()).getExpr())
         elif isinstance(str_or_vec, Sequence):
             for u in str_or_vec:
                 if not isinstance(u, int):
                     raise ValueError("List should contain ints but got: {}".format(str_or_vec))
                 v.push_back(<unsigned> u)
-            term.t = new c_Term(self.s.mkString(<const vector[unsigned]&> v).getExpr())
+            term.cterm = new c_Term(self.csolver.mkString(<const vector[unsigned]&> v).getExpr())
         else:
             raise ValueError("Unexpected inputs: {}".format(str_or_vec))
         return term
 
     def mkUniverseSet(self, Sort sort):
         cdef Term term = Term()
-        term.t = new c_Term(self.s.mkUniverseSet(sort.s[0]).getExpr())
+        term.cterm = new c_Term(self.csolver.mkUniverseSet(sort.csort[0]).getExpr())
         return term
 
     def mkBitVector(self, int size, val = None):
@@ -522,15 +522,15 @@ cdef class Solver:
         cdef Term term = Term()
 
         if val is None:
-            t = self.s.mkBitVector(size)
+            t = self.csolver.mkBitVector(size)
         elif isinstance(val, int):
             # TODO: Figure out which one to use?
             # uint32_t or uint64_t
-            t = self.s.mkBitVector(size, <uint64_t> val)
+            t = self.csolver.mkBitVector(size, <uint64_t> val)
         else:
             raise RuntimeError("Unsupported value type: {}".format(type(val)))
 
-        term.t = new c_Term(t.getExpr())
+        term.cterm = new c_Term(t.getExpr())
         return term
 
     # TODO: Fill in a bunch of missing functions -- skipped mkConst (lots of overloaded versions)
@@ -539,9 +539,9 @@ cdef class Solver:
         cdef Term term = Term()
 
         if sort is None:
-            term.t = new c_Term(self.s.mkVar((<Sort?> symbol_or_sort).s[0]).getExpr())
+            term.cterm = new c_Term(self.csolver.mkVar((<Sort?> symbol_or_sort).csort[0]).getExpr())
         else:
-            term.t = new c_Term(self.s.mkVar((<str?> symbol_or_sort).encode(), (<Sort?> sort).s[0]).getExpr())
+            term.cterm = new c_Term(self.csolver.mkVar((<str?> symbol_or_sort).encode(), (<Sort?> sort).csort[0]).getExpr())
 
         return term
 
@@ -549,22 +549,22 @@ cdef class Solver:
         cdef Term term = Term()
 
         if sort is None:
-            term.t = new c_Term(self.s.mkBoundVar((<Sort?> symbol_or_sort).s[0]).getExpr())
+            term.cterm = new c_Term(self.csolver.mkBoundVar((<Sort?> symbol_or_sort).csort[0]).getExpr())
         else:
-            term.t = new c_Term(self.s.mkBoundVar((<str?> symbol_or_sort).encode(), (<Sort?> sort).s[0]).getExpr())
+            term.cterm = new c_Term(self.csolver.mkBoundVar((<str?> symbol_or_sort).encode(), (<Sort?> sort).csort[0]).getExpr())
 
         return term
 
     def simplify(self, Term t):
         cdef Term term = Term()
-        term.t = new c_Term(self.s.simplify(t.t[0]).getExpr())
+        term.cterm = new c_Term(self.csolver.simplify(t.cterm[0]).getExpr())
         return term
 
     def assertFormula(self, Term term):
-        self.s.assertFormula(term.t[0])
+        self.csolver.assertFormula(term.cterm[0])
 
     def checkSat(self):
-        cdef c_Result r = self.s.checkSat()
+        cdef c_Result r = self.csolver.checkSat()
         name = r.toString().decode()
         explanation = ""
         if r.isSatUnknown():
@@ -579,11 +579,11 @@ cdef class Solver:
         cdef vector[c_Term] v
 
         if isinstance(assumptions, Term):
-            r = self.s.checkSatAssuming((<Term?> assumptions).t[0])
+            r = self.csolver.checkSatAssuming((<Term?> assumptions).cterm[0])
         elif isinstance(assumptions, Sequence):
             for a in assumptions:
-                v.push_back((<Term?> a).t[0])
-            r = self.s.checkSatAssuming(<const vector[c_Term]&> v)
+                v.push_back((<Term?> a).cterm[0])
+            r = self.csolver.checkSatAssuming(<const vector[c_Term]&> v)
         else:
             raise RuntimeError("Expecting a list of Terms")
 
@@ -595,7 +595,7 @@ cdef class Solver:
         return pyres
 
     def checkValid(self):
-        cdef c_Result r = self.s.checkValid()
+        cdef c_Result r = self.csolver.checkValid()
         name = r.toString().decode()
         explanation = ""
         if r.isValidUnknown():
@@ -610,11 +610,11 @@ cdef class Solver:
         cdef vector[c_Term] v
 
         if isinstance(assumptions, Term):
-            r = self.s.checkValidAssuming((<Term?> assumptions).t[0])
+            r = self.csolver.checkValidAssuming((<Term?> assumptions).cterm[0])
         elif isinstance(assumptions, Sequence):
             for a in assumptions:
-                v.push_back((<Term?> a).t[0])
-            r = self.s.checkValidAssuming(<const vector[c_Term]&> v)
+                v.push_back((<Term?> a).cterm[0])
+            r = self.csolver.checkValidAssuming(<const vector[c_Term]&> v)
         else:
             raise RuntimeError("Expecting a list of Terms")
 
@@ -627,7 +627,7 @@ cdef class Solver:
 
     def declareConst(self, str symbol, Sort sort):
         cdef Term term = Term()
-        term.t = new c_Term(self.s.declareConst(symbol.encode(), sort.s[0]).getExpr())
+        term.cterm = new c_Term(self.csolver.declareConst(symbol.encode(), sort.csort[0]).getExpr())
         return term
 
     def declareFun(self, str symbol, sorts, Sort sort):
@@ -635,9 +635,9 @@ cdef class Solver:
 
         cdef vector[c_Sort] v
         for s in sorts:
-            v.push_back((<Sort?> s).s[0])
+            v.push_back((<Sort?> s).csort[0])
 
-        term.t = new c_Term(self.s.declareFun(symbol.encode(), <const vector[c_Sort]&> v, sort.s[0]).getExpr())
+        term.cterm = new c_Term(self.csolver.declareFun(symbol.encode(), <const vector[c_Sort]&> v, sort.csort[0]).getExpr())
 
         return term
 
@@ -687,11 +687,11 @@ class Result:
 
 
 cdef class Term:
-    cdef c_Term* t
+    cdef c_Term* cterm
     # TODO: Decide if we should support the Term(Expr) constructor
     #       might not, because should never construct it directly
     def __cinit__(self):
-        self.t = NULL
+        self.cterm = NULL
 
     def __eq__(self, Term other):
         if self.__isnull__() and other.__isnull__():
@@ -699,7 +699,7 @@ cdef class Term:
         elif self.__isnull__() or other.__isnull__():
             return False
         else:
-            return self.t[0] == other.t[0]
+            return self.cterm[0] == other.cterm[0]
 
     def __ne__(self, Term other):
         # TODO: Think about desired semantics -- might be better to return True
@@ -707,10 +707,10 @@ cdef class Term:
         return not self.__eq__(other)
 
     def __isnull__(self):
-        return self.t == NULL
+        return self.cterm == NULL
 
     def __str__(self):
-        return self.t.toString().decode()
+        return self.cterm.toString().decode()
 
     def __repr__(self):
-        return self.t.toString().decode()
+        return self.cterm.toString().decode()
