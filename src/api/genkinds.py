@@ -3,32 +3,33 @@ import argparse
 from collections import OrderedDict
 
 #################### Default Filenames ################
-DEFAULT_HEADER      = "cvc4cppkind.h"
-DEFAULT_PREFIX      = "kinds"
+DEFAULT_HEADER      = 'cvc4cppkind.h'
+DEFAULT_PREFIX      = 'kinds'
 
 ##################### Useful Constants ################
-OCB                 = "{"
-CCB                 = "}"
-SC                  = ";"
-EQ                  = "="
-C                   = ","
-US                  = "_"
-NL                  = "\n"
+OCB                 = '{'
+CCB                 = '}'
+SC                  = ';'
+EQ                  = '='
+C                   = ','
+US                  = '_'
+NL                  = '\n'
 
 #################### Enum Declarations ################
-ENUM_START          = "enum CVC4_PUBLIC Kind"
+ENUM_START          = 'enum CVC4_PUBLIC Kind'
 ENUM_END            = CCB+SC
 
 ################ Comments and Macro Tokens ############
-comment             = '//'
-block_comment_begin = '/*'
-block_comment_end   = '*/'
-macro_block_begin   = '#if 0'
-macro_block_end     = '#endif'
+PYCOMMENT           = '#'
+COMMENT             = '//'
+BLOCK_COMMENT_BEGIN = '/*'
+BLOCK_COMMENT_END   = '*/'
+MACRO_BLOCK_BEGIN   = '#if 0'
+MACRO_BLOCK_END     = '#endif'
 
 #################### Format Kind Names ################
 # special cases for format_name
-_IS                 = "_IS"
+_IS                 = '_IS'
 # replacements after some preprocessing
 replacements        = {
     'Bitvector'    : 'BV',
@@ -36,6 +37,9 @@ replacements        = {
 }
 
 ####################### Code Blocks ###################
+CDEF_KIND = "    cdef Kind "
+KIND_DICT_ENTRY = "    <int> {}: \"{}\""
+
 KINDS_PXD_TOP = \
 r"""cdef extern from "cvc4cppkind.h" namespace "CVC4::api":
     cdef cppclass Kind:
@@ -97,8 +101,8 @@ del name
 
 class KindsParser:
     tokenmap = {
-        block_comment_begin : block_comment_end,
-        macro_block_begin   : macro_block_end
+        BLOCK_COMMENT_BEGIN : BLOCK_COMMENT_END,
+        MACRO_BLOCK_BEGIN   : MACRO_BLOCK_END
     }
 
     def __init__(self):
@@ -107,7 +111,7 @@ class KindsParser:
         self.endtoken_stack = []
         self.in_kinds = False
 
-    def format_name(name):
+    def format_name(self, name):
         '''
         In the Python API, each Kind name is reformatted for easier use
 
@@ -142,12 +146,12 @@ class KindsParser:
 
     def ignore_block(self, line):
         '''
-        Returns a boolean telling parse whether to ignore a line or not.
+        Returns a boolean telling self.parse whether to ignore a line or not.
         It also updates all the necessary state to track comments and macro
         blocks
         '''
 
-        # entering block comment or macro block
+        # check if entering block comment or macro block
         for token in self.tokenmap:
             if token in line:
                 if self.tokenmap[token] not in line:
@@ -156,9 +160,9 @@ class KindsParser:
                     self.endtoken = self.tokenmap[token]
                 return True
 
-        # currently in block comment or macro block
+        # check if currently in block comment or macro block
         if self.endtoken is not None:
-            # reached the end of block comment or macro block
+            # check if reached the end of block comment or macro block
             if self.endtoken in line:
                 if self.endtoken_stack:
                     self.endtoken = self.endtoken_stack.pop()
@@ -173,8 +177,8 @@ class KindsParser:
 
         for line in f.read().split(NL):
             line = line.strip()
-            if comment in line:
-                line = line[:line.find(comment)]
+            if COMMENT in line:
+                line = line[:line.find(COMMENT)]
             if not line:
                 continue
 
@@ -191,7 +195,7 @@ class KindsParser:
                     line = line[:line.find(EQ)].strip()
                 elif C in line:
                     line = line[:line.find(C)].strip()
-                self.kinds[line] = KindsParser.format_name(line)
+                self.kinds[line] = self.format_name(line)
             elif ENUM_START in line:
                 self.in_kinds = True
                 continue
@@ -204,25 +208,23 @@ class KindsParser:
         # include the format_name docstring in the generated file
         # could be helpful for users to see the formatting rules
         for line in self.format_name.__doc__.split(NL):
-            f.write("#")
+            f.write(PYCOMMENT)
             if not line.isspace():
                 f.write(line)
             f.write(NL)
-        prefix = "    cdef Kind "
         for kind in self.kinds:
-            f.write(prefix + kind + NL)
+            f.write(CDEF_KIND + kind + NL)
         f.close()
 
     def gen_pyx(self, filename):
         f = open(filename, "w")
         f.write(KINDS_PYX_TOP)
         f.write(KINDS_PYX_DICT)
-        fstr = "    <int> {}: \"{}\""
         num_kinds = len(self.kinds)
         for i, (kind, name) in enumerate(self.kinds.items()):
-            line = fstr.format(kind, name)
+            line = KIND_DICT_ENTRY.format(kind, name)
             if i + 1 < num_kinds:
-                # add a comma
+                # add a comma to all but entry
                 line += C
             line += NL
             f.write(line)
