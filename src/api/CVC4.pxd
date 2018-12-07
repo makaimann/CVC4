@@ -96,14 +96,8 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkTrue() except +
         Term mkFalse() except +
         Term mkBoolean(bint val) except +
-        # Note: Not including all overloaded functions
-        Term mkInteger(const string & s, uint32_t base) except +
-        Term mkInteger(int32_t val) except +
-        Term mkInteger(uint64_t val) except +
         Term mkPi() except +
         Term mkReal(const string & s, uint32_t base) except +
-        Term mkReal(int64_t val) except +
-        Term mkReal(int64_t num, int64_t den) except +
         Term mkRegexpEmpty() except +
         Term mkRegexpSigma() except +
         Term mkEmptySet(Sort s) except +
@@ -112,8 +106,6 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkString(const vector[unsigned]& s) except +
         Term mkUniverseSet(Sort sort) except +
         Term mkBitVector(uint32_t size) except +
-        # Do we need this one
-        Term mkBitVector(uint32_t size, uint32_t val) except +
         Term mkBitVector(uint32_t size, uint64_t val) except +
         # TODO: fill in missing functions (skipped all the overloaded mkConsts)
         Term mkVar(const string & symbol, Sort sort) except +
