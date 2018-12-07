@@ -9,9 +9,9 @@ from CVC4 cimport Sort as c_Sort
 from CVC4 cimport Result as c_Result
 from CVC4 cimport Term as c_Term
 
-from kinds cimport kind as Kind
-from kinds import kind as Kind
-from Kind cimport Kind as c_Kind
+from kinds cimport Kind as c_Kind
+from kinds cimport kind
+from kinds import kind
 
 from cython.operator cimport dereference as dref
 
@@ -282,11 +282,11 @@ cdef class Solver:
         sort.csort = self.csolver.mkTupleSort(v)
         return sort
 
-    def mkTerm(self, Kind kind, *args):
+    def mkTerm(self, kind k, *args):
         cdef Term term = Term()
 
         if len(args) == 1 and isinstance(args[0], Sort):
-            term.cterm = self.csolver.mkTerm(kind.k, (<Sort?> args[0]).csort)
+            term.cterm = self.csolver.mkTerm(k.k, (<Sort?> args[0]).csort)
             return term
 
         if isinstance(args[0], Sequence):
@@ -299,7 +299,7 @@ cdef class Solver:
         for a in args:
             v.push_back((<Term> a).cterm)
 
-        term.cterm = self.csolver.mkTerm(kind.k, <const vector[c_Term]&> v)
+        term.cterm = self.csolver.mkTerm(k.k, <const vector[c_Term]&> v)
 
         return term
 

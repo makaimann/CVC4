@@ -4,7 +4,7 @@ from libc.stdint cimport int32_t, int64_t, uint32_t, uint64_t
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
-from Kind cimport Kind
+from kinds cimport Kind
 
 cdef extern from "cvc4cpp.cpp":
     pass
