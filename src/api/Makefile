@@ -1,6 +1,7 @@
 all: kinds solver
 
 kinds:
+	./genkinds.py
 	python setup-kind.py build_ext --inplace
 
 solver:
@@ -8,7 +9,6 @@ solver:
 
 clean:
 	rm -rf build
-	rm -f kinds.cpp
-	rm -f kinds.cpython-*
+	rm -f kinds.*
 	rm -f cvc4.cpp
 	rm -f cvc4.cpython-*

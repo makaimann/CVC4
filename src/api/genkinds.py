@@ -1,0 +1,253 @@
+#!/usr/bin/env python
+import argparse
+from collections import OrderedDict
+
+#################### Default Filenames ################
+DEFAULT_HEADER      = "cvc4cppkind.h"
+DEFAULT_PREFIX      = "kinds"
+
+##################### Useful Constants ################
+OCB                 = "{"
+CCB                 = "}"
+SC                  = ";"
+EQ                  = "="
+C                   = ","
+US                  = "_"
+NL                  = "\n"
+
+#################### Enum Declarations ################
+ENUM_START          = "enum CVC4_PUBLIC Kind"
+ENUM_END            = CCB+SC
+
+################ Comments and Macro Tokens ############
+comment             = '//'
+block_comment_begin = '/*'
+block_comment_end   = '*/'
+macro_block_begin   = '#if 0'
+macro_block_end     = '#endif'
+
+#################### Format Kind Names ################
+# special cases for format_name
+_IS                 = "_IS"
+# replacements after some preprocessing
+replacements        = {
+    'Bitvector'    : 'BV',
+    'Floatingpoint': 'FP'
+}
+
+####################### Code Blocks ###################
+KINDS_PXD_TOP = \
+r"""cdef extern from "cvc4cppkind.h" namespace "CVC4::api":
+    cdef cppclass Kind:
+        pass
+
+
+cdef class kind:
+    cdef Kind k
+    cdef str name
+
+
+# Kind declarations: See cvc4cppkind.h for additional information
+cdef extern from "cvc4cppkind.h" namespace "CVC4::api::Kind":
+"""
+
+KINDS_PYX_TOP = \
+r"""# distutils: language = c++
+# distutils: extra_compile_args = -std=c++11
+
+from kinds cimport *
+import sys
+
+"""
+
+KINDS_PYX_DICT = \
+r"""
+# map C++ kinds to Python names
+cdef kind_dict = {
+"""
+
+KINDS_PYX_BOT = \
+r"""
+cdef class kind:
+    def __cinit__(self, int val):
+        self.k = <Kind> val
+        self.name = kind_dict[val]
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
+
+# add all kinds to this module
+mod_ref = sys.modules[__name__]
+for kind_int, name in kind_dict.items():
+    new_kind = kind(kind_int)
+
+    if name in dir(mod_ref):
+        raise RuntimeError("Redefinition of Python kind %s."%name)
+
+    setattr(mod_ref, name, new_kind)
+
+del mod_ref
+del new_kind
+del kind_int
+del name
+"""
+
+class KindsParser:
+    tokenmap = {
+        block_comment_begin : block_comment_end,
+        macro_block_begin   : macro_block_end
+    }
+
+    def __init__(self):
+        self.kinds = OrderedDict()
+        self.endtoken = None
+        self.endtoken_stack = []
+        self.in_kinds = False
+
+    def format_name(name):
+        '''
+        In the Python API, each Kind name is reformatted for easier use
+
+        The naming scheme is:
+           1. capitalize the first letter of each word (delimited by underscores)
+           2. make the rest of the letters lowercase
+           3. replace Floatingpoint with FP
+           4. replace Bitvector with BV
+
+        There is one exception:
+           FLOATINGPOINT_ISNAN  --> FPIsNan
+
+        For every "_IS" in the name, there's an underscore added before step 1,
+           so that the word after "Is" is capitalized
+
+        Examples:
+           BITVECTOR_PLUS      -->  BVPlus
+           APPLY_SELECTOR      -->  ApplySelector
+           FLOATINGPOINT_ISNAN -->  FPIsNan
+           SETMINUS            -->  Setminus
+
+        See the generated .pyx file for an explicit mapping
+        '''
+        name = name.replace(_IS, _IS+US)
+        words = [w.capitalize() for w in name.lower().split(US)]
+        name = "".join(words)
+
+        for og, new in replacements.items():
+            name = name.replace(og, new)
+
+        return name
+
+    def ignore_block(self, line):
+        '''
+        Returns a boolean telling parse whether to ignore a line or not.
+        It also updates all the necessary state to track comments and macro
+        blocks
+        '''
+
+        # entering block comment or macro block
+        for token in self.tokenmap:
+            if token in line:
+                if self.tokenmap[token] not in line:
+                    if self.endtoken is not None:
+                        self.endtoken_stack.append(self.endtoken)
+                    self.endtoken = self.tokenmap[token]
+                return True
+
+        # currently in block comment or macro block
+        if self.endtoken is not None:
+            # reached the end of block comment or macro block
+            if self.endtoken in line:
+                if self.endtoken_stack:
+                    self.endtoken = self.endtoken_stack.pop()
+                else:
+                    self.endtoken =None
+            return True
+
+        return False
+
+    def parse(self, filename):
+        f = open(filename, "r")
+
+        for line in f.read().split(NL):
+            line = line.strip()
+            if comment in line:
+                line = line[:line.find(comment)]
+            if not line:
+                continue
+
+            if self.ignore_block(line):
+                continue
+
+            if ENUM_END in line:
+                self.in_kinds = False
+                break
+            elif self.in_kinds:
+                if line == OCB:
+                    continue
+                if EQ in line:
+                    line = line[:line.find(EQ)].strip()
+                elif C in line:
+                    line = line[:line.find(C)].strip()
+                self.kinds[line] = KindsParser.format_name(line)
+            elif ENUM_START in line:
+                self.in_kinds = True
+                continue
+
+        f.close()
+
+    def gen_pxd(self, filename):
+        f = open(filename, "w")
+        f.write(KINDS_PXD_TOP)
+        # include the format_name docstring in the generated file
+        # could be helpful for users to see the formatting rules
+        for line in self.format_name.__doc__.split(NL):
+            f.write("#")
+            if not line.isspace():
+                f.write(line)
+            f.write(NL)
+        prefix = "    cdef Kind "
+        for kind in self.kinds:
+            f.write(prefix + kind + NL)
+        f.close()
+
+    def gen_pyx(self, filename):
+        f = open(filename, "w")
+        f.write(KINDS_PYX_TOP)
+        f.write(KINDS_PYX_DICT)
+        fstr = "    <int> {}: \"{}\""
+        num_kinds = len(self.kinds)
+        for i, (kind, name) in enumerate(self.kinds.items()):
+            line = fstr.format(kind, name)
+            if i + 1 < num_kinds:
+                # add a comma
+                line += C
+            line += NL
+            f.write(line)
+        f.write(CCB + NL)
+        f.write(KINDS_PYX_BOT)
+        f.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser('Read a kinds header file and generate a '
+                         'corresponding pxd file, with simplified kind names.')
+    parser.add_argument('--kinds-header', metavar='<KINDS_HEADER>',
+                        help='The header file to read kinds from',
+                        default=DEFAULT_HEADER)
+    parser.add_argument('--kinds-file-prefix', metavar='<KIND_FILE_PREFIX>',
+                        help='The prefix for the .pxd and .pyx files to write '
+                        'the Cython declarations to.',
+                        default=DEFAULT_PREFIX)
+
+    args               = parser.parse_args()
+    kinds_header       = args.kinds_header
+    kinds_file_prefix  = args.kinds_file_prefix
+
+    kp = KindsParser()
+    kp.parse(kinds_header)
+
+    kp.gen_pxd(kinds_file_prefix + ".pxd")
+    kp.gen_pyx(kinds_file_prefix + ".pyx")
