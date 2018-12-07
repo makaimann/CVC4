@@ -17,39 +17,31 @@ cdef extern from "cvc4cpp.h" namespace "CVC4":
 cdef extern from "cvc4cpp.h" namespace "CVC4::api":
 
 
+    cdef cppclass DatatypeConstructorDecl:
+        DatatypeConstructorDecl(const string& name) except +
+        void addSelector(const DatatypeSelectorDecl& stor) except +
+        string toString() except +
+
+
     cdef cppclass DatatypeDecl:
         DatatypeDecl(const string & name, bint isCoDatatype) except +
         DatatypeDecl(const string & name, Sort param, bint isCoDatatype) except +
         DatatypeDecl(const string & name, const vector[Sort]& params, bint isCoDatatype) except +
+        # TODO: add these to Python class
+        void addConstructor(const DatatypeConstructorDecl& ctor) except +
+        bint isParametric() except +
         string toString() except +
 
 
-    cdef cppclass Sort:
-        Sort() except +
-        bint operator==(const Sort&) except +
-        bint operator!=(const Sort&) except +
-        bint isBoolean() except +
-        bint isInteger() except +
-        bint isReal() except +
-        bint isString() except +
-        bint isRegExp() except +
-        bint isRoundingMode() except +
-        bint isBitVector() except +
-        bint isFloatingPoint() except +
-        bint isDatatype() except +
-        bint isParametricDatatype() except +
-        bint isFunction() except +
-        bint isPredicate() except +
-        bint isTuple() except +
-        bint isRecord() except +
-        bint isArray() except +
-        bint isSet() except +
-        bint isUninterpretedSort() except +
-        bint isSortConstructor() except +
-        bint isFirstClass() except +
-        bint isFunctionLike() except +
-        bint isUninterpretedSortParameterized() except +
+    cdef cppclass DatatypeDeclSelfSort:
+        DatatypeDeclSelfSort() except +
+
+
+    cdef cppclass DatatypeSelectorDecl:
+        DatatypeSelectorDecl(const string& name, Sort sort) except +
+        DatatypeSelectorDecl(const string & name, DatatypeDeclSelfSort sort) except +
         string toString() except +
+
 
     cdef cppclass Solver:
         Solver(Options*) except +
@@ -114,6 +106,34 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term declareFun(const string& symbol, Sort sort) except +
         Term declareFun(const string& symbol, const vector[Sort] & sorts, Sort sort) except +
         # TODO: missing some more functions
+
+
+    cdef cppclass Sort:
+        Sort() except +
+        bint operator==(const Sort&) except +
+        bint operator!=(const Sort&) except +
+        bint isBoolean() except +
+        bint isInteger() except +
+        bint isReal() except +
+        bint isString() except +
+        bint isRegExp() except +
+        bint isRoundingMode() except +
+        bint isBitVector() except +
+        bint isFloatingPoint() except +
+        bint isDatatype() except +
+        bint isParametricDatatype() except +
+        bint isFunction() except +
+        bint isPredicate() except +
+        bint isTuple() except +
+        bint isRecord() except +
+        bint isArray() except +
+        bint isSet() except +
+        bint isUninterpretedSort() except +
+        bint isSortConstructor() except +
+        bint isFirstClass() except +
+        bint isFunctionLike() except +
+        bint isUninterpretedSortParameterized() except +
+        string toString() except +
 
 
     cdef cppclass Result:

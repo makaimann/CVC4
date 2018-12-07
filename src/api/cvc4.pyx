@@ -3,7 +3,18 @@
 # distutils: extra_compile_args = -std=c++11
 # distutils: libraries = cvc4 cvc4parser
 
+from collections import Sequence
+
+from libc.stdint cimport int32_t, int64_t, uint32_t, uint64_t
+
+from libcpp.pair cimport pair
+from libcpp.string cimport string
+from libcpp.vector cimport vector
+
+from CVC4 cimport DatatypeConstructorDecl as c_DatatypeConstructorDecl
 from CVC4 cimport DatatypeDecl as c_DatatypeDecl
+from CVC4 cimport DatatypeDeclSelfSort as c_DatatypeDeclSelfSort
+from CVC4 cimport DatatypeSelectorDecl as c_DatatypeSelectorDecl
 from CVC4 cimport Solver as c_Solver
 from CVC4 cimport Sort as c_Sort
 from CVC4 cimport Result as c_Result
@@ -13,16 +24,8 @@ from kinds cimport Kind as c_Kind
 from kinds cimport kind
 from kinds import kind
 
-from cython.operator cimport dereference as dref
 
-from libc.stdint cimport int32_t, int64_t, uint32_t, uint64_t
-
-from libcpp.pair cimport pair
-from libcpp.string cimport string
-from libcpp.vector cimport vector
-
-from collections import Sequence
-
+# TODO: match order of classes to CVC4.pxd (i.e. alphabetical)
 
 ## TODO: Add lots of assertions
 ##       Add type declarations where possible
@@ -36,90 +39,23 @@ from collections import Sequence
 # can omit spaces between unrelated oneliners
 
 
-cdef class Sort:
-    cdef c_Sort csort
-    def __cinit__(self):
-        # csort always set by Solver
-        pass
+cdef class DatatypeConstructorDecl:
+    cdef c_DatatypeConstructorDecl* cddc
+    def __cinit__(self, str name):
+        self.cddc = new c_DatatypeConstructorDecl(name.encode())
 
-    def __eq__(self, Sort other):
-        return self.csort == other.csort
-
-    def __ne__(self, Sort other):
-        return self.csort != other.csort
+    def addSelector(self, DatatypeSelectorDecl stor):
+        self.cddc.addSelector(stor.cdsd[0])
 
     def __str__(self):
-        return self.csort.toString().decode()
+        return self.cddc.toString().decode()
 
     def __repr__(self):
-        return self.csort.toString().decode()
-
-    def isBoolean(self):
-        return self.csort.isBoolean()
-
-    def isInteger(self):
-        return self.csort.isInteger()
-
-    def isReal(self):
-        return self.csort.isReal()
-
-    def isString(self):
-        return self.csort.isString()
-
-    def isRegExp(self):
-        return self.csort.isRegExp()
-
-    def isRoundingMode(self):
-        return self.csort.isRoundingMode()
-
-    def isBitVector(self):
-        return self.csort.isBitVector()
-
-    def isFloatingPoint(self):
-        return self.csort.isFloatingPoint()
-
-    def isDatatype(self):
-        return self.csort.isDatatype()
-
-    def isParametricDatatype(self):
-        return self.csort.isParametricDatatype()
-
-    def isFunction(self):
-        return self.csort.isFunction()
-
-    def isPredicate(self):
-        return self.csort.isPredicate()
-
-    def isTuple(self):
-        return self.csort.isTuple()
-
-    def isRecord(self):
-        return self.csort.isRecord()
-
-    def isArray(self):
-        return self.csort.isArray()
-
-    def isSet(self):
-        return self.csort.isSet()
-
-    def isUninterpretedSort(self):
-        return self.csort.isUninterpretedSort()
-
-    def isSortConstructor(self):
-        return self.csort.isSortConstructor()
-
-    def isFirstClass(self):
-        return self.csort.isFirstClass()
-
-    def isFunctionLike(self):
-        return self.csort.isFunctionLike()
-
-    def isUninterpretedSortParameterized(self):
-        return self.csort.isUninterpretedSortParameterized()
+        return self.cddc.toString().decode()
 
 
 cdef class DatatypeDecl:
-    cdef c_DatatypeDecl* d
+    cdef c_DatatypeDecl* cdd
     def __cinit__(self, name, sorts_or_bool=None, isCoDatatype=False):
 
         # TODO: Decide if this is worth it
@@ -140,21 +76,48 @@ cdef class DatatypeDecl:
             sorts_or_bool = None
 
         if sorts_or_bool is None:
-            self.d = new c_DatatypeDecl(<const string &> name, <bint> isCoDatatype)
+            self.cdd = new c_DatatypeDecl(<const string &> name, <bint> isCoDatatype)
         elif isinstance(sorts_or_bool, Sort):
-            self.d = new c_DatatypeDecl(<const string &> name, (<Sort?> sorts_or_bool).csort, <bint> isCoDatatype)
+            self.cdd = new c_DatatypeDecl(<const string &> name, (<Sort?> sorts_or_bool).csort, <bint> isCoDatatype)
         elif isinstance(sorts_or_bool, list):
             for s in sorts_or_bool:
                 v.push_back((<Sort?> s).csort)
-            self.d = new c_DatatypeDecl(<const string &> name, <const vector[c_Sort]&> v, <bint> isCoDatatype)
+            self.cdd = new c_DatatypeDecl(<const string &> name, <const vector[c_Sort]&> v, <bint> isCoDatatype)
         else:
             raise RuntimeError("Unhandled input types {}".format(list(map(type, (name, sorts_or_bool, isCoDatatype)))))
 
+    def addConstructor(self, DatatypeConstructorDecl ctor):
+        self.cdd.addConstructor(ctor.cddc[0])
+
+    def isParametric(self):
+        return self.cdd.isParametric()
+
     def __str__(self):
-        return self.d.toString().decode()
+        return self.cdd.toString().decode()
 
     def __repr__(self):
-        return self.d.toString().decode()
+        return self.cdd.toString().decode()
+
+
+cdef class DatatypeDeclSelfSort:
+    cdef c_DatatypeDeclSelfSort cddss
+    def __cinit__(self):
+        self.cddss = c_DatatypeDeclSelfSort()
+
+
+cdef class DatatypeSelectorDecl:
+    cdef c_DatatypeSelectorDecl* cdsd
+    def __cinit__(self, str name, sort):
+        if isinstance(sort, Sort):
+            self.cdsd = new c_DatatypeSelectorDecl(<const string &> name.encode(), (<Sort?> sort).csort)
+        elif isinstance(sort, DatatypeDeclSelfSort):
+            self.cdsd = new c_DatatypeSelectorDecl(<const string &> name.encode(), (<DatatypeDeclSelfSort?> sort).cddss)
+
+    def __str__(self):
+        return self.cdsd.toString().decode()
+
+    def __repr__(self):
+        return self.cdsd.toString().decode()
 
 
 cdef class Solver:
@@ -215,7 +178,7 @@ cdef class Solver:
     # FIXME: Complains about expecting at least one constructor?
     def mkDatatypeSort(self, DatatypeDecl dtypedecl):
         cdef Sort sort = Sort()
-        sort.csort = self.csolver.mkDatatypeSort(dtypedecl.d[0])
+        sort.csort = self.csolver.mkDatatypeSort(dtypedecl.cdd[0])
         return sort
 
     def mkFunctionSort(self, sorts, Sort codomain):
@@ -482,6 +445,89 @@ cdef class Solver:
             v.push_back((<Sort?> s).csort)
         term.cterm = self.csolver.declareFun(symbol.encode(), <const vector[c_Sort]&> v, sort.csort)
         return term
+
+
+cdef class Sort:
+    cdef c_Sort csort
+    def __cinit__(self):
+        # csort always set by Solver
+        pass
+
+    def __eq__(self, Sort other):
+        return self.csort == other.csort
+
+    def __ne__(self, Sort other):
+        return self.csort != other.csort
+
+    def __str__(self):
+        return self.csort.toString().decode()
+
+    def __repr__(self):
+        return self.csort.toString().decode()
+
+    def isBoolean(self):
+        return self.csort.isBoolean()
+
+    def isInteger(self):
+        return self.csort.isInteger()
+
+    def isReal(self):
+        return self.csort.isReal()
+
+    def isString(self):
+        return self.csort.isString()
+
+    def isRegExp(self):
+        return self.csort.isRegExp()
+
+    def isRoundingMode(self):
+        return self.csort.isRoundingMode()
+
+    def isBitVector(self):
+        return self.csort.isBitVector()
+
+    def isFloatingPoint(self):
+        return self.csort.isFloatingPoint()
+
+    def isDatatype(self):
+        return self.csort.isDatatype()
+
+    def isParametricDatatype(self):
+        return self.csort.isParametricDatatype()
+
+    def isFunction(self):
+        return self.csort.isFunction()
+
+    def isPredicate(self):
+        return self.csort.isPredicate()
+
+    def isTuple(self):
+        return self.csort.isTuple()
+
+    def isRecord(self):
+        return self.csort.isRecord()
+
+    def isArray(self):
+        return self.csort.isArray()
+
+    def isSet(self):
+        return self.csort.isSet()
+
+    def isUninterpretedSort(self):
+        return self.csort.isUninterpretedSort()
+
+    def isSortConstructor(self):
+        return self.csort.isSortConstructor()
+
+    def isFirstClass(self):
+        return self.csort.isFirstClass()
+
+    def isFunctionLike(self):
+        return self.csort.isFunctionLike()
+
+    def isUninterpretedSortParameterized(self):
+        return self.csort.isUninterpretedSortParameterized()
+
 
 class Result:
     _name = None
