@@ -10,33 +10,21 @@ cdef extern from "cvc4cpp.cpp":
     pass
 
 cdef extern from "cvc4cpp.h" namespace "CVC4":
-    cdef cppclass Expr:
-        pass
-    cdef cppclass Datatype:
-        pass
-    cdef cppclass DataTypeConstructor:
-        pass
-    cdef cppclass ExprManager:
-        pass
-    cdef cppclass NodeManager:
-        pass
-    cdef cppclass SmtEngine:
-        pass
-    cdef cppclass Type:
-        pass
     cdef cppclass Options:
         pass
-    cdef cppclass Random:
-        pass
+
 
 cdef extern from "cvc4cpp.h" namespace "CVC4::api":
+
+
     cdef cppclass DatatypeDecl:
         DatatypeDecl(const string & name, bint isCoDatatype) except +
         DatatypeDecl(const string & name, Sort param, bint isCoDatatype) except +
         DatatypeDecl(const string & name, const vector[Sort]& params, bint isCoDatatype) except +
         string toString() except +
+
+
     cdef cppclass Sort:
-        Sort(Type) except +
         Sort() except +
         bint operator==(const Sort&) except +
         bint operator!=(const Sort&) except +
@@ -62,7 +50,6 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         bint isFunctionLike() except +
         bint isUninterpretedSortParameterized() except +
         string toString() except +
-        Type getType() except +
 
     cdef cppclass Solver:
         Solver(Options*) except +
@@ -128,6 +115,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term declareFun(const string& symbol, const vector[Sort] & sorts, Sort sort) except +
         # TODO: missing some more functions
 
+
     cdef cppclass Result:
         # Note: don't even need constructor
         bint isSat() except +
@@ -139,9 +127,9 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         string getUnknownExplanation() except +
         string toString() except +
 
+
     cdef cppclass Term:
         Term()
-        Term(const Expr&) except +
         bint operator==(const Term&) except +
         bint operator!=(const Term&) except +
         Kind getKind() except +
@@ -155,4 +143,3 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term impTerm(const Term& t) except +
         Term iteTerm(const Term& then_t, const Term& else_t) except +
         string toString() except +
-        Expr getExpr() except +
