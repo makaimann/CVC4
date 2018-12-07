@@ -25,7 +25,16 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         size_t getNumConstructors() except +
         bint isParametric() except +
         string toString() except +
-        # TODO: Add iterator
+        cppclass const_iterator:
+            const_iterator() except +
+            # TODO: make sure we actually don't need this one
+            # const_iterator& operator=(const const_iterator& it) except +
+            bint operator==(const const_iterator& it) except +
+            bint operator!=(const const_iterator& it) except +
+            const_iterator& operator++();
+            const DatatypeConstructor& operator*() except +
+        const_iterator begin() except +
+        const_iterator end() except +
 
 
     cdef cppclass DatatypeConstructor:
@@ -34,7 +43,15 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         DatatypeSelector getSelector(const string & name) except +
         Term getSelectorTerm(const string & name) except +
         string toString() except +
-        # TODO: Add iterator
+        cppclass const_iterator:
+            const_iterator() except +
+            bint operator==(const const_iterator& it) except +
+            bint operator!=(const const_iterator& it) except +
+            const_iterator& operator++();
+            # TODO: Check if the const return type is enforced
+            const DatatypeSelector& operator*() except +
+        const_iterator begin() except +
+        const_iterator end() except +
 
 
     cdef cppclass DatatypeConstructorDecl:
@@ -189,3 +206,11 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term impTerm(const Term& t) except +
         Term iteTerm(const Term& then_t, const Term& else_t) except +
         string toString() except +
+        cppclass const_iterator:
+            const_iterator() except +
+            bint operator==(const const_iterator& it) except +
+            bint operator!=(const const_iterator& it) except +
+            const_iterator& operator++();
+            Term operator*() except +
+        const_iterator begin() except +
+        const_iterator end() except +

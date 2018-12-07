@@ -42,14 +42,12 @@ from kinds import kind
 # can omit spaces between unrelated oneliners
 
 
-# TODO: Add iterator
 cdef class Datatype:
     cdef c_Datatype cd
     def __cinit__(self):
         pass
 
     def __getitem__(self, str name):
-        # TODO: Try not initializing it here (try with Sort too)
         cdef DatatypeConstructor dc = DatatypeConstructor()
         dc.cdc = self.cd[name.encode()]
         return dc
@@ -74,8 +72,13 @@ cdef class Datatype:
     def __repr__(self):
         return self.cd.toString().decode()
 
+    def __iter__(self):
+        for ci in self.cd:
+            dc = DatatypeConstructor()
+            dc.cdc = ci
+            yield dc
 
-# TODO: Add iterator
+
 cdef class DatatypeConstructor:
     cdef c_DatatypeConstructor cdc
     def __cinit__(self):
@@ -101,6 +104,12 @@ cdef class DatatypeConstructor:
 
     def __repr__(self):
         return self.cdc.toString().decode()
+
+    def __iter__(self):
+        for ci in self.cdc:
+            ds = DatatypeSelector()
+            ds.cds = ci
+            yield ds
 
 
 cdef class DatatypeConstructorDecl:
@@ -680,3 +689,9 @@ cdef class Term:
 
     def __repr__(self):
         return self.cterm.toString().decode()
+
+    def __iter__(self):
+        for ci in self.cterm:
+            term = Term()
+            term.cterm = ci
+            yield term
