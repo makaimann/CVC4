@@ -11,9 +11,12 @@ from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
+from CVC4 cimport Datatype as c_Datatype
+from CVC4 cimport DatatypeConstructor as c_DatatypeConstructor
 from CVC4 cimport DatatypeConstructorDecl as c_DatatypeConstructorDecl
 from CVC4 cimport DatatypeDecl as c_DatatypeDecl
 from CVC4 cimport DatatypeDeclSelfSort as c_DatatypeDeclSelfSort
+from CVC4 cimport DatatypeSelector as c_DatatypeSelector
 from CVC4 cimport DatatypeSelectorDecl as c_DatatypeSelectorDecl
 from CVC4 cimport Solver as c_Solver
 from CVC4 cimport Sort as c_Sort
@@ -37,6 +40,67 @@ from kinds import kind
 # separate methods by one space
 # use spaces in functions sparingly to separate logical blocks
 # can omit spaces between unrelated oneliners
+
+
+# TODO: Add iterator
+cdef class Datatype:
+    cdef c_Datatype cd
+    def __cinit__(self):
+        pass
+
+    def __getitem__(self, str name):
+        # TODO: Try not initializing it here (try with Sort too)
+        cdef DatatypeConstructor dc = DatatypeConstructor()
+        dc.cdc = self.cd[name.encode()]
+        return dc
+
+    def getConstructor(self, str name):
+        cdef DatatypeConstructor dc = DatatypeConstructor()
+        dc.cdc = self.cd.getConstructor(name.encode())
+
+    def getConstructorTerm(self, str name):
+        cdef Term term = Term()
+        term.cterm = self.cd.getConstructorTerm(name.encode())
+
+    def getNumConstructors(self):
+        return self.cd.getNumConstructors()
+
+    def isParametric(self):
+        return self.cd.isParametric()
+
+    def __str__(self):
+        return self.cd.toString().decode()
+
+    def __repr__(self):
+        return self.cd.toString().decode()
+
+
+# TODO: Add iterator
+cdef class DatatypeConstructor:
+    cdef c_DatatypeConstructor cdc
+    def __cinit__(self):
+        self.cdc = c_DatatypeConstructor()
+
+    def __getitem__(self, str name):
+        cdef DatatypeSelector ds = DatatypeSelector()
+        ds.cds = self.cdc[name.encode()]
+        return ds
+
+    def getSelector(self, str name):
+        cdef DatatypeSelector ds = DatatypeSelector()
+        ds.cds = self.cdc.getSelector(name.encode())
+        return ds
+
+    def getSelectorTerm(self, str name):
+        cdef Term term = Term()
+        term.cterm = self.cdc.getSelectorTerm(name.encode())
+        return term
+
+    def __str__(self):
+        return self.cdc.toString().decode()
+
+    def __repr__(self):
+        return self.cdc.toString().decode()
 
 
 cdef class DatatypeConstructorDecl:
@@ -103,6 +167,18 @@ cdef class DatatypeDeclSelfSort:
     cdef c_DatatypeDeclSelfSort cddss
     def __cinit__(self):
         self.cddss = c_DatatypeDeclSelfSort()
+
+
+cdef class DatatypeSelector:
+    cdef c_DatatypeSelector cds
+    def __cinit__(self):
+        self.cds = c_DatatypeSelector()
+
+    def __str__(self):
+        return self.cds.toString().decode()
+
+    def __repr__(self):
+        return self.cds.toString().decode()
 
 
 cdef class DatatypeSelectorDecl:
@@ -524,6 +600,19 @@ cdef class Sort:
 
     def isFunctionLike(self):
         return self.csort.isFunctionLike()
+
+    def getDatatype(self):
+        cdef Datatype d = Datatype()
+        d.cd = self.csort.getDatatype()
+        return d
+
+    def instantiate(self, params):
+        cdef Sort sort = Sort()
+        cdef vector[c_Sort] v
+        for s in params:
+            v.push_back((<Sort?> s).csort)
+        sort.csort = self.csort.instantiate(v)
+        return sort
 
     def isUninterpretedSortParameterized(self):
         return self.csort.isUninterpretedSortParameterized()

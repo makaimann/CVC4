@@ -17,6 +17,26 @@ cdef extern from "cvc4cpp.h" namespace "CVC4":
 cdef extern from "cvc4cpp.h" namespace "CVC4::api":
 
 
+    cdef cppclass Datatype:
+        Datatype() except +
+        DatatypeConstructor operator[](const string & name) except +
+        DatatypeConstructor getConstructor(const string & name) except +
+        Term getConstructorTerm(const string & name) except +
+        size_t getNumConstructors() except +
+        bint isParametric() except +
+        string toString() except +
+        # TODO: Add iterator
+
+
+    cdef cppclass DatatypeConstructor:
+        DatatypeConstructor() except +
+        DatatypeSelector operator[](const string & name) except +
+        DatatypeSelector getSelector(const string & name) except +
+        Term getSelectorTerm(const string & name) except +
+        string toString() except +
+        # TODO: Add iterator
+
+
     cdef cppclass DatatypeConstructorDecl:
         DatatypeConstructorDecl(const string& name) except +
         void addSelector(const DatatypeSelectorDecl& stor) except +
@@ -27,7 +47,6 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         DatatypeDecl(const string & name, bint isCoDatatype) except +
         DatatypeDecl(const string & name, Sort param, bint isCoDatatype) except +
         DatatypeDecl(const string & name, const vector[Sort]& params, bint isCoDatatype) except +
-        # TODO: add these to Python class
         void addConstructor(const DatatypeConstructorDecl& ctor) except +
         bint isParametric() except +
         string toString() except +
@@ -35,6 +54,11 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
 
     cdef cppclass DatatypeDeclSelfSort:
         DatatypeDeclSelfSort() except +
+
+
+    cdef cppclass DatatypeSelector:
+        DatatypeSelector() except +
+        string toString() except +
 
 
     cdef cppclass DatatypeSelectorDecl:
@@ -132,6 +156,8 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         bint isSortConstructor() except +
         bint isFirstClass() except +
         bint isFunctionLike() except +
+        Datatype getDatatype() except +
+        Sort instantiate(const vector[Sort]& params) except +
         bint isUninterpretedSortParameterized() except +
         string toString() except +
 
