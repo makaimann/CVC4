@@ -331,7 +331,17 @@ cdef class Solver:
         return sort
 
     def mkTerm(self, kind k, *args):
+        '''
+        Supports the following arguments:
+                Term mkTerm(Kind kind)
+                Term mkTerm(Kind kind, Sort sort)
+                Term mkTerm(Kind kind, List[Term] children)
+        '''
         cdef Term term = Term()
+
+        if len(args) == 0:
+            term.cterm = self.csolver.mkTerm(k.k)
+            return term
 
         if len(args) == 1 and isinstance(args[0], Sort):
             term.cterm = self.csolver.mkTerm(k.k, (<Sort?> args[0]).csort)
@@ -530,6 +540,149 @@ cdef class Solver:
             v.push_back((<Sort?> s).csort)
         term.cterm = self.csolver.declareFun(symbol.encode(), <const vector[c_Sort]&> v, sort.csort)
         return term
+
+    def declareSort(self, str symbol, int arity):
+        cdef Sort sort = Sort()
+        sort.csort = self.csolver.declareSort(symbol.encode(), arity)
+        return sort
+
+    def defineFun(self, sym_or_fun, bound_vars, sort_or_term, t=None):
+        '''
+        Supports two uses:
+                Term defineFun(str symbol, List[Term] bound_vars,
+                               Sort sort, Term term)
+                Term defineFun(Term fun, List[Term] bound_vars,
+                               Term term)
+        '''
+        cdef Term term = Term()
+        cdef vector[c_Term] v
+        for bv in bound_vars:
+            v.push_back((<Term?> bv).cterm)
+
+        if t is not None:
+            term.cterm = self.csolver.defineFun((<str?> sym_or_fun).encode(),
+                                                <const vector[c_Term] &> v,
+                                                (<Sort?> sort_or_term).csort,
+                                                (<Term?> t).cterm)
+        else:
+            term.cterm = self.csolver.defineFun((<Term?> sym_or_fun).cterm, <const vector[c_Term]&> v, (<Term?> sort_or_term).cterm)
+
+        return term
+
+    def defineFunRec(self, sym_or_fun, bound_vars, sort_or_term, t=None):
+        '''
+        Supports two uses:
+                Term defineFunRec(str symbol, List[Term] bound_vars,
+                               Sort sort, Term term)
+                Term defineFunRec(Term fun, List[Term] bound_vars,
+                               Term term)
+        '''
+        cdef Term term = Term()
+        cdef vector[c_Term] v
+        for bv in bound_vars:
+            v.push_back((<Term?> bv).cterm)
+
+        if t is not None:
+            term.cterm = self.csolver.defineFunRec((<str?> sym_or_fun).encode(),
+                                                <const vector[c_Term] &> v,
+                                                (<Sort?> sort_or_term).csort,
+                                                (<Term?> t).cterm)
+        else:
+            term.cterm = self.csolver.defineFunRec((<Term?> sym_or_fun).cterm, <const vector[c_Term]&> v, (<Term?> sort_or_term).cterm)
+
+        return term
+
+    # TODO: Test this -- not sure it actually works
+    #       Just commenting it for now
+    # def defineFunsRec(self, funs, bound_vars, terms):
+    #     cdef vector[c_Term] vf
+    #     cdef vector[vector[c_Term]] vbv
+    #     cdef vector[c_Term] vt
+
+    #     for f in funs:
+    #         vf.push_back((<Term?> f).cterm)
+
+    #     cdef vector[c_Term] temp
+    #     for v in bound_vars:
+    #         for t in v:
+    #             temp.push_back((<Term?> t).cterm)
+    #         vbv.push_back(temp)
+    #         temp.clear()
+
+    #     for t in terms:
+    #         vf.push_back((<Term?> t).cterm)
+
+    def getAssertions(self):
+        assertions = []
+        for a in self.csolver.getAssertions():
+            term = Term()
+            term.cterm = a
+            assertions.append(term)
+        return assertions
+
+    # TODO: figure out why it's empty in test?
+    def getAssignment(self):
+        assignments = {}
+        for a in self.csolver.getAssignment():
+            varterm = Term()
+            valterm = Term()
+            varterm.cterm = a.first
+            valterm.cterm = a.second
+            assignments[varterm] = valterm
+        return assignments
+
+    def getInfo(self, str flag):
+        return self.csolver.getInfo(flag.encode())
+
+    def getOption(self, str option):
+        return self.csolver.getOption(option.encode())
+
+    def getUnsatAssumptions(self):
+        assumptions = []
+        for a in self.csolver.getUnsatAssumptions():
+            term = Term()
+            term.cterm = a
+            assumptions.append(term)
+        return assumptions
+
+    def getUnsatCore(self):
+        core = []
+        for a in self.csolver.getUnsatCore():
+            term = Term()
+            term.cterm = a
+            core.append(term)
+        return core
+
+    def getValue(self, Term t):
+        cdef Term term = Term()
+        term.cterm = self.csolver.getValue(t.cterm)
+        return term
+
+    def pop(self, nscopes=1):
+        self.csolver.pop(nscopes)
+
+    def push(self, nscopes=1):
+        self.csolver.push(nscopes)
+
+    def reset(self):
+        self.csolver.reset()
+
+    def resetAssertions(self):
+        self.csolver.resetAssertions()
+
+    def setInfo(self, str keyword, str value):
+        self.csolver.setInfo(keyword.encode(), value.encode())
+
+    def setLogic(self, str logic):
+        self.csolver.setLogic(logic.encode())
+
+    def setOption(self, str option, str value):
+        self.csolver.setOption(option.encode(), value.encode())
+
+    # TODO Insert missing functions here
+
+    def setOption(self, str option, str value):
+        self.csolver.setOption(option.encode(), value.encode())
 
 
 cdef class Sort:

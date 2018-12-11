@@ -19,16 +19,14 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
 
     cdef cppclass Datatype:
         Datatype() except +
-        DatatypeConstructor operator[](const string & name) except +
-        DatatypeConstructor getConstructor(const string & name) except +
-        Term getConstructorTerm(const string & name) except +
+        DatatypeConstructor operator[](const string& name) except +
+        DatatypeConstructor getConstructor(const string& name) except +
+        Term getConstructorTerm(const string& name) except +
         size_t getNumConstructors() except +
         bint isParametric() except +
         string toString() except +
         cppclass const_iterator:
             const_iterator() except +
-            # TODO: make sure we actually don't need this one
-            # const_iterator& operator=(const const_iterator& it) except +
             bint operator==(const const_iterator& it) except +
             bint operator!=(const const_iterator& it) except +
             const_iterator& operator++();
@@ -39,9 +37,9 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
 
     cdef cppclass DatatypeConstructor:
         DatatypeConstructor() except +
-        DatatypeSelector operator[](const string & name) except +
-        DatatypeSelector getSelector(const string & name) except +
-        Term getSelectorTerm(const string & name) except +
+        DatatypeSelector operator[](const string& name) except +
+        DatatypeSelector getSelector(const string& name) except +
+        Term getSelectorTerm(const string& name) except +
         string toString() except +
         cppclass const_iterator:
             const_iterator() except +
@@ -61,9 +59,9 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
 
 
     cdef cppclass DatatypeDecl:
-        DatatypeDecl(const string & name, bint isCoDatatype) except +
-        DatatypeDecl(const string & name, Sort param, bint isCoDatatype) except +
-        DatatypeDecl(const string & name, const vector[Sort]& params, bint isCoDatatype) except +
+        DatatypeDecl(const string& name, bint isCoDatatype) except +
+        DatatypeDecl(const string& name, Sort param, bint isCoDatatype) except +
+        DatatypeDecl(const string& name, const vector[Sort]& params, bint isCoDatatype) except +
         void addConstructor(const DatatypeConstructorDecl& ctor) except +
         bint isParametric() except +
         string toString() except +
@@ -80,7 +78,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
 
     cdef cppclass DatatypeSelectorDecl:
         DatatypeSelectorDecl(const string& name, Sort sort) except +
-        DatatypeSelectorDecl(const string & name, DatatypeDeclSelfSort sort) except +
+        DatatypeSelectorDecl(const string& name, DatatypeDeclSelfSort sort) except +
         string toString() except +
 
 
@@ -105,19 +103,15 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Sort mkUninterpretedSort(const string& symbol) except +
         Sort mkSortConstructorSort(const string& symbol, size_t arity) except +
         Sort mkTupleSort(const vector[Sort]& sorts) except +
-        # TODO: determine if I should even have all of these? Easier to always use vector
         Term mkTerm(Kind kind) except +
         Term mkTerm(Kind kind, Sort sort) except +
-        Term mkTerm(Kind kind, Term child) except +
-        Term mkTerm(Kind kind, Term child1, Term child2) except +
-        Term mkTerm(Kind kind, Term child1, Term child2, Term child3) except +
         Term mkTerm(Kind kind, const vector[Term]& children) except +
         # TODO: fill in missing mkTerm(OpTerm) functions
         Term mkTrue() except +
         Term mkFalse() except +
         Term mkBoolean(bint val) except +
         Term mkPi() except +
-        Term mkReal(const string & s, uint32_t base) except +
+        Term mkReal(const string& s, uint32_t base) except +
         Term mkRegexpEmpty() except +
         Term mkRegexpSigma() except +
         Term mkEmptySet(Sort s) except +
@@ -128,13 +122,12 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkBitVector(uint32_t size) except +
         Term mkBitVector(uint32_t size, uint64_t val) except +
         # TODO: fill in missing functions (skipped all the overloaded mkConsts)
-        Term mkVar(const string & symbol, Sort sort) except +
+        Term mkVar(const string& symbol, Sort sort) except +
         Term mkVar(Sort sort) except +
-        Term mkBoundVar(const string & symbol, Sort sort) except +
+        Term mkBoundVar(const string& symbol, Sort sort) except +
         Term mkBoundVar(Sort sort) except +
         Term simplify(const Term& t) except +
         void assertFormula(Term term) except +
-        # TODO: Finish these
         Result checkSat() except +
         Result checkSatAssuming(Term assumption) except +
         Result checkSatAssuming(const vector[Term]& assumptions) except +
@@ -145,8 +138,36 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term declareConst(const string& symbol, Sort sort) except +
         # left out declareDatatype for now
         Term declareFun(const string& symbol, Sort sort) except +
-        Term declareFun(const string& symbol, const vector[Sort] & sorts, Sort sort) except +
-        # TODO: missing some more functions
+        Term declareFun(const string& symbol, const vector[Sort]& sorts, Sort sort) except +
+        # TODO: add these to cvc4.pyx
+        Sort declareSort(const string& symbol, uint32_t arity) except +
+        Term defineFun(const string& symbol, const vector[Term]& bound_vars,
+                       Sort sort, Term term) except +
+        Term defineFun(Term fun, const vector[Term]& bound_vars, Term term) except +
+        Term defineFunRec(const string& symbol, const vector[Term]& bound_vars,
+                          Sort sort, Term term) except +
+        Term defineFunRec(Term fun, const vector[Term]& bound_vars,
+                          Term term) except +
+        # TODO: Decide if this is worth supporting
+        Term defineFunsRec(vector[Term]& funs, vector[vector[Term]]& bound_vars,
+                           vector[Term]& terms) except +
+        # not supporting echo
+        # TODO: Add these to cvc4.pyx
+        vector[Term] getAssertions() except +
+        vector[pair[Term, Term]] getAssignment() except +
+        string getInfo(const string& flag) except +
+        string getOption(string& option) except +
+        vector[Term] getUnsatAssumptions() except +
+        vector[Term] getUnsatCore() except +
+        Term getValue(Term term) except +
+        vector[Term] getValue(const vector[Term]& terms) except +
+        void pop(uint32_t nscopes) except +
+        void push(uint32_t nscopes) except +
+        void reset() except +
+        void resetAssertions() except +
+        void setInfo(string& keyword, const string& value) except +
+        void setLogic(const string& logic) except +
+        void setOption(const string& option, const string& value) except +
 
 
     cdef cppclass Sort:
