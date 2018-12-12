@@ -4,6 +4,7 @@
 # distutils: libraries = cvc4 cvc4parser
 
 from collections import Sequence
+import sys
 
 from libc.stdint cimport int32_t, int64_t, uint32_t, uint64_t
 
@@ -21,11 +22,16 @@ from CVC4 cimport DatatypeSelectorDecl as c_DatatypeSelectorDecl
 from CVC4 cimport Solver as c_Solver
 from CVC4 cimport Sort as c_Sort
 from CVC4 cimport Result as c_Result
+from CVC4 cimport RoundingMode as c_RoundingMode
+from CVC4 cimport ROUND_NEAREST_TIES_TO_EVEN, ROUND_TOWARD_POSITIVE, ROUND_TOWARD_ZERO, ROUND_NEAREST_TIES_TO_AWAY
 from CVC4 cimport Term as c_Term
 
 from kinds cimport Kind as c_Kind
 from kinds cimport kind
 from kinds import kind
+
+# TODO: Decide which to use -- this way requires ctypedef enum RoundingMode in CVC4.pxd
+# include "RoundingMode.pxd"
 
 
 # TODO: match order of classes to CVC4.pxd (i.e. alphabetical)
@@ -205,14 +211,77 @@ cdef class DatatypeSelectorDecl:
         return self.cdsd.toString().decode()
 
 
+class Result:
+    _name = None
+    _explanation = None
+
+    def __init__(self, name, explanation=""):
+        assert name in {"sat", "unsat", "valid", "invalid", "unknown"}
+        self._name = name
+        self._explanation = explanation
+
+    def __bool__(self):
+        if self._name in {"sat", "valid"}:
+            return True
+        elif self._name in {"unsat", "invalid"}:
+            return False
+        elif self._name == "unknown":
+            raise RuntimeError("Cannot interpret 'unknown' result as a Boolean")
+        else:
+            assert False, "Unhandled result=%s"%self._name
+
+    def __eq__(self, other):
+        if not isinstance(other, Result):
+            return False
+
+        return self._name == other._name
+
+    def __ne__(self, other):
+        if not isinstance(other, Result):
+            return True
+
+        return self._name != other._name
+
+    def __str__(self):
+        return self._name
+
+    def __repr__(self):
+        return self._name
+
+    def isUnknown(self):
+        return self._name == "unknown"
+
+    @property
+    def explanation(self):
+        return self._explanation
+
+
+cdef class RoundingMode:
+    cdef c_RoundingMode crm
+    cdef str name
+    def __cinit__(self, int rm):
+        # crm always assigned externally
+        self.crm = <c_RoundingMode> rm
+        self.name = __rounding_modes[rm]
+
+    def __eq__(self, RoundingMode other):
+        return (<int> self.crm) == (<int> other.crm)
+
+    def __ne__(self, RoundingMode other):
+        return (<int> self.crm) != (<int> other.crm)
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
+
+
 cdef class Solver:
     cdef c_Solver* csolver
 
     def __cinit__(self):
-        # TODO: pass options through
         self.csolver = new c_Solver(NULL)
-
-    # TODO: Go through the functions below and update the sort construction
 
     def getBooleanSort(self):
         cdef Sort sort = Sort()
@@ -260,7 +329,6 @@ cdef class Solver:
         sort.csort = self.csolver.mkFloatingPointSort(exp, sig)
         return sort
 
-    # FIXME: Complains about expecting at least one constructor?
     def mkDatatypeSort(self, DatatypeDecl dtypedecl):
         cdef Sort sort = Sort()
         sort.csort = self.csolver.mkDatatypeSort(dtypedecl.cdd[0])
@@ -780,51 +848,6 @@ cdef class Sort:
         return self.csort.isUninterpretedSortParameterized()
 
 
-class Result:
-    _name = None
-    _explanation = None
-
-    def __init__(self, name, explanation=""):
-        assert name in {"sat", "unsat", "valid", "invalid", "unknown"}
-        self._name = name
-        self._explanation = explanation
-
-    def __bool__(self):
-        if self._name in {"sat", "valid"}:
-            return True
-        elif self._name in {"unsat", "invalid"}:
-            return False
-        elif self._name == "unknown":
-            raise RuntimeError("Cannot interpret 'unknown' result as a Boolean")
-        else:
-            assert False, "Unhandled result=%s"%self._name
-
-    def __eq__(self, other):
-        if not isinstance(other, Result):
-            return False
-
-        return self._name == other._name
-
-    def __ne__(self, other):
-        if not isinstance(other, Result):
-            return True
-
-        return self._name != other._name
-
-    def __str__(self):
-        return self._name
-
-    def __repr__(self):
-        return self._name
-
-    def isUnknown(self):
-        return self._name == "unknown"
-
-    @property
-    def explanation(self):
-        return self._explanation
-
-
 cdef class Term:
     cdef c_Term cterm
     def __cinit__(self):
@@ -848,3 +871,21 @@ cdef class Term:
             term = Term()
             term.cterm = ci
             yield term
+
+
+# Generate rounding modes
+cdef __rounding_modes = {
+    <int> ROUND_NEAREST_TIES_TO_EVEN: "RoundNearestTiesToEven",
+    <int> ROUND_TOWARD_POSITIVE: "RoundTowardPositive",
+    <int> ROUND_TOWARD_ZERO: "RoundTowardZero",
+    <int> ROUND_NEAREST_TIES_TO_AWAY: "RoundNearestTiesToAway"
+}
+
+mod_ref = sys.modules[__name__]
+for rm_int, name in __rounding_modes.items():
+    r = RoundingMode(rm_int)
+
+    if name in dir(mod_ref):
+        raise RuntimeError("Redefinition of Python RoundingMode %s."%name)
+
+    setattr(mod_ref, name, r)

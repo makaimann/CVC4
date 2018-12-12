@@ -12,11 +12,11 @@ cdef extern from "cvc4cpp.cpp":
 cdef extern from "cvc4cpp.h" namespace "CVC4":
     cdef cppclass Options:
         pass
+    cdef cppclass RoundingMode:
+        pass
 
 
 cdef extern from "cvc4cpp.h" namespace "CVC4::api":
-
-
     cdef cppclass Datatype:
         Datatype() except +
         DatatypeConstructor operator[](const string& name) except +
@@ -122,6 +122,16 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkBitVector(uint32_t size) except +
         Term mkBitVector(uint32_t size, uint64_t val) except +
         # TODO: fill in missing functions (skipped all the overloaded mkConsts)
+        # Term mkConst(RoundingMode rm) except +
+        # Term mkConst(Kind kind, Sort arg) except +
+        # Term mkConst(Kind kind, Sort arg1, int32_t arg2) except +
+        # Term mkConst(Kind kind, bool arg) except +
+        # Term mkConst(Kind kind, const string& arg) except +
+        # Term mkConst(Kind, kind, const string& arg1, uint32_t arg2) except + # default arg2=10
+        # Term mkConst(Kind kind, int64_t arg)
+        # Term mkConst(Kind kind, int64_t arg1, int64_t arg2)
+        # Term mkConst(Kind kind, uint32_t arg1, uint32_t arg2, Term arg3) except +
+
         Term mkVar(const string& symbol, Sort sort) except +
         Term mkVar(Sort sort) except +
         Term mkBoundVar(const string& symbol, Sort sort) except +
@@ -235,3 +245,11 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
             Term operator*() except +
         const_iterator begin() except +
         const_iterator end() except +
+
+
+cdef extern from "cvc4cpp.h" namespace "CVC4::api::RoundingMode":
+    cdef RoundingMode ROUND_NEAREST_TIES_TO_EVEN,
+    cdef RoundingMode ROUND_TOWARD_POSITIVE,
+    cdef RoundingMode ROUND_TOWARD_NEGATIVE,
+    cdef RoundingMode ROUND_TOWARD_ZERO,
+    cdef RoundingMode ROUND_NEAREST_TIES_TO_AWAY
