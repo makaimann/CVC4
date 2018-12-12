@@ -77,11 +77,23 @@ cdef class kind:
         self.k = <Kind> val
         self.name = kind_dict[val]
 
+    def __eq__(self, kind other):
+        return (<int> self.k) == (<int> other.k)
+
+    def __ne__(self, kind other):
+        return (<int> self.k) != (<int> other.k)
+
+    def __hash__(self):
+        return hash((<int> self.k, self.name))
+
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return self.name
+
+    def as_int(self):
+        return <int> self.k
 
 # add all kinds to this module
 mod_ref = sys.modules[__name__]

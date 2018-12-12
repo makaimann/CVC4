@@ -270,6 +270,9 @@ cdef class RoundingMode:
     def __ne__(self, RoundingMode other):
         return (<int> self.crm) != (<int> other.crm)
 
+    def __hash__(self):
+        return hash((<int> self.crm, self.name))
+
     def __str__(self):
         return self.name
 
