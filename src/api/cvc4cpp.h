@@ -81,6 +81,9 @@ class CVC4_PUBLIC Result
    */
   Result(const CVC4::Result& r);
 
+  // Nullary constructor for Cython
+  Result();
+
   /**
    * Return true if query was a satisfiable checkSat() or checkSatAssuming()
    * query.
@@ -190,6 +193,9 @@ class CVC4_PUBLIC Sort
    * @return the Sort
    */
   Sort(const CVC4::Type& t);
+
+  // Nullary constructor for Cython
+  Sort();
 
   /**
    * Destructor.
@@ -1167,6 +1173,9 @@ class CVC4_PUBLIC DatatypeConstructor
     friend class DatatypeConstructor;  // to access constructor
 
    public:
+    // Nullary constructor for Cython
+    const_iterator();
+
     /**
      * Assignment operator.
      * @param it the iterator to assign to
@@ -1270,6 +1279,9 @@ class CVC4_PUBLIC Datatype
    */
   Datatype(const CVC4::Datatype& dtype);
 
+  // Nullary constructor for Cython
+  Datatype();
+
   /**
    * Destructor.
    */
@@ -1312,6 +1324,9 @@ class CVC4_PUBLIC Datatype
     friend class Datatype;  // to access constructor
 
    public:
+    // Nullary constructor for Cython
+    const_iterator();
+
     /**
      * Assignment operator.
      * @param it the iterator to assign to
