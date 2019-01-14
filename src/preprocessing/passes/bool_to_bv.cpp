@@ -48,7 +48,8 @@ PreprocessingPassResult BoolToBV::applyInternal(
       Node newAssertion = lowerNode((*assertionsToPreprocess)[i]);
       if (newAssertion.getType().isBitVector())
       {
-        newAssertion = nm->mkNode(kind::EQUAL, newAssertion, bv::utils::mkOne(1));
+        newAssertion =
+            nm->mkNode(kind::EQUAL, newAssertion, bv::utils::mkOne(1));
       }
       assertionsToPreprocess->replace(i, Rewriter::rewrite(newAssertion));
     }
@@ -124,8 +125,20 @@ Node BoolToBV::lowerNode(const TNode& topnode, bool force)
     }
     else
     {
-      // don't force to bit-vector if it's a toplevel node
-      lowerNodeHelper(n, force && (topnode == n));
+      // Optimization: Don't push to BV as aggressively if this is a top-level
+      // node
+      //               will need to be converted back to a bit-vector anyway
+      if (topnode == n)
+      {
+        if (n.getKind() == kind::EQUAL)
+        {
+          // just skip it if it's an EQUAL, there's no reason to push to BVCOMP
+          // at the top-level
+          continue;
+        }
+        // don't force
+        lowerNodeHelper(n, false);
+      }
     }
   }
   return fromCache(topnode);
@@ -191,8 +204,8 @@ void BoolToBV::lowerNodeHelper(const TNode& n, bool force)
   // easy case -- just replace boolean constant
   if (k == kind::CONST_BOOLEAN)
   {
-    d_lowerCache[n] = (n == bv::utils::mkTrue()) ? bv::utils::mkOne(1)
-      : bv::utils::mkZero(1);
+    d_lowerCache[n] =
+        (n == bv::utils::mkTrue()) ? bv::utils::mkOne(1) : bv::utils::mkZero(1);
     return;
   }
 
@@ -226,9 +239,10 @@ void BoolToBV::lowerNodeHelper(const TNode& n, bool force)
     // need to check that it's safe
     bool safe_to_rebuild = true;
     Type t;
-    for (const Node& nn  : n)
+    for (const Node& nn : n)
     {
-      safe_to_rebuild = safe_to_rebuild && fromCache(nn).getType().isBitVector();
+      safe_to_rebuild =
+          safe_to_rebuild && fromCache(nn).getType().isBitVector();
       if (!safe_to_rebuild)
       {
         break;
