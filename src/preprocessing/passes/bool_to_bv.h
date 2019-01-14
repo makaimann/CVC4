@@ -50,7 +50,7 @@ class BoolToBV : public PreprocessingPass
    *  Passes the force argument to lowerNodeHelper
    *  Returns the lowered node
    */
-  Node lowerNode(const TNode& node, bool force = true);
+  Node lowerNode(const TNode& topnode, bool force = true);
 
   /** Tries to lower one node to a width-one bit-vector
    *  Caches the result if successful

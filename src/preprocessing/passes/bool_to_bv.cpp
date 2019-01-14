@@ -46,9 +46,10 @@ PreprocessingPassResult BoolToBV::applyInternal(
     for (unsigned i = 0; i < size; ++i)
     {
       Node newAssertion = lowerNode((*assertionsToPreprocess)[i]);
-      // mode all should always succeed
-      Assert(newAssertion.getType().isBitVector());
-      newAssertion = nm->mkNode(kind::EQUAL, newAssertion, bv::utils::mkOne(1));
+      if (newAssertion.getType().isBitVector())
+      {
+        newAssertion = nm->mkNode(kind::EQUAL, newAssertion, bv::utils::mkOne(1));
+      }
       assertionsToPreprocess->replace(i, Rewriter::rewrite(newAssertion));
     }
   }
@@ -91,10 +92,10 @@ bool BoolToBV::needToRebuild(TNode n) const
   return false;
 }
 
-Node BoolToBV::lowerNode(const TNode& node, bool force)
+Node BoolToBV::lowerNode(const TNode& topnode, bool force)
 {
   std::vector<TNode> visit;
-  visit.push_back(node);
+  visit.push_back(topnode);
   std::unordered_set<TNode, TNodeHashFunction> visited;
 
   while (!visit.empty())
@@ -123,10 +124,11 @@ Node BoolToBV::lowerNode(const TNode& node, bool force)
     }
     else
     {
-      lowerNodeHelper(n, force);
+      // don't force to bit-vector if it's a toplevel node
+      lowerNodeHelper(n, force && (topnode == n));
     }
   }
-  return fromCache(node);
+  return fromCache(topnode);
 }
 
 Node BoolToBV::lowerIte(const TNode& node)
