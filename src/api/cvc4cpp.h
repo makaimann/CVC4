@@ -195,9 +195,6 @@ class CVC4_PUBLIC Sort
    */
   Sort(const CVC4::Type& t);
 
-  // Nullary constructor for Cython
-  Sort();
-
   /**
    * Constructor.
    */

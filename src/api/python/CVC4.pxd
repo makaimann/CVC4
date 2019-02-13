@@ -21,7 +21,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Datatype() except +
         DatatypeConstructor operator[](const string& name) except +
         DatatypeConstructor getConstructor(const string& name) except +
-        Term getConstructorTerm(const string& name) except +
+        OpTerm getConstructorTerm(const string& name) except +
         size_t getNumConstructors() except +
         bint isParametric() except +
         string toString() except +
@@ -39,7 +39,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         DatatypeConstructor() except +
         DatatypeSelector operator[](const string& name) except +
         DatatypeSelector getSelector(const string& name) except +
-        Term getSelectorTerm(const string& name) except +
+        OpTerm getSelectorTerm(const string& name) except +
         string toString() except +
         cppclass const_iterator:
             const_iterator() except +
@@ -82,6 +82,28 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         string toString() except +
 
 
+    cdef cppclass OpTerm:
+        OpTerm() except +
+        bint operator==(const OpTerm&) except +
+        bint operator!=(const OpTerm&) except +
+        Kind getKind() except +
+        Sort getSort() except +
+        bint isNull() except +
+        string toString() except +
+
+
+    cdef cppclass Result:
+    # Note: don't even need constructor
+        bint isSat() except +
+        bint isUnsat() except +
+        bint isSatUnknown() except +
+        bint isValid() except +
+        bint isInvalid() except +
+        bint isValidUnknown() except +
+        string getUnknownExplanation() except +
+        string toString() except +
+
+
     cdef cppclass Solver:
         Solver(Options*) except +
         Sort getBooleanSort() except +
@@ -104,14 +126,22 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Sort mkSortConstructorSort(const string& symbol, size_t arity) except +
         Sort mkTupleSort(const vector[Sort]& sorts) except +
         Term mkTerm(Kind kind) except +
-        Term mkTerm(Kind kind, Sort sort) except +
+        # TODO: decide if we should explicitly support these or only vector
+        # Term mkTerm(Kind kind, Term child) except +
+        # Term mkTerm(Kind kind, Term child1, Term child2) except +
+        # Term mkTerm(Kind kind, Term child1, Term child2, Term child3) except +
+        # Term mkTerm(Kind kind, OpTerm child) except +
+        # Term mkTerm(Kind kind, OpTerm child1, Term child2) except +
+        # Term mkTerm(Kind kind, OpTerm child1, Term child2, Term child3) except +
+        # Term mkTerm(Kind kind, OpTerm child1, Term child2, Term child3, Term child4) except +
+        # end TODO
         Term mkTerm(Kind kind, const vector[Term]& children) except +
-        # TODO: fill in missing mkTerm(OpTerm) functions
+        Term mkTerm(Kind kind, OpTerm child, const vector[Term]& children) except +
         Term mkTrue() except +
         Term mkFalse() except +
         Term mkBoolean(bint val) except +
         Term mkPi() except +
-        Term mkReal(const string& s, uint32_t base) except +
+        Term mkReal(const string& s) except +
         Term mkRegexpEmpty() except +
         Term mkRegexpSigma() except +
         Term mkEmptySet(Sort s) except +
@@ -146,7 +176,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Result checkValidAssuming(const vector[Term]& assumptions) except +
         # TODO: Missing some functions
         Term declareConst(const string& symbol, Sort sort) except +
-        # left out declareDatatype for now
+        Sort declareDatatype(const string& symbol, const vector[DatatypeConstructorDecl]& ctors)
         Term declareFun(const string& symbol, Sort sort) except +
         Term declareFun(const string& symbol, const vector[Sort]& sorts, Sort sort) except +
         # TODO: add these to cvc4.pyx
@@ -209,19 +239,6 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         bint isUninterpretedSortParameterized() except +
         string toString() except +
 
-
-    cdef cppclass Result:
-        # Note: don't even need constructor
-        bint isSat() except +
-        bint isUnsat() except +
-        bint isSatUnknown() except +
-        bint isValid() except +
-        bint isInvalid() except +
-        bint isValidUnknown() except +
-        string getUnknownExplanation() except +
-        string toString() except +
-
-
     cdef cppclass Term:
         Term()
         bint operator==(const Term&) except +
@@ -233,7 +250,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term andTerm(const Term& t) except +
         Term orTerm(const Term& t) except +
         Term xorTerm(const Term& t) except +
-        Term iffTerm(const Term& t) except +
+        Term eqTerm(const Term& t) except +
         Term impTerm(const Term& t) except +
         Term iteTerm(const Term& then_t, const Term& else_t) except +
         string toString() except +

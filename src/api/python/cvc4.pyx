@@ -19,16 +19,41 @@ from CVC4 cimport DatatypeDecl as c_DatatypeDecl
 from CVC4 cimport DatatypeDeclSelfSort as c_DatatypeDeclSelfSort
 from CVC4 cimport DatatypeSelector as c_DatatypeSelector
 from CVC4 cimport DatatypeSelectorDecl as c_DatatypeSelectorDecl
-from CVC4 cimport Solver as c_Solver
-from CVC4 cimport Sort as c_Sort
 from CVC4 cimport Result as c_Result
 from CVC4 cimport RoundingMode as c_RoundingMode
-from CVC4 cimport ROUND_NEAREST_TIES_TO_EVEN, ROUND_TOWARD_POSITIVE, ROUND_TOWARD_ZERO, ROUND_NEAREST_TIES_TO_AWAY
+from CVC4 cimport OpTerm as c_OpTerm
+from CVC4 cimport Solver as c_Solver
+from CVC4 cimport Sort as c_Sort
+from CVC4 cimport ROUND_NEAREST_TIES_TO_EVEN, ROUND_TOWARD_POSITIVE, \
+    ROUND_TOWARD_ZERO, ROUND_NEAREST_TIES_TO_AWAY
 from CVC4 cimport Term as c_Term
 
 from kinds cimport Kind as c_Kind
 from kinds cimport kind
 from kinds import kind
+
+# TODO: Use @expand_list_arg everywhere
+################################## DECORATORS #########################################
+def expand_list_arg(num_req_args=0):
+    '''
+    Creates a decorator that looks at the num_req_args-th argument.
+    If it's a list, it expands it before calling the function.
+    '''
+    def decorator(func):
+        def wrapper(*args):
+            if len(args) > num_req_args and isinstance(args[num_req_args], list):
+                assert len(args) == num_req_args + 1, (
+                    "Expected {} regular arguments followed by "
+                    "a list or more comma separated arguments, but "
+                    "got {} instead".format(num_req_args, args)
+                )
+                args = list(args[:num_req_args]) + args[num_req_args]
+                func(*args)
+        return wrapper
+    return decorator
+######################################################################################
+
+# TODO: Use cdef for declarations
 
 # TODO: Decide which to use -- this way requires ctypedef enum RoundingMode in CVC4.pxd
 # include "RoundingMode.pxd"
@@ -61,10 +86,12 @@ cdef class Datatype:
     def getConstructor(self, str name):
         cdef DatatypeConstructor dc = DatatypeConstructor()
         dc.cdc = self.cd.getConstructor(name.encode())
+        return dc
 
     def getConstructorTerm(self, str name):
-        cdef Term term = Term()
-        term.cterm = self.cd.getConstructorTerm(name.encode())
+        opterm = OpTerm()
+        opterm.copterm = self.cd.getConstructorTerm(name.encode())
+        return opterm
 
     def getNumConstructors(self):
         return self.cd.getNumConstructors()
@@ -101,9 +128,9 @@ cdef class DatatypeConstructor:
         return ds
 
     def getSelectorTerm(self, str name):
-        cdef Term term = Term()
-        term.cterm = self.cdc.getSelectorTerm(name.encode())
-        return term
+        opterm = OpTerm()
+        opterm.copterm = self.cdc.getSelectorTerm(name.encode())
+        return opterm
 
     def __str__(self):
         return self.cdc.toString().decode()
@@ -280,6 +307,35 @@ cdef class RoundingMode:
         return self.name
 
 
+cdef class OpTerm:
+    cdef c_OpTerm copterm
+    def __cinit__(self):
+        self.copterm = c_OpTerm()
+
+    def __eq__(self, OpTerm other):
+        return self.copterm == other.copterm
+
+    def __ne__(self, OpTerm other):
+        return self.copterm != other.copterm
+
+    def __str__(self):
+        return self.copterm.toString().decode()
+
+    def __repr__(self):
+        return self.copterm.toString().decode()
+
+    def getKind(self):
+        return kind(<int> self.opterm.getKind())
+
+    def getSort(self):
+        sort = Sort()
+        sort.csort = self.copterm.getSort()
+        return sort
+
+    def isNull(self):
+        return self.opterm.isNull()
+
+
 cdef class Solver:
     cdef c_Solver* csolver
 
@@ -401,35 +457,30 @@ cdef class Solver:
         sort.csort = self.csolver.mkTupleSort(v)
         return sort
 
+    # TODO: ensure that mkTerm(kind, OpTerm) <-> mkTerm(kind, OpTerm, [])
+#    @expand_list_arg(num_req_args=1)
     def mkTerm(self, kind k, *args):
         '''
-        Supports the following arguments:
-                Term mkTerm(Kind kind)
-                Term mkTerm(Kind kind, Sort sort)
-                Term mkTerm(Kind kind, List[Term] children)
+            Supports the following arguments:
+                    Term mkTerm(Kind kind)
+                    Term mkTerm(Kind kind, OpTerm child1, List[Term] children)
+                    Term mkTerm(Kind kind, List[Term] children)
+
+                where List[Term] can also be comma-separated arguments
         '''
         cdef Term term = Term()
+        cdef vector[c_Term] v
 
         if len(args) == 0:
             term.cterm = self.csolver.mkTerm(k.k)
-            return term
-
-        if len(args) == 1 and isinstance(args[0], Sort):
-            term.cterm = self.csolver.mkTerm(k.k, (<Sort?> args[0]).csort)
-            return term
-
-        if isinstance(args[0], Sequence):
-            if not len(args) == 1:
-                raise RuntimeError("Expecting one sequence or multiple arguments, got {}".format(args))
-
-            args = args[0]
-
-        cdef vector[c_Term] v
-        for a in args:
-            v.push_back((<Term> a).cterm)
-
-        term.cterm = self.csolver.mkTerm(k.k, <const vector[c_Term]&> v)
-
+        elif isinstance(args[0], OpTerm):
+            for a in args[1:]:
+                v.push_back((<Term?> a).cterm)
+            term.cterm = self.csolver.mkTerm(k.k, (<OpTerm?> args[0]).copterm, v)
+        else:
+            for a in args:
+                v.push_back((<Term?> a).cterm)
+            term.cterm = self.csolver.mkTerm(k.k, v)
         return term
 
     def mkTrue(self):
@@ -458,17 +509,15 @@ cdef class Solver:
         cdef Term term = Term()
         if den is None:
             try:
-                term.cterm = self.csolver.mkReal(str(val).encode(), 10)
+                term.cterm = self.csolver.mkReal(str(val).encode())
             except ValueError as e:
                 raise ValueError("Expecting a number or a string representing a number but got: {}".format(val))
         else:
             if not isinstance(val, int) or not isinstance(den, int):
                 raise RuntimeError("Expecting integers when constructing a rational but got: {}".format((val, den)))
-            term.cterm = self.csolver.mkReal("{}/{}".format(val, den).encode(), 10)
+            term.cterm = self.csolver.mkReal("{}/{}".format(val, den).encode())
         return term
 
-    # TODO: Look into this error
-    #       Commented out in unit tests -- pretty sure it's not my fault
     def mkRegexpEmpty(self):
         cdef Term term = Term()
         term.cterm = self.csolver.mkRegexpEmpty()
@@ -603,6 +652,15 @@ cdef class Solver:
         cdef Term term = Term()
         term.cterm = self.csolver.declareConst(symbol.encode(), sort.csort)
         return term
+
+    def declareDatatype(self, str symbol, list ctors):
+        cdef Sort sort = Sort()
+        cdef vector[c_DatatypeConstructorDecl] v
+
+        for c in ctors:
+            v.push_back((<DatatypeConstructorDecl?> c).cddc[0])
+        sort.csort = self.csolver.declareDatatype(symbol.encode(), v)
+        return sort
 
     def declareFun(self, str symbol, sorts, Sort sort):
         cdef Term term = Term()
@@ -874,6 +932,52 @@ cdef class Term:
             term = Term()
             term.cterm = ci
             yield term
+
+    def getKind(self):
+        return kind(<int> self.cterm.getKind())
+
+    def getSort(self):
+        sort = Sort()
+        sort.csort = self.cterm.getSort()
+        return sort
+
+    def isNull(self):
+        return self.cterm.isNull()
+
+    def notTerm(self):
+        term = Term()
+        term.cterm = self.cterm.notTerm()
+        return term
+
+    def andTerm(self, Term t):
+        term = Term()
+        term.cterm = self.cterm.andTerm((<Term> t).cterm)
+        return term
+
+    def orTerm(self, Term t):
+        term = Term()
+        term.cterm = self.cterm.orTerm(t.cterm)
+        return term
+
+    def xorTerm(self, Term t):
+        term = Term()
+        term.cterm = self.cterm.xorTerm(t.cterm)
+        return term
+
+    def eqTerm(self, Term t):
+        term = Term()
+        term.cterm = self.cterm.eqTerm(t.cterm)
+        return term
+
+    def impTerm(self, Term t):
+        term = Term()
+        term.cterm = self.cterm.impTerm(t.cterm)
+        return term
+
+    def iteTerm(self, Term then_t, Term else_t):
+        term = Term()
+        term.cterm = self.cterm.iteTerm(then_t.cterm, else_t.cterm)
+        return term
 
 
 # Generate rounding modes
