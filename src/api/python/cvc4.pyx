@@ -41,12 +41,7 @@ def expand_list_arg(num_req_args=0):
     '''
     def decorator(func):
         def wrapper(owner, *args):
-            if len(args) > num_req_args and isinstance(args[num_req_args], list):
-                assert len(args) == num_req_args + 1, (
-                    "Expected {} regular arguments followed by "
-                    "a list or more comma separated arguments, but "
-                    "got {} instead".format(num_req_args, args)
-                )
+            if len(args) == num_req_args + 1 and isinstance(args[num_req_args], list):
                 args = list(args[:num_req_args]) + args[num_req_args]
             return func(owner, *args)
         return wrapper
@@ -243,9 +238,17 @@ class Result:
     _explanation = None
 
     def __init__(self, name, explanation=""):
-        assert name in {"sat", "unsat", "valid", "invalid", "unknown"}
+        name = name.lower()
+        incomplete = False
+        if "(incomplete)" in name:
+            incomplete = True
+            name = name.replace("(incomplete)", "").strip()
+        assert name in {"sat", "unsat", "valid", "invalid", "unknown"}, \
+            "can't interpret result = {}".format(name)
+
         self._name = name
         self._explanation = explanation
+        self._incomplete = incomplete
 
     def __bool__(self):
         if self._name in {"sat", "valid"}:
@@ -277,6 +280,9 @@ class Result:
 
     def isUnknown(self):
         return self._name == "unknown"
+
+    def isIncomplete(self):
+        return self._incomplete
 
     @property
     def explanation(self):
@@ -414,7 +420,8 @@ cdef class Solver:
         sort.csort = self.csolver.mkParamSort(symbolname.encode())
         return sort
 
-    def mkPredicateSort(self, sorts):
+    @expand_list_arg(num_req_args=0)
+    def mkPredicateSort(self, *sorts):
         cdef Sort sort = Sort()
         cdef vector[c_Sort] v
         for s in sorts:
@@ -422,7 +429,8 @@ cdef class Solver:
         sort.csort = self.csolver.mkPredicateSort(<const vector[c_Sort]&> v)
         return sort
 
-    def mkRecordSort(self, fields):
+    @expand_list_arg(num_req_args=0)
+    def mkRecordSort(self, *fields):
         cdef Sort sort = Sort()
         cdef vector[pair[string, c_Sort]] v
         cdef pair[string, c_Sort] p
@@ -449,7 +457,8 @@ cdef class Solver:
         sort.csort =self.csolver.mkSortConstructorSort(symbol.encode(), arity)
         return sort
 
-    def mkTupleSort(self, sorts):
+    @expand_list_arg(num_req_args=0)
+    def mkTupleSort(self, *sorts):
         cdef Sort sort = Sort()
         cdef vector[c_Sort] v
         for s in sorts:
@@ -503,17 +512,15 @@ cdef class Solver:
         return term
 
     def mkReal(self, val, den=None):
-        # FIXME: the second argument (base) which I'm implicitly assuming to be 10
-        #        here will not be supported going forward -- make this change
         cdef Term term = Term()
         if den is None:
             try:
                 term.cterm = self.csolver.mkReal(str(val).encode())
-            except ValueError as e:
+            except Exception as e:
                 raise ValueError("Expecting a number or a string representing a number but got: {}".format(val))
         else:
             if not isinstance(val, int) or not isinstance(den, int):
-                raise RuntimeError("Expecting integers when constructing a rational but got: {}".format((val, den)))
+                raise ValueError("Expecting integers when constructing a rational but got: {}".format((val, den)))
             term.cterm = self.csolver.mkReal("{}/{}".format(val, den).encode())
         return term
 
@@ -542,7 +549,7 @@ cdef class Solver:
         cdef vector[unsigned] v
         if isinstance(str_or_vec, str):
             term.cterm = self.csolver.mkString(<string &> str_or_vec.encode())
-        elif isinstance(str_or_vec, Sequence):
+        elif isinstance(str_or_vec, list):
             for u in str_or_vec:
                 if not isinstance(u, int):
                     raise ValueError("List should contain ints but got: {}".format(str_or_vec))
@@ -601,19 +608,14 @@ cdef class Solver:
             explanation = r.getUnknownExplanation().decode()
         return Result(name, explanation)
 
-    def checkSatAssuming(self, assumptions):
+    @expand_list_arg(num_req_args=0)
+    def checkSatAssuming(self, *assumptions):
         cdef c_Result r
         # used if assumptions is a list of terms
         cdef vector[c_Term] v
-        if isinstance(assumptions, Term):
-            r = self.csolver.checkSatAssuming((<Term?> assumptions).cterm)
-        elif isinstance(assumptions, Sequence):
-            for a in assumptions:
-                v.push_back((<Term?> a).cterm)
-            r = self.csolver.checkSatAssuming(<const vector[c_Term]&> v)
-        else:
-            raise RuntimeError("Expecting a list of Terms")
-
+        for a in assumptions:
+            v.push_back((<Term?> a).cterm)
+        r = self.csolver.checkSatAssuming(<const vector[c_Term]&> v)
         name = r.toString().decode()
         explanation = ""
         if r.isSatUnknown():
@@ -628,19 +630,14 @@ cdef class Solver:
             explanation = r.getUnknownExplanation().decode()
         return Result(name, explanation)
 
-    def checkValidAssuming(self, assumptions):
+    @expand_list_arg(num_req_args=0)
+    def checkValidAssuming(self, *assumptions):
         cdef c_Result r
         # used if assumptions is a list of terms
         cdef vector[c_Term] v
-        if isinstance(assumptions, Term):
-            r = self.csolver.checkValidAssuming((<Term?> assumptions).cterm)
-        elif isinstance(assumptions, Sequence):
-            for a in assumptions:
-                v.push_back((<Term?> a).cterm)
-            r = self.csolver.checkValidAssuming(<const vector[c_Term]&> v)
-        else:
-            raise RuntimeError("Expecting a list of Terms")
-
+        for a in assumptions:
+            v.push_back((<Term?> a).cterm)
+        r = self.csolver.checkValidAssuming(<const vector[c_Term]&> v)
         name = r.toString().decode()
         explanation = ""
         if r.isValidUnknown():
@@ -652,7 +649,8 @@ cdef class Solver:
         term.cterm = self.csolver.declareConst(symbol.encode(), sort.csort)
         return term
 
-    def declareDatatype(self, str symbol, list ctors):
+    @expand_list_arg(num_req_args=1)
+    def declareDatatype(self, str symbol, *ctors):
         cdef Sort sort = Sort()
         cdef vector[c_DatatypeConstructorDecl] v
 
@@ -661,12 +659,15 @@ cdef class Solver:
         sort.csort = self.csolver.declareDatatype(symbol.encode(), v)
         return sort
 
-    def declareFun(self, str symbol, sorts, Sort sort):
+#    @expand_list_arg(num_req_args=1)
+    def declareFun(self, str symbol, list sorts, Sort sort):
         cdef Term term = Term()
         cdef vector[c_Sort] v
         for s in sorts:
             v.push_back((<Sort?> s).csort)
-        term.cterm = self.csolver.declareFun(symbol.encode(), <const vector[c_Sort]&> v, sort.csort)
+        term.cterm = self.csolver.declareFun(symbol.encode(),
+                                             <const vector[c_Sort]&> v,
+                                             sort.csort)
         return term
 
     def declareSort(self, str symbol, int arity):

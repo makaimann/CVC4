@@ -160,10 +160,12 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term simplify(const Term& t) except +
         void assertFormula(Term term) except +
         Result checkSat() except +
-        Result checkSatAssuming(Term assumption) except +
+        # TODO: verify that this works with a vector of size 1
+        # Result checkSatAssuming(Term assumption) except +
         Result checkSatAssuming(const vector[Term]& assumptions) except +
         Result checkValid() except +
-        Result checkValidAssuming(Term assumption) except +
+        # TODO: ditto above
+        # Result checkValidAssuming(Term assumption) except +
         Result checkValidAssuming(const vector[Term]& assumptions) except +
         # TODO: Missing some functions
         Term declareConst(const string& symbol, Sort sort) except +
