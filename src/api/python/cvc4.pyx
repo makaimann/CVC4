@@ -36,11 +36,11 @@ from kinds import kind
 ################################## DECORATORS #########################################
 def expand_list_arg(num_req_args=0):
     '''
-    Creates a decorator that looks at the num_req_args-th argument.
-    If it's a list, it expands it before calling the function.
+    Creates a decorator that looks at index num_req_args of the args,
+    if it's a list, it expands it before calling the function.
     '''
     def decorator(func):
-        def wrapper(*args):
+        def wrapper(owner, *args):
             if len(args) > num_req_args and isinstance(args[num_req_args], list):
                 assert len(args) == num_req_args + 1, (
                     "Expected {} regular arguments followed by "
@@ -48,7 +48,7 @@ def expand_list_arg(num_req_args=0):
                     "got {} instead".format(num_req_args, args)
                 )
                 args = list(args[:num_req_args]) + args[num_req_args]
-                func(*args)
+            return func(owner, *args)
         return wrapper
     return decorator
 ######################################################################################
@@ -457,8 +457,7 @@ cdef class Solver:
         sort.csort = self.csolver.mkTupleSort(v)
         return sort
 
-    # TODO: ensure that mkTerm(kind, OpTerm) <-> mkTerm(kind, OpTerm, [])
-#    @expand_list_arg(num_req_args=1)
+    @expand_list_arg(num_req_args=1)
     def mkTerm(self, kind k, *args):
         '''
             Supports the following arguments:

@@ -126,15 +126,6 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Sort mkSortConstructorSort(const string& symbol, size_t arity) except +
         Sort mkTupleSort(const vector[Sort]& sorts) except +
         Term mkTerm(Kind kind) except +
-        # TODO: decide if we should explicitly support these or only vector
-        # Term mkTerm(Kind kind, Term child) except +
-        # Term mkTerm(Kind kind, Term child1, Term child2) except +
-        # Term mkTerm(Kind kind, Term child1, Term child2, Term child3) except +
-        # Term mkTerm(Kind kind, OpTerm child) except +
-        # Term mkTerm(Kind kind, OpTerm child1, Term child2) except +
-        # Term mkTerm(Kind kind, OpTerm child1, Term child2, Term child3) except +
-        # Term mkTerm(Kind kind, OpTerm child1, Term child2, Term child3, Term child4) except +
-        # end TODO
         Term mkTerm(Kind kind, const vector[Term]& children) except +
         Term mkTerm(Kind kind, OpTerm child, const vector[Term]& children) except +
         Term mkTrue() except +
