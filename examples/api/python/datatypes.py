@@ -1,5 +1,20 @@
 #!/usr/bin/env python3
 
+#####################
+#! \file datatypes.py
+ ## \verbatim
+ ## Top contributors (to current version):
+ ##   Makai Mann
+ ## This file is part of the CVC4 project.
+ ## Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
+ ## in the top-level source directory) and their institutional affiliations.
+ ## All rights reserved.  See the file COPYING in the top-level source
+ ## directory for licensing information.\endverbatim
+ ##
+ ## \brief A simple demonstration of the solving capabilities of the CVC4
+ ## datatypes solver through the Python API. This is a direct translation
+ ## of datatypes-new.cpp.
+
 import cvc4
 import kinds
 
