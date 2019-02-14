@@ -128,6 +128,10 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkTerm(Kind kind) except +
         Term mkTerm(Kind kind, const vector[Term]& children) except +
         Term mkTerm(Kind kind, OpTerm child, const vector[Term]& children) except +
+        OpTerm mkOpTerm(Kind kind, Kind k) except +
+        OpTerm mkOpTerm(Kind kind, const string& arg) except +
+        OpTerm mkOpTerm(Kind kind, uint32_t arg) except +
+        OpTerm mkOpTerm(Kind kind, uint32_t arg1, uint32_t arg2) except +
         Term mkTrue() except +
         Term mkFalse() except +
         Term mkBoolean(bint val) except +
