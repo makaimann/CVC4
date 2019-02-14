@@ -12,6 +12,7 @@ from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
+from CVC4 cimport cout
 from CVC4 cimport Datatype as c_Datatype
 from CVC4 cimport DatatypeConstructor as c_DatatypeConstructor
 from CVC4 cimport DatatypeConstructorDecl as c_DatatypeConstructorDecl
@@ -819,6 +820,9 @@ cdef class Solver:
 
     def pop(self, nscopes=1):
         self.csolver.pop(nscopes)
+
+    def printModel(self):
+        self.csolver.printModel(cout)
 
     def push(self, nscopes=1):
         self.csolver.push(nscopes)

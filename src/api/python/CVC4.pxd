@@ -6,8 +6,16 @@ from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 from kinds cimport Kind
 
+
+cdef extern from "<iostream>" namespace "std":
+    cdef cppclass ostream:
+        pass
+    ostream cout
+
+
 cdef extern from "cvc4cpp.cpp":
     pass
+
 
 cdef extern from "cvc4cpp.h" namespace "CVC4":
     cdef cppclass Options:
@@ -199,6 +207,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term getValue(Term term) except +
         vector[Term] getValue(const vector[Term]& terms) except +
         void pop(uint32_t nscopes) except +
+        void printModel(ostream& out)
         void push(uint32_t nscopes) except +
         void reset() except +
         void resetAssertions() except +
