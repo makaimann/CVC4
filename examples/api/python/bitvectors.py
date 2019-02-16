@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #####################
-#! \file bitvectors.cpp
+#! \file bitvectors.py
  ## \verbatim
  ## Top contributors (to current version):
  ##   Makai Mann
