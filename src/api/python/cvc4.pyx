@@ -33,7 +33,7 @@ from kinds cimport Kind as c_Kind
 from kinds cimport kind
 from kinds import kind
 
-################################## DECORATORS #########################################
+################################## DECORATORS #################################
 def expand_list_arg(num_req_args=0):
     '''
     Creates a decorator that looks at index num_req_args of the args,
@@ -41,23 +41,23 @@ def expand_list_arg(num_req_args=0):
     '''
     def decorator(func):
         def wrapper(owner, *args):
-            if len(args) == num_req_args + 1 and isinstance(args[num_req_args], list):
+            if len(args) == num_req_args + 1 and \
+               isinstance(args[num_req_args], list):
                 args = list(args[:num_req_args]) + args[num_req_args]
             return func(owner, *args)
         return wrapper
     return decorator
-######################################################################################
+###############################################################################
 
-# TODO: Decide which to use -- this way requires ctypedef enum RoundingMode in CVC4.pxd
+# TODO: Decide which to use -- this way requires ctypedef enum RoundingMode
+# in CVC4.pxd
 # include "RoundingMode.pxd"
 
-
-# TODO: match order of classes to CVC4.pxd (i.e. alphabetical)
 
 ## TODO: Add lots of assertions
 ##       Add type declarations where possible
 
-## TODO: Use PEP-8 spacing recommendations
+# Using PEP-8 spacing recommendations
 # Limit linewidth to 79 characters
 # Break before binary operators
 # surround top level functions and classes with two spaces
@@ -157,12 +157,6 @@ cdef class DatatypeDecl:
     cdef c_DatatypeDecl* cdd
     def __cinit__(self, name, sorts_or_bool=None, isCoDatatype=False):
 
-        # TODO: Decide if this is worth it
-        ###### supporting three overloaded constructors at Python level #####
-        # DatatypeDecl(const string &, bool)
-        # DatatypeDecl(const string &, Sort, bool)
-        # DatatypeDecl(const string &, const vector[Sort]&, bool)
-
         # TODO: Verify that this won't cause memory leaks
         # used if sorts_or_bool is supplied as a list of Sorts
         cdef vector[c_Sort] v
@@ -175,15 +169,24 @@ cdef class DatatypeDecl:
             sorts_or_bool = None
 
         if sorts_or_bool is None:
-            self.cdd = new c_DatatypeDecl(<const string &> name, <bint> isCoDatatype)
+            self.cdd = new c_DatatypeDecl(<const string &> name,
+                                          <bint> isCoDatatype)
         elif isinstance(sorts_or_bool, Sort):
-            self.cdd = new c_DatatypeDecl(<const string &> name, (<Sort?> sorts_or_bool).csort, <bint> isCoDatatype)
+            self.cdd = new c_DatatypeDecl(<const string &> name,
+                                          (<Sort?> sorts_or_bool).csort,
+                                          <bint> isCoDatatype)
         elif isinstance(sorts_or_bool, list):
             for s in sorts_or_bool:
                 v.push_back((<Sort?> s).csort)
-            self.cdd = new c_DatatypeDecl(<const string &> name, <const vector[c_Sort]&> v, <bint> isCoDatatype)
+            self.cdd = new c_DatatypeDecl(<const string &> name,
+                                          <const vector[c_Sort]&> v,
+                                          <bint> isCoDatatype)
         else:
-            raise RuntimeError("Unhandled input types {}".format(list(map(type, (name, sorts_or_bool, isCoDatatype)))))
+            raise RuntimeError("Unhandled input"
+                               " types {}".format(list(map(type,
+                                                           (name,
+                                                            sorts_or_bool,
+                                                            isCoDatatype)))))
 
     def addConstructor(self, DatatypeConstructorDecl ctor):
         self.cdd.addConstructor(ctor.cddc[0])
@@ -220,9 +223,12 @@ cdef class DatatypeSelectorDecl:
     cdef c_DatatypeSelectorDecl* cdsd
     def __cinit__(self, str name, sort):
         if isinstance(sort, Sort):
-            self.cdsd = new c_DatatypeSelectorDecl(<const string &> name.encode(), (<Sort?> sort).csort)
+            self.cdsd = new c_DatatypeSelectorDecl(
+                <const string &> name.encode(), (<Sort?> sort).csort)
         elif isinstance(sort, DatatypeDeclSelfSort):
-            self.cdsd = new c_DatatypeSelectorDecl(<const string &> name.encode(), (<DatatypeDeclSelfSort?> sort).cddss)
+            self.cdsd = new c_DatatypeSelectorDecl(
+                <const string &> name.encode(),
+                (<DatatypeDeclSelfSort?> sort).cddss)
 
     def __str__(self):
         return self.cdsd.toString().decode()
@@ -404,7 +410,8 @@ cdef class Solver:
         cdef vector[c_Sort] v
 
         if isinstance(sorts, Sort):
-            sort.csort = self.csolver.mkFunctionSort((<Sort?> sorts).csort, codomain.csort)
+            sort.csort = self.csolver.mkFunctionSort((<Sort?> sorts).csort,
+                                                     codomain.csort)
         elif isinstance(sorts, list):
             for s in sorts:
                 v.push_back((<Sort?>s).csort)
@@ -437,7 +444,8 @@ cdef class Solver:
             name = name.encode()
             p = pair[string, c_Sort](<string?> name, (<Sort?> sortarg).csort)
             v.push_back(p)
-        sort.csort = self.csolver.mkRecordSort(<const vector[pair[string, c_Sort]] &> v)
+        sort.csort = self.csolver.mkRecordSort(
+            <const vector[pair[string, c_Sort]] &> v)
         return sort
 
     def mkSetSort(self, Sort elemSort):
@@ -482,7 +490,8 @@ cdef class Solver:
         elif isinstance(args[0], OpTerm):
             for a in args[1:]:
                 v.push_back((<Term?> a).cterm)
-            term.cterm = self.csolver.mkTerm(k.k, (<OpTerm?> args[0]).copterm, v)
+            term.cterm = self.csolver.mkTerm(k.k,
+                                             (<OpTerm?> args[0]).copterm, v)
         else:
             for a in args:
                 v.push_back((<Term?> a).cterm)
@@ -502,7 +511,9 @@ cdef class Solver:
             if isinstance(args[0], kind):
                 opterm.copterm = self.csolver.mkOpTerm(k.k, (<kind?> args[0]).k)
             elif isinstance(args[0], str):
-                opterm.copterm = self.csolver.mkOpTerm(k.k, <const string &> args[0].encode())
+                opterm.copterm = self.csolver.mkOpTerm(k.k,
+                                                       <const string &>
+                                                       args[0].encode())
             elif isinstance(args[0], int):
                 opterm.copterm = self.csolver.mkOpTerm(k.k, <int?> args[0])
             else:
@@ -510,13 +521,15 @@ cdef class Solver:
                                  " mkOpTerm: {}".format(" X ".join([k] + args)))
         elif len(args) == 2:
             if isinstance(args[0], int) and isinstance(args[1], int):
-                opterm.copterm = self.csolver.mkOpTerm(k.k, <int> args[0], <int> args[1])
+                opterm.copterm = self.csolver.mkOpTerm(k.k, <int> args[0],
+                                                       <int> args[1])
             else:
                 raise ValueError("Unsupported signature"
                                  " mkOpTerm: {}".format(" X ".join([k] + args)))
         else:
             raise ValueError("Expecting 2-3 args but"
-                             " got {}".format([str(a) for a in [k] + list(args)]))
+                             " got {}".format(
+                                 [str(a) for a in [k] + list(args)]))
         return opterm
 
     def mkTrue(self):
@@ -545,10 +558,14 @@ cdef class Solver:
             try:
                 term.cterm = self.csolver.mkReal(str(val).encode())
             except Exception as e:
-                raise ValueError("Expecting a number or a string representing a number but got: {}".format(val))
+                raise ValueError("Expecting a number"
+                                 " or a string representing a number"
+                                 " but got: {}".format(val))
         else:
             if not isinstance(val, int) or not isinstance(den, int):
-                raise ValueError("Expecting integers when constructing a rational but got: {}".format((val, den)))
+                raise ValueError("Expecting integers when"
+                                 " constructing a rational"
+                                 " but got: {}".format((val, den)))
             term.cterm = self.csolver.mkReal("{}/{}".format(val, den).encode())
         return term
 
@@ -580,11 +597,13 @@ cdef class Solver:
         elif isinstance(str_or_vec, list):
             for u in str_or_vec:
                 if not isinstance(u, int):
-                    raise ValueError("List should contain ints but got: {}".format(str_or_vec))
+                    raise ValueError("List should contain ints but got: {}"
+                                     .format(str_or_vec))
                 v.push_back(<unsigned> u)
             term.cterm = self.csolver.mkString(<const vector[unsigned]&> v)
         else:
-            raise ValueError("Expected string or vector of ASCII codes but got: {}".format(str_or_vec))
+            raise ValueError("Expected string or vector of ASCII codes"
+                             " but got: {}".format(str_or_vec))
         return term
 
     def mkUniverseSet(self, Sort sort):
@@ -602,14 +621,15 @@ cdef class Solver:
             raise RuntimeError("Unsupported value type: {}".format(type(val)))
         return term
 
-    # TODO: Fill in a bunch of missing functions -- skipped mkConst (lots of overloaded versions)
+    # TODO: Decide if we need missing functions, i.e. mkConst
 
     def mkVar(self, symbol_or_sort, sort=None):
         cdef Term term = Term()
         if sort is None:
             term.cterm = self.csolver.mkVar((<Sort?> symbol_or_sort).csort)
         else:
-            term.cterm = self.csolver.mkVar((<str?> symbol_or_sort).encode(), (<Sort?> sort).csort)
+            term.cterm = self.csolver.mkVar((<str?> symbol_or_sort).encode(),
+                                            (<Sort?> sort).csort)
         return term
 
     def mkBoundVar(self, symbol_or_sort, sort=None):
@@ -617,7 +637,8 @@ cdef class Solver:
         if sort is None:
             term.cterm = self.csolver.mkBoundVar((<Sort?> symbol_or_sort).csort)
         else:
-            term.cterm = self.csolver.mkBoundVar((<str?> symbol_or_sort).encode(), (<Sort?> sort).csort)
+            term.cterm = self.csolver.mkBoundVar(
+                (<str?> symbol_or_sort).encode(), (<Sort?> sort).csort)
         return term
 
     def simplify(self, Term t):
@@ -722,7 +743,9 @@ cdef class Solver:
                                                 (<Sort?> sort_or_term).csort,
                                                 (<Term?> t).cterm)
         else:
-            term.cterm = self.csolver.defineFun((<Term?> sym_or_fun).cterm, <const vector[c_Term]&> v, (<Term?> sort_or_term).cterm)
+            term.cterm = self.csolver.defineFun((<Term?> sym_or_fun).cterm,
+                                                <const vector[c_Term]&> v,
+                                                (<Term?> sort_or_term).cterm)
 
         return term
 
@@ -745,7 +768,9 @@ cdef class Solver:
                                                 (<Sort?> sort_or_term).csort,
                                                 (<Term?> t).cterm)
         else:
-            term.cterm = self.csolver.defineFunRec((<Term?> sym_or_fun).cterm, <const vector[c_Term]&> v, (<Term?> sort_or_term).cterm)
+            term.cterm = self.csolver.defineFunRec((<Term?> sym_or_fun).cterm,
+                                                   <const vector[c_Term]&> v,
+                                                   (<Term?> sort_or_term).cterm)
 
         return term
 
