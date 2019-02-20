@@ -54,7 +54,6 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
             bint operator==(const const_iterator& it) except +
             bint operator!=(const const_iterator& it) except +
             const_iterator& operator++();
-            # TODO: Check if the const return type is enforced
             const DatatypeSelector& operator*() except +
         const_iterator begin() except +
         const_iterator end() except +
@@ -154,7 +153,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkUniverseSet(Sort sort) except +
         Term mkBitVector(uint32_t size) except +
         Term mkBitVector(uint32_t size, uint64_t val) except +
-        # TODO: fill in missing functions (skipped all the overloaded mkConsts)
+        # TODO: decide if these should be supported
         # Term mkConst(RoundingMode rm) except +
         # Term mkConst(Kind kind, Sort arg) except +
         # Term mkConst(Kind kind, Sort arg1, int32_t arg2) except +
@@ -172,19 +171,14 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term simplify(const Term& t) except +
         void assertFormula(Term term) except +
         Result checkSat() except +
-        # TODO: verify that this works with a vector of size 1
-        # Result checkSatAssuming(Term assumption) except +
         Result checkSatAssuming(const vector[Term]& assumptions) except +
         Result checkValid() except +
-        # TODO: ditto above
-        # Result checkValidAssuming(Term assumption) except +
         Result checkValidAssuming(const vector[Term]& assumptions) except +
         # TODO: Missing some functions
         Term declareConst(const string& symbol, Sort sort) except +
         Sort declareDatatype(const string& symbol, const vector[DatatypeConstructorDecl]& ctors)
         Term declareFun(const string& symbol, Sort sort) except +
         Term declareFun(const string& symbol, const vector[Sort]& sorts, Sort sort) except +
-        # TODO: add these to cvc4.pyx
         Sort declareSort(const string& symbol, uint32_t arity) except +
         Term defineFun(const string& symbol, const vector[Term]& bound_vars,
                        Sort sort, Term term) except +
@@ -193,11 +187,8 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
                           Sort sort, Term term) except +
         Term defineFunRec(Term fun, const vector[Term]& bound_vars,
                           Term term) except +
-        # TODO: Decide if this is worth supporting
         Term defineFunsRec(vector[Term]& funs, vector[vector[Term]]& bound_vars,
                            vector[Term]& terms) except +
-        # not supporting echo
-        # TODO: Add these to cvc4.pyx
         vector[Term] getAssertions() except +
         vector[pair[Term, Term]] getAssignment() except +
         string getInfo(const string& flag) except +
