@@ -20,8 +20,6 @@ cdef extern from "cvc4cpp.cpp":
 cdef extern from "cvc4cpp.h" namespace "CVC4":
     cdef cppclass Options:
         pass
-    cdef cppclass RoundingMode:
-        pass
 
 
 cdef extern from "cvc4cpp.h" namespace "CVC4::api":
@@ -111,6 +109,10 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         string toString() except +
 
 
+    cdef cppclass RoundingMode:
+        pass
+
+
     cdef cppclass Solver:
         Solver(Options*) except +
         Sort getBooleanSort() except +
@@ -153,17 +155,16 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkUniverseSet(Sort sort) except +
         Term mkBitVector(uint32_t size) except +
         Term mkBitVector(uint32_t size, uint64_t val) except +
-        # TODO: decide if these should be supported
-        # Term mkConst(RoundingMode rm) except +
-        # Term mkConst(Kind kind, Sort arg) except +
-        # Term mkConst(Kind kind, Sort arg1, int32_t arg2) except +
-        # Term mkConst(Kind kind, bool arg) except +
-        # Term mkConst(Kind kind, const string& arg) except +
-        # Term mkConst(Kind, kind, const string& arg1, uint32_t arg2) except + # default arg2=10
-        # Term mkConst(Kind kind, int64_t arg)
-        # Term mkConst(Kind kind, int64_t arg1, int64_t arg2)
-        # Term mkConst(Kind kind, uint32_t arg1, uint32_t arg2, Term arg3) except +
-
+        Term mkBitVector(const string& s, uint32_t base) except +
+        Term mkPosInf(uint32_t exp, uint32_t sig) except +
+        Term mkNegInf(uint32_t exp, uint32_t sig) except +
+        Term mkNaN(uint32_t exp, uint32_t sig) except +
+        Term mkPosZero(uint32_t exp, uint32_t sig) except +
+        Term mkNegZero(uint32_t exp, uint32_t sig) except +
+        Term mkRoundingMode(RoundingMode rm) except +
+        Term mkUninterpretedConst(Sort sort, int32_t index) except +
+        Term mkAbstractValue(const string& index) except +
+        Term mkFloatingPoint(uint32_t exp, uint32_t sig, Term val) except +
         Term mkVar(const string& symbol, Sort sort) except +
         Term mkVar(Sort sort) except +
         Term mkBoundVar(const string& symbol, Sort sort) except +
@@ -174,7 +175,6 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Result checkSatAssuming(const vector[Term]& assumptions) except +
         Result checkValid() except +
         Result checkValidAssuming(const vector[Term]& assumptions) except +
-        # TODO: Missing some functions
         Term declareConst(const string& symbol, Sort sort) except +
         Sort declareDatatype(const string& symbol, const vector[DatatypeConstructorDecl]& ctors)
         Term declareFun(const string& symbol, Sort sort) except +

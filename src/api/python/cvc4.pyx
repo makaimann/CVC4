@@ -610,17 +610,74 @@ cdef class Solver:
         term.cterm = self.csolver.mkUniverseSet(sort.csort)
         return term
 
-    def mkBitVector(self, int size, val = None):
+    def mkBitVector(self, size_or_str, val = None):
         cdef Term term = Term()
-        if val is None:
-            term.cterm = self.csolver.mkBitVector(size)
-        elif isinstance(val, int):
-            term.cterm = self.csolver.mkBitVector(size, val)
+        if isinstance(size_or_str, int):
+            # handle default value
+            if val is None:
+                val = 0
+            term.cterm = self.csolver.mkBitVector(<int> size_or_str,
+                                                  <int> val)
+        elif isinstance(size_or_str, str):
+            # handle default value
+            if val is None:
+                val = 2
+            term.cterm = self.csolver.mkBitVector(
+                <const string &> size_or_str.encode(), <int> val)
         else:
-            raise RuntimeError("Unsupported value type: {}".format(type(val)))
+            raise ValueError("Unexpected inputs {} to"
+                             " mkBitVector".format((size_or_str, val)))
         return term
 
-    # TODO: Decide if we need missing functions, i.e. mkConst
+    def mkPosInf(self, int exp, int sig):
+        cdef Term term = Term()
+        term.cterm = self.csolver.mkPosInf(exp, sig)
+        return term
+
+    def mkNegInf(self, int exp, int sig):
+        cdef Term term = Term()
+        term.cterm = self.csolver.mkNegInf(exp, sig)
+        return term
+
+    def mkNaN(self, int exp, int sig):
+        cdef Term term = Term()
+        term.cterm = self.csolver.mkNaN(exp, sig)
+        return term
+
+    def mkPosZero(self, int exp, int sig):
+        cdef Term term = Term()
+        term.cterm = self.csolver.mkPosZero(exp, sig)
+        return term
+
+    def mkNegZero(self, int exp, int sig):
+        cdef Term term = Term()
+        term.cterm = self.csolver.mkNegZero(exp, sig)
+        return term
+
+    # TODO: Fix this and uncommment
+    def mkRoundingMode(self, RoundingMode rm):
+        cdef Term term = Term()
+        term.cterm = self.csolver.mkRoundingMode(<c_RoundingMode> rm.crm)
+        return term
+
+    def mkUninterpretedConst(self, Sort sort, int index):
+        cdef Term term = Term()
+        term.cterm = self.csolver.mkUninterpretedConst(sort.csort, index)
+        return term
+
+    def mkAbstractValue(self, index):
+        cdef Term term = Term()
+        try:
+            term.cterm = self.csolver.mkAbstractValue(str(index).encode())
+        except:
+            raise ValueError("mkAbstractValue expects a str representing a number"
+                             " or an int, but got{}".format(index))
+        return term
+
+    def mkFloatingPoint(self, int exp, int sig, Term val):
+        cdef Term term = Term()
+        term.cterm = self.csolver.mkFloatingPoint(exp, sig, val.cterm)
+        return term
 
     def mkVar(self, symbol_or_sort, sort=None):
         cdef Term term = Term()
