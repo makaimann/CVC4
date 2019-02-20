@@ -384,7 +384,6 @@ cdef class Solver:
 
     def mkArraySort(self, Sort indexSort, Sort elemSort):
         cdef Sort sort = Sort()
-        # TODO: Decide if there should be a null-check on inputs...
         sort.csort = self.csolver.mkArraySort(indexSort.csort, elemSort.csort)
         return sort
 
@@ -774,25 +773,23 @@ cdef class Solver:
 
         return term
 
-    # TODO: Test this -- not sure it actually works
-    #       Just commenting it for now
-    # def defineFunsRec(self, funs, bound_vars, terms):
-    #     cdef vector[c_Term] vf
-    #     cdef vector[vector[c_Term]] vbv
-    #     cdef vector[c_Term] vt
+    def defineFunsRec(self, funs, bound_vars, terms):
+        cdef vector[c_Term] vf
+        cdef vector[vector[c_Term]] vbv
+        cdef vector[c_Term] vt
 
-    #     for f in funs:
-    #         vf.push_back((<Term?> f).cterm)
+        for f in funs:
+            vf.push_back((<Term?> f).cterm)
 
-    #     cdef vector[c_Term] temp
-    #     for v in bound_vars:
-    #         for t in v:
-    #             temp.push_back((<Term?> t).cterm)
-    #         vbv.push_back(temp)
-    #         temp.clear()
+        cdef vector[c_Term] temp
+        for v in bound_vars:
+            for t in v:
+                temp.push_back((<Term?> t).cterm)
+            vbv.push_back(temp)
+            temp.clear()
 
-    #     for t in terms:
-    #         vf.push_back((<Term?> t).cterm)
+        for t in terms:
+            vf.push_back((<Term?> t).cterm)
 
     def getAssertions(self):
         assertions = []
@@ -860,11 +857,6 @@ cdef class Solver:
 
     def setLogic(self, str logic):
         self.csolver.setLogic(logic.encode())
-
-    def setOption(self, str option, str value):
-        self.csolver.setOption(option.encode(), value.encode())
-
-    # TODO Insert missing functions here
 
     def setOption(self, str option, str value):
         self.csolver.setOption(option.encode(), value.encode())
