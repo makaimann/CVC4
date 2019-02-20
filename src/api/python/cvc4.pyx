@@ -33,7 +33,6 @@ from kinds cimport Kind as c_Kind
 from kinds cimport kind
 from kinds import kind
 
-# TODO: Use @expand_list_arg everywhere
 ################################## DECORATORS #########################################
 def expand_list_arg(num_req_args=0):
     '''
@@ -48,8 +47,6 @@ def expand_list_arg(num_req_args=0):
         return wrapper
     return decorator
 ######################################################################################
-
-# TODO: Use cdef for declarations
 
 # TODO: Decide which to use -- this way requires ctypedef enum RoundingMode in CVC4.pxd
 # include "RoundingMode.pxd"
@@ -234,6 +231,35 @@ cdef class DatatypeSelectorDecl:
         return self.cdsd.toString().decode()
 
 
+cdef class OpTerm:
+    cdef c_OpTerm copterm
+    def __cinit__(self):
+        self.copterm = c_OpTerm()
+
+    def __eq__(self, OpTerm other):
+        return self.copterm == other.copterm
+
+    def __ne__(self, OpTerm other):
+        return self.copterm != other.copterm
+
+    def __str__(self):
+        return self.copterm.toString().decode()
+
+    def __repr__(self):
+        return self.copterm.toString().decode()
+
+    def getKind(self):
+        return kind(<int> self.copterm.getKind())
+
+    def getSort(self):
+        cdef Sort sort = Sort()
+        sort.csort = self.copterm.getSort()
+        return sort
+
+    def isNull(self):
+        return self.copterm.isNull()
+
+
 class Result:
     _name = None
     _explanation = None
@@ -312,35 +338,6 @@ cdef class RoundingMode:
 
     def __repr__(self):
         return self.name
-
-
-cdef class OpTerm:
-    cdef c_OpTerm copterm
-    def __cinit__(self):
-        self.copterm = c_OpTerm()
-
-    def __eq__(self, OpTerm other):
-        return self.copterm == other.copterm
-
-    def __ne__(self, OpTerm other):
-        return self.copterm != other.copterm
-
-    def __str__(self):
-        return self.copterm.toString().decode()
-
-    def __repr__(self):
-        return self.copterm.toString().decode()
-
-    def getKind(self):
-        return kind(<int> self.copterm.getKind())
-
-    def getSort(self):
-        sort = Sort()
-        sort.csort = self.copterm.getSort()
-        return sort
-
-    def isNull(self):
-        return self.copterm.isNull()
 
 
 cdef class Solver:
@@ -971,7 +968,7 @@ cdef class Term:
         return kind(<int> self.cterm.getKind())
 
     def getSort(self):
-        sort = Sort()
+        cdef Sort sort = Sort()
         sort.csort = self.cterm.getSort()
         return sort
 
@@ -979,37 +976,37 @@ cdef class Term:
         return self.cterm.isNull()
 
     def notTerm(self):
-        term = Term()
+        cdef Term term = Term()
         term.cterm = self.cterm.notTerm()
         return term
 
     def andTerm(self, Term t):
-        term = Term()
+        cdef Term term = Term()
         term.cterm = self.cterm.andTerm((<Term> t).cterm)
         return term
 
     def orTerm(self, Term t):
-        term = Term()
+        cdef Term term = Term()
         term.cterm = self.cterm.orTerm(t.cterm)
         return term
 
     def xorTerm(self, Term t):
-        term = Term()
+        cdef Term term = Term()
         term.cterm = self.cterm.xorTerm(t.cterm)
         return term
 
     def eqTerm(self, Term t):
-        term = Term()
+        cdef Term term = Term()
         term.cterm = self.cterm.eqTerm(t.cterm)
         return term
 
     def impTerm(self, Term t):
-        term = Term()
+        cdef Term term = Term()
         term.cterm = self.cterm.impTerm(t.cterm)
         return term
 
     def iteTerm(self, Term then_t, Term else_t):
-        term = Term()
+        cdef Term term = Term()
         term.cterm = self.cterm.iteTerm(then_t.cterm, else_t.cterm)
         return term
 
