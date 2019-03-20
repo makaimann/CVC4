@@ -653,7 +653,6 @@ cdef class Solver:
         term.cterm = self.csolver.mkNegZero(exp, sig)
         return term
 
-    # TODO: Fix this and uncommment
     def mkRoundingMode(self, RoundingMode rm):
         cdef Term term = Term()
         term.cterm = self.csolver.mkRoundingMode(<c_RoundingMode> rm.crm)
