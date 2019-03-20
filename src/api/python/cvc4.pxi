@@ -47,9 +47,6 @@ def expand_list_arg(num_req_args=0):
     return decorator
 ###############################################################################
 
-## TODO: Add lots of assertions
-##       Add type declarations where possible
-
 # Style Guidelines
 ### Using PEP-8 spacing recommendations
 ### Limit linewidth to 79 characters
