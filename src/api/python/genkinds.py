@@ -81,7 +81,9 @@ cdef class kind:
         return <int> self.k
 
 # create a kinds submodule
-kinds = lambda: 0
+class Kinds(object):
+    pass
+kinds = Kinds()
 """
 
 KINDS_ATTR_TEMPLATE = \
