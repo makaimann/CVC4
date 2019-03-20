@@ -38,7 +38,6 @@ replacements        = {
 
 ####################### Code Blocks ###################
 CDEF_KIND = "    cdef Kind "
-KIND_DICT_ENTRY = "    <int> {}: \"{}\""
 
 KINDS_PXD_TOP = \
 r"""cdef extern from "cvc4cppkind.h" namespace "CVC4::api":
@@ -46,36 +45,22 @@ r"""cdef extern from "cvc4cppkind.h" namespace "CVC4::api":
         pass
 
 
-cdef class kind:
-    cdef Kind k
-    cdef str name
-
-
 # Kind declarations: See cvc4cppkind.h for additional information
 cdef extern from "cvc4cppkind.h" namespace "CVC4::api::Kind":
 """
 
-KINDS_PYX_TOP = \
+KINDS_PXI_TOP = \
 r"""# distutils: language = c++
 # distutils: extra_compile_args = -std=c++11
 
 from kinds cimport *
 import sys
 
-"""
-
-KINDS_PYX_DICT = \
-r"""
-# map C++ kinds to Python names
-cdef kind_dict = {
-"""
-
-KINDS_PYX_BOT = \
-r"""
 cdef class kind:
-    def __cinit__(self, int val):
-        self.k = <Kind> val
-        self.name = kind_dict[val]
+    cdef Kind k
+    cdef str name
+    def __cinit__(self, str name):
+        self.name = name
 
     def __eq__(self, kind other):
         return (<int> self.k) == (<int> other.k)
@@ -95,20 +80,15 @@ cdef class kind:
     def as_int(self):
         return <int> self.k
 
-# add all kinds to this module
-mod_ref = sys.modules[__name__]
-for kind_int, name in kind_dict.items():
-    new_kind = kind(kind_int)
+# create a kinds submodule
+kinds = lambda: 0
+"""
 
-    if name in dir(mod_ref):
-        raise RuntimeError("Redefinition of Python kind %s."%name)
-
-    setattr(mod_ref, name, new_kind)
-
-del mod_ref
-del new_kind
-del kind_int
-del name
+KINDS_ATTR_TEMPLATE = \
+r"""
+cdef kind {name} = kind("{name}")
+{name}.k = {kind}
+setattr(kinds, "{name}", {name})
 """
 
 class KindsParser:
@@ -145,7 +125,7 @@ class KindsParser:
            FLOATINGPOINT_ISNAN -->  FPIsNan
            SETMINUS            -->  Setminus
 
-        See the generated .pyx file for an explicit mapping
+        See the generated .pxi file for an explicit mapping
         '''
         name = name.replace(_IS, _IS+US)
         words = [w.capitalize() for w in name.lower().split(US)]
@@ -228,20 +208,12 @@ class KindsParser:
             f.write(CDEF_KIND + kind + NL)
         f.close()
 
-    def gen_pyx(self, filename):
+    def gen_pxi(self, filename):
         f = open(filename, "w")
-        f.write(KINDS_PYX_TOP)
-        f.write(KINDS_PYX_DICT)
-        num_kinds = len(self.kinds)
-        for i, (kind, name) in enumerate(self.kinds.items()):
-            line = KIND_DICT_ENTRY.format(kind, name)
-            if i + 1 < num_kinds:
-                # add a comma to all but entry
-                line += C
-            line += NL
-            f.write(line)
-        f.write(CCB + NL)
-        f.write(KINDS_PYX_BOT)
+        pxi = KINDS_PXI_TOP
+        for kind, name in self.kinds.items():
+            pxi += KINDS_ATTR_TEMPLATE.format(name=name, kind=kind)
+        f.write(pxi)
         f.close()
 
 
@@ -252,7 +224,7 @@ if __name__ == "__main__":
                         help='The header file to read kinds from',
                         default=DEFAULT_HEADER)
     parser.add_argument('--kinds-file-prefix', metavar='<KIND_FILE_PREFIX>',
-                        help='The prefix for the .pxd and .pyx files to write '
+                        help='The prefix for the .pxd and .pxi files to write '
                         'the Cython declarations to.',
                         default=DEFAULT_PREFIX)
 
@@ -264,4 +236,4 @@ if __name__ == "__main__":
     kp.parse(kinds_header)
 
     kp.gen_pxd(kinds_file_prefix + ".pxd")
-    kp.gen_pyx(kinds_file_prefix + ".pyx")
+    kp.gen_pxi(kinds_file_prefix + ".pxi")

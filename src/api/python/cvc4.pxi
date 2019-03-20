@@ -12,26 +12,24 @@ from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
-from CVC4 cimport cout
-from CVC4 cimport Datatype as c_Datatype
-from CVC4 cimport DatatypeConstructor as c_DatatypeConstructor
-from CVC4 cimport DatatypeConstructorDecl as c_DatatypeConstructorDecl
-from CVC4 cimport DatatypeDecl as c_DatatypeDecl
-from CVC4 cimport DatatypeDeclSelfSort as c_DatatypeDeclSelfSort
-from CVC4 cimport DatatypeSelector as c_DatatypeSelector
-from CVC4 cimport DatatypeSelectorDecl as c_DatatypeSelectorDecl
-from CVC4 cimport Result as c_Result
-from CVC4 cimport RoundingMode as c_RoundingMode
-from CVC4 cimport OpTerm as c_OpTerm
-from CVC4 cimport Solver as c_Solver
-from CVC4 cimport Sort as c_Sort
-from CVC4 cimport ROUND_NEAREST_TIES_TO_EVEN, ROUND_TOWARD_POSITIVE, \
+from cvc4 cimport cout
+from cvc4 cimport Datatype as c_Datatype
+from cvc4 cimport DatatypeConstructor as c_DatatypeConstructor
+from cvc4 cimport DatatypeConstructorDecl as c_DatatypeConstructorDecl
+from cvc4 cimport DatatypeDecl as c_DatatypeDecl
+from cvc4 cimport DatatypeDeclSelfSort as c_DatatypeDeclSelfSort
+from cvc4 cimport DatatypeSelector as c_DatatypeSelector
+from cvc4 cimport DatatypeSelectorDecl as c_DatatypeSelectorDecl
+from cvc4 cimport Result as c_Result
+from cvc4 cimport RoundingMode as c_RoundingMode
+from cvc4 cimport OpTerm as c_OpTerm
+from cvc4 cimport Solver as c_Solver
+from cvc4 cimport Sort as c_Sort
+from cvc4 cimport ROUND_NEAREST_TIES_TO_EVEN, ROUND_TOWARD_POSITIVE, \
     ROUND_TOWARD_ZERO, ROUND_NEAREST_TIES_TO_AWAY
-from CVC4 cimport Term as c_Term
+from cvc4 cimport Term as c_Term
 
 from kinds cimport Kind as c_Kind
-from kinds cimport kind
-from kinds import kind
 
 ################################## DECORATORS #################################
 def expand_list_arg(num_req_args=0):
@@ -50,7 +48,7 @@ def expand_list_arg(num_req_args=0):
 ###############################################################################
 
 # TODO: Decide which to use -- this way requires ctypedef enum RoundingMode
-# in CVC4.pxd
+# in cvc4.pxd
 # include "RoundingMode.pxd"
 
 
@@ -1101,3 +1099,7 @@ for rm_int, name in __rounding_modes.items():
         raise RuntimeError("Redefinition of Python RoundingMode %s."%name)
 
     setattr(mod_ref, name, r)
+
+del r
+del rm_int
+del name
