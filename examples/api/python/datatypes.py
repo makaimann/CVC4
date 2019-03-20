@@ -126,7 +126,6 @@ if __name__ == "__main__":
     consListSort = slv.mkDatatypeSort(consListSpec)
     test(slv, consListSort)
 
-    # TODO
     print("### Alternatively, use declareDatatype")
 
     ctors = [cons, nil]
