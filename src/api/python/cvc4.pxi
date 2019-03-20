@@ -47,21 +47,19 @@ def expand_list_arg(num_req_args=0):
     return decorator
 ###############################################################################
 
-# TODO: Decide which to use -- this way requires ctypedef enum RoundingMode
-# in cvc4.pxd
-# include "RoundingMode.pxd"
-
-
 ## TODO: Add lots of assertions
 ##       Add type declarations where possible
 
-# Using PEP-8 spacing recommendations
-# Limit linewidth to 79 characters
-# Break before binary operators
-# surround top level functions and classes with two spaces
-# separate methods by one space
-# use spaces in functions sparingly to separate logical blocks
-# can omit spaces between unrelated oneliners
+# Style Guidelines
+### Using PEP-8 spacing recommendations
+### Limit linewidth to 79 characters
+### Break before binary operators
+### surround top level functions and classes with two spaces
+### separate methods by one space
+### use spaces in functions sparingly to separate logical blocks
+### can omit spaces between unrelated oneliners
+### always use c++ default arguments
+#### only use default args of None at python level
 
 
 cdef class Datatype:
@@ -268,9 +266,6 @@ cdef class OpTerm:
 
 
 class Result:
-    _name = None
-    _explanation = None
-
     def __init__(self, name, explanation=""):
         name = name.lower()
         incomplete = False
