@@ -153,38 +153,44 @@ cdef class DatatypeConstructorDecl:
 
 cdef class DatatypeDecl:
     cdef c_DatatypeDecl* cdd
-    def __cinit__(self, name, sorts_or_bool=None, isCoDatatype=False):
-
-        # TODO: Verify that this won't cause memory leaks
-        # used if sorts_or_bool is supplied as a list of Sorts
+    def __cinit__(self, str name, sorts_or_bool=None, isCoDatatype=None):
         cdef vector[c_Sort] v
 
         # encode string as bytes
         name = name.encode()
 
-        if isinstance(sorts_or_bool, bool):
-            isCoDatatype = sorts_or_bool
-            sorts_or_bool = None
-
-        if sorts_or_bool is None:
-            self.cdd = new c_DatatypeDecl(<const string &> name,
-                                          <bint> isCoDatatype)
-        elif isinstance(sorts_or_bool, Sort):
-            self.cdd = new c_DatatypeDecl(<const string &> name,
-                                          (<Sort?> sorts_or_bool).csort,
-                                          <bint> isCoDatatype)
-        elif isinstance(sorts_or_bool, list):
-            for s in sorts_or_bool:
-                v.push_back((<Sort?> s).csort)
-            self.cdd = new c_DatatypeDecl(<const string &> name,
-                                          <const vector[c_Sort]&> v,
-                                          <bint> isCoDatatype)
-        else:
-            raise RuntimeError("Unhandled input"
-                               " types {}".format(list(map(type,
-                                                           (name,
-                                                            sorts_or_bool,
-                                                            isCoDatatype)))))
+        # argument cases
+        if sorts_or_bool is None and isCoDatatype is None:
+            self.cdd = new c_DatatypeDecl(name)
+        elif sorts_or_bool is not None and isCoDatatype is None:
+            if isinstance(sorts_or_bool, bool):
+                self.cdd = new c_DatatypeDecl(<const string &> name,
+                                              <bint> sorts_or_bool)
+            elif isinstance(sorts_or_bool, Sort):
+                self.cdd = new c_DatatypeDecl(<const string &> name,
+                                              (<Sort> sorts_or_bool).csort)
+            elif isinstance(sorts_or_bool, list):
+                for s in sorts_or_bool:
+                    v.push_back((<Sort?> s).csort)
+                self.cdd = new c_DatatypeDecl(<const string &> name,
+                                              <const vector[c_Sort]&> v)
+            else:
+                raise ValueError("Unhandled second argument type {}"
+                                 .format(type(sorts_or_bool)))
+        elif sorts_or_bool is not None and isCoDatatype is not None:
+            if isinstance(sorts_or_bool, Sort):
+                self.cdd = new c_DatatypeDecl(<const string &> name,
+                                              (<Sort> sorts_or_bool).csort,
+                                              <bint> isCoDatatype)
+            elif isinstance(sorts_or_bool, list):
+                for s in sorts_or_bool:
+                    v.push_back((<Sort?> s).csort)
+                self.cdd = new c_DatatypeDecl(<const string &> name,
+                                              <const vector[c_Sort]&> v,
+                                              <bint> isCoDatatype)
+            else:
+                raise ValueError("Unhandled second argument type {}"
+                                 .format(type(sorts_or_bool)))
 
     def addConstructor(self, DatatypeConstructorDecl ctor):
         self.cdd.addConstructor(ctor.cddc[0])

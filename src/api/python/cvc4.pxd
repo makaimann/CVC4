@@ -64,8 +64,11 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
 
 
     cdef cppclass DatatypeDecl:
+        DatatypeDecl(const string& name) except +
         DatatypeDecl(const string& name, bint isCoDatatype) except +
+        DatatypeDecl(const string& name, Sort param) except +
         DatatypeDecl(const string& name, Sort param, bint isCoDatatype) except +
+        DatatypeDecl(const string& name, const vector[Sort]& params) except +
         DatatypeDecl(const string& name, const vector[Sort]& params, bint isCoDatatype) except +
         void addConstructor(const DatatypeConstructorDecl& ctor) except +
         bint isParametric() except +
