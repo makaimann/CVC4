@@ -14,13 +14,13 @@
  ## \brief A simple demonstration of the solving capabilities of the CVC4
  ## bit-vector and array solvers through the Python API. This is a direct
  ## translation of bitvectors_and_arrays-new.cpp.
-import cvc4
-import kinds
+import pycvc4
+from pycvc4 import kinds
 
 import math
 
 if __name__ == "__main__":
-    slv = cvc4.Solver()
+    slv = pycvc4.Solver()
     slv.setOption("produce-models", "true")
     slv.setOption("output-language", "smtlib")
     slv.setLogic("QF_AUFBV")
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Setting up the problem parameters
     k = 4
-    index_size = math.log2(k)
+    index_size = math.ceil(math.log2(k))
 
     # Sorts
     elementSort = slv.mkBitVectorSort(32)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     arraySort = slv.mkArraySort(indexSort, elementSort)
 
     # Variables
-    current_array = slv.mkVar("current_array", arraySort)
+    current_array = slv.mkVar(arraySort, "current_array")
 
     # Making a bit-vector constant
     zero = slv.mkBitVector(index_size, 0)

@@ -15,8 +15,8 @@
  ## bit-vector solver through the Python API. This is a direct translation
  ## of extract-new.cpp.
 
-from cvc4 import Solver
-from kinds import BVExtractOp, BVExtract, Equal
+from pycvc4 import Solver
+from pycvc4.kinds import BVExtractOp, BVExtract, Equal
 
 if __name__ == "__main__":
     slv = Solver()
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     bitvector32 = slv.mkBitVectorSort(32)
 
-    x = slv.mkVar("a", bitvector32)
+    x = slv.mkVar(bitvector32, "a")
 
     ext_31_1 = slv.mkOpTerm(BVExtractOp, 31, 1)
     x_31_1 = slv.mkTerm(BVExtract, ext_31_1, x)

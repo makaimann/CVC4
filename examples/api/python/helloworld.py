@@ -12,10 +12,10 @@
 ## directory for licensing information.\endverbatim
 ##
 ## \brief A very simple CVC4 tutorial example, adapted from helloworld-new.cpp
-import cvc4
-import kinds
+import pycvc4
+from pycvc4 import kinds
 
 if __name__ == "__main__":
-    slv = cvc4.Solver()
-    helloworld = slv.mkVar("Hello World!", slv.getBooleanSort())
+    slv = pycvc4.Solver()
+    helloworld = slv.mkVar(slv.getBooleanSort(), "Hello World!")
     print(helloworld, "is", slv.checkValidAssuming(helloworld))

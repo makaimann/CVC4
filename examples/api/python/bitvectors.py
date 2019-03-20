@@ -14,11 +14,11 @@
  ## \brief A simple demonstration of the solving capabilities of the CVC4
  ## bit-vector solver through the Python API. This is a direct translation
  ## of bitvectors-new.cpp.
-import cvc4
-import kinds
+import pycvc4
+from pycvc4 import kinds
 
 if __name__ == "__main__":
-    slv = cvc4.Solver()
+    slv = pycvc4.Solver()
     slv.setLogic("QF_BV") # Set the logic
     # The following example has been adapted from the book A Hacker's Delight by
     # Henry S. Warren.
@@ -43,9 +43,9 @@ if __name__ == "__main__":
     bitvector32 = slv.mkBitVectorSort(32)
 
     # Variables
-    x = slv.mkVar("x", bitvector32)
-    a = slv.mkVar("a", bitvector32)
-    b = slv.mkVar("b", bitvector32)
+    x = slv.mkVar(bitvector32, "x")
+    a = slv.mkVar(bitvector32, "a")
+    b = slv.mkVar(bitvector32, "b")
 
     # First encode the assumption that x must be equal to a or b
     x_eq_a = slv.mkTerm(kinds.Equal, x, a)
@@ -57,9 +57,9 @@ if __name__ == "__main__":
 
     # Introduce a new variable for the new value of x after assignment.
     # x after executing code (0)
-    new_x = slv.mkVar("new_x", bitvector32)
+    new_x = slv.mkVar(bitvector32, "new_x")
     # x after executing code (1) or (2)
-    new_x_ = slv.mkVar("new_x_", bitvector32)
+    new_x_ = slv.mkVar(bitvector32, "new_x_")
 
     # Encoding code (0)
     # new_x = x == a ? b : a

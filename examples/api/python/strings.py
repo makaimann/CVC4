@@ -14,11 +14,11 @@
 ## \brief A simple demonstration of the solving capabilities of the CVC4
 ## strings solver through the Python API. This is a direct translation
 ## of strings-new.cpp.
-import cvc4
-import kinds
+import pycvc4
+from pycvc4 import kinds
 
 if __name__ == "__main__":
-    slv = cvc4.Solver()
+    slv = pycvc4.Solver()
     # Set the logic
     slv.setLogic("S")
     # Produce models
@@ -37,9 +37,9 @@ if __name__ == "__main__":
     ab  = slv.mkString(str_ab)
     abc = slv.mkString("abc")
     # String variables
-    x = slv.mkVar("x", string)
-    y = slv.mkVar("y", string)
-    z = slv.mkVar("z", string)
+    x = slv.mkVar(string, "x")
+    y = slv.mkVar(string, "y")
+    z = slv.mkVar(string, "z")
 
     # String concatenation: x.ab.y
     lhs = slv.mkTerm(kinds.StringConcat, x, ab, y)
@@ -64,8 +64,8 @@ if __name__ == "__main__":
                  slv.mkTerm(kinds.StringToRegexp, slv.mkString("h")))
 
     # String variables
-    s1 = slv.mkVar("s1", string)
-    s2 = slv.mkVar("s2", string)
+    s1 = slv.mkVar(string, "s1")
+    s2 = slv.mkVar(string, "s2")
     # String concatenation: s1.s2
     s = slv.mkTerm(kinds.StringConcat, s1, s2)
 

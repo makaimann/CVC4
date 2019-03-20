@@ -14,11 +14,11 @@
 ## \brief A simple demonstration of the solving capabilities of the CVC4
 ## linear arithmetic solver through the Python API. This is a direct
 ## translation of linear_arith-new.cpp.
-import cvc4
-import kinds
+import pycvc4
+from pycvc4 import kinds
 
 if __name__ == "__main__":
-    slv = cvc4.Solver()
+    slv = pycvc4.Solver()
     slv.setLogic("QF_LIRA")
 
     # Prove that if given x (Integer) and y (Real) and some constraints
@@ -29,8 +29,8 @@ if __name__ == "__main__":
     integer = slv.getIntegerSort()
 
     # Variables
-    x = slv.mkVar("x", integer)
-    y = slv.mkVar("y", real)
+    x = slv.mkVar(integer, "x")
+    y = slv.mkVar(real, "y")
 
     # Constants
     three = slv.mkReal(3)

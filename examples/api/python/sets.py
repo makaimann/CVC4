@@ -14,11 +14,11 @@
 ## \brief A simple demonstration of the solving capabilities of the CVC4
 ## sets solver through the Python API. This is a direct translation
 ## of sets-new.cpp.
-import cvc4
-import kinds
+import pycvc4
+from pycvc4 import kinds
 
 if __name__ == "__main__":
-    slv = cvc4.Solver()
+    slv = pycvc4.Solver()
 
     # Optionally, set the logic. We need at least UF for equality predicate,
     # integers (LIA) and sets (FS).
@@ -34,9 +34,9 @@ if __name__ == "__main__":
     # Verify union distributions over intersection
     # (A union B) intersection C = (A intersection C) union (B intersection C)
 
-    A = slv.mkVar("A", set_)
-    B = slv.mkVar("B", set_)
-    C = slv.mkVar("C", set_)
+    A = slv.mkVar(set_, "A")
+    B = slv.mkVar(set_, "B")
+    C = slv.mkVar(set_, "C")
 
     unionAB = slv.mkTerm(kinds.Union, A, B)
     lhs = slv.mkTerm(kinds.Intersection, unionAB, C)
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     # Verify emptset is a subset of any set
 
-    A = slv.mkVar("A", set_)
+    A = slv.mkVar(set_, "A")
     emptyset = slv.mkEmptySet(set_)
 
     theorem = slv.mkTerm(kinds.Subset, emptyset, A)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     two_three = slv.mkTerm(kinds.Union, singleton_two, singleton_three)
     intersection = slv.mkTerm(kinds.Intersection, one_two, two_three)
 
-    x = slv.mkVar("x", integer)
+    x = slv.mkVar(integer, "x")
 
     e = slv.mkTerm(kinds.Member, x, intersection)
 

@@ -15,8 +15,8 @@
  ## datatypes solver through the Python API. This is a direct translation
  ## of datatypes-new.cpp.
 
-import cvc4
-import kinds
+import pycvc4
+from pycvc4 import kinds
 
 def test(slv, consListSort):
     # Now our old "consListSpec" is useless--the relevant information
@@ -66,11 +66,11 @@ def test(slv, consListSort):
     # This example builds a simple parameterized list of sort T, with one
     # constructor "cons".
     sort = slv.mkParamSort("T")
-    paramConsListSpec = cvc4.DatatypeDecl("paramlist", sort)
-    paramCons = cvc4.DatatypeConstructorDecl("cons")
-    paramNil = cvc4.DatatypeConstructorDecl("nil")
-    paramHead = cvc4.DatatypeSelectorDecl("head", sort)
-    paramTail = cvc4.DatatypeSelectorDecl("tail", cvc4.DatatypeDeclSelfSort())
+    paramConsListSpec = pycvc4.DatatypeDecl("paramlist", sort)
+    paramCons = pycvc4.DatatypeConstructorDecl("cons")
+    paramNil = pycvc4.DatatypeConstructorDecl("nil")
+    paramHead = pycvc4.DatatypeSelectorDecl("head", sort)
+    paramTail = pycvc4.DatatypeSelectorDecl("tail", pycvc4.DatatypeDeclSelfSort())
     paramCons.addSelector(paramHead)
     paramCons.addSelector(paramTail)
     paramConsListSpec.addConstructor(paramCons)
@@ -95,7 +95,7 @@ def test(slv, consListSort):
 
 
 if __name__ == "__main__":
-    slv = cvc4.Solver()
+    slv = pycvc4.Solver()
 
     # This example builds a simple "cons list" of integers, with
     # two constructors, "cons" and "nil."
@@ -105,14 +105,14 @@ if __name__ == "__main__":
     # Second, it is "resolved" to an actual sort, at which point function
     # symbols are assigned to its constructors, selectors, and testers.
 
-    consListSpec = cvc4.DatatypeDecl("list") # give the datatype a name
-    cons = cvc4.DatatypeConstructorDecl("cons")
-    head = cvc4.DatatypeSelectorDecl("head", slv.getIntegerSort())
-    tail = cvc4.DatatypeSelectorDecl("tail", cvc4.DatatypeDeclSelfSort())
+    consListSpec = pycvc4.DatatypeDecl("list") # give the datatype a name
+    cons = pycvc4.DatatypeConstructorDecl("cons")
+    head = pycvc4.DatatypeSelectorDecl("head", slv.getIntegerSort())
+    tail = pycvc4.DatatypeSelectorDecl("tail", pycvc4.DatatypeDeclSelfSort())
     cons.addSelector(head)
     cons.addSelector(tail)
     consListSpec.addConstructor(cons)
-    nil = cvc4.DatatypeConstructorDecl("nil")
+    nil = pycvc4.DatatypeConstructorDecl("nil")
     consListSpec.addConstructor(nil)
 
     print("spec is {}".format(consListSpec))

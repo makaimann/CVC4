@@ -14,8 +14,8 @@
  ## \brief A simple demonstration of the solving capabilities of the CVC4
  ## combination solver through the Python API. This is a direct translation
  ## of combination-new.cpp.
-import cvc4
-import kinds
+import pycvc4
+from pycvc4 import kinds
 
 def prefixPrintGetValue(slv, t, level=0):
     print("slv.getValue({})".format(slv.getValue(t)))
@@ -23,9 +23,9 @@ def prefixPrintGetValue(slv, t, level=0):
         prefixPrintGetValue(slv, c, level + 1)
 
 if __name__ == "__main__":
-    slv = cvc4.Solver()
+    slv = pycvc4.Solver()
     slv.setOption("produce-models", "true")  # Produce Models
-    slv.setOption("output-language", "cvc4") # Set the output-language to CVC's
+    slv.setOption("output-language", "pycvc4") # Set the output-language to CVC's
     slv.setOption("default-dag-thresh", "0") # Disable dagifying the output
     slv.setOption("output-language", "smt2") # use smt-lib v2 as output language
     slv.setLogic("QF_UFLIRA")
@@ -38,12 +38,12 @@ if __name__ == "__main__":
     intPred = slv.mkFunctionSort(integer, boolean)
 
     # Variables
-    x = slv.mkVar("x", u)
-    y = slv.mkVar("y", u)
+    x = slv.mkVar(u, "x")
+    y = slv.mkVar(u, "y")
 
     # Functions
-    f = slv.mkVar("f", uToInt)
-    p = slv.mkVar("p", intPred)
+    f = slv.mkVar(uToInt, "f")
+    p = slv.mkVar(intPred, "p")
 
     # Constants
     zero = slv.mkReal(0)
