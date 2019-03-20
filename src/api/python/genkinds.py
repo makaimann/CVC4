@@ -55,6 +55,7 @@ r"""# distutils: language = c++
 
 from kinds cimport *
 import sys
+from types import ModuleType
 
 cdef class kind:
     cdef Kind k
@@ -81,9 +82,10 @@ cdef class kind:
         return <int> self.k
 
 # create a kinds submodule
-class Kinds(object):
-    pass
-kinds = Kinds()
+kinds = ModuleType('kinds')
+# fake a submodule for dotted imports, e.g. from pycvc4.kinds import *
+sys.modules['%s.%s'%(__name__, kinds.__name__)] = kinds
+kinds.__file__ = kinds.__name__ + ".py"
 """
 
 KINDS_ATTR_TEMPLATE = \
