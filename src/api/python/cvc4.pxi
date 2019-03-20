@@ -677,22 +677,22 @@ cdef class Solver:
         term.cterm = self.csolver.mkFloatingPoint(exp, sig, val.cterm)
         return term
 
-    def mkVar(self, symbol_or_sort, sort=None):
+    def mkVar(self, Sort sort, symbol=None):
         cdef Term term = Term()
-        if sort is None:
-            term.cterm = self.csolver.mkVar((<Sort?> symbol_or_sort).csort)
+        if symbol is None:
+            term.cterm = self.csolver.mkVar(sort.csort)
         else:
-            term.cterm = self.csolver.mkVar((<str?> symbol_or_sort).encode(),
-                                            (<Sort?> sort).csort)
+            term.cterm = self.csolver.mkVar(sort.csort,
+                                            (<str?> symbol).encode())
         return term
 
-    def mkBoundVar(self, symbol_or_sort, sort=None):
+    def mkBoundVar(self, Sort sort, symbol=None):
         cdef Term term = Term()
-        if sort is None:
-            term.cterm = self.csolver.mkBoundVar((<Sort?> symbol_or_sort).csort)
+        if symbol is None:
+            term.cterm = self.csolver.mkBoundVar(sort.csort)
         else:
-            term.cterm = self.csolver.mkBoundVar(
-                (<str?> symbol_or_sort).encode(), (<Sort?> sort).csort)
+            term.cterm = self.csolver.mkBoundVar(sort.csort,
+                                                 (<str?> symbol).encode())
         return term
 
     def simplify(self, Term t):

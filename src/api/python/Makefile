@@ -1,14 +1,12 @@
-all: kinds solver
+all: kinds pycvc4
 
 kinds:
 	./genkinds.py
-	python setup-kind.py build_ext --inplace
 
-solver:
-	python setup-solver.py build_ext --inplace
+pycvc4:
+	python setup-pycvc4.py build_ext --inplace
 
 clean:
 	rm -rf build
-	rm -f kinds.*
-	rm -f cvc4.cpp
-	rm -f cvc4.cpython-*
+	rm -f pycvc4.cpp
+	rm -f pycvc4.cpython-*

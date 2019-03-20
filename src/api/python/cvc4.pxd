@@ -165,9 +165,11 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkUninterpretedConst(Sort sort, int32_t index) except +
         Term mkAbstractValue(const string& index) except +
         Term mkFloatingPoint(uint32_t exp, uint32_t sig, Term val) except +
-        Term mkVar(const string& symbol, Sort sort) except +
+        Term mkVar(Sort sort, const string& symbol) except +
+        # default value for symbol defined in cvc4cpp.h
         Term mkVar(Sort sort) except +
-        Term mkBoundVar(const string& symbol, Sort sort) except +
+        Term mkBoundVar(Sort sort, const string& symbol) except +
+        # default value for symbol defined in cvc4cpp.h
         Term mkBoundVar(Sort sort) except +
         Term simplify(const Term& t) except +
         void assertFormula(Term term) except +
