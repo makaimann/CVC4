@@ -41,8 +41,18 @@ PreprocessingPassResult BoolToBV::applyInternal(
   unsigned size = assertionsToPreprocess->size();
   for (unsigned i = 0; i < size; ++i)
   {
+    Node origAssertion = (*assertionsToPreprocess)[i];
+    Node rewrittenOrigAssertion = Rewriter::rewrite(origAssertion);
+    Assert(rewrittenOrigAssertion == Rewriter::rewrite(rewrittenOrigAssertion));
+    // debugging rewritten
+    Node newAssertion = lowerAssertion((*assertionsToPreprocess)[i]);
+    // make sure it type checks
+    TypeNode newAssertionType = newAssertion.getType();
+    Node rewritten = Rewriter::rewrite(newAssertion);
+    // this is failing for some reason...
+    Assert(rewritten == Rewriter::rewrite(rewritten));
     assertionsToPreprocess->replace(
-        i, Rewriter::rewrite(lowerAssertion((*assertionsToPreprocess)[i])));
+        i, rewritten);
   }
 
   return PreprocessingPassResult::NO_CONFLICT;
