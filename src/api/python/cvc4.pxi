@@ -156,36 +156,33 @@ cdef class DatatypeDecl:
     def __cinit__(self, str name, sorts_or_bool=None, isCoDatatype=None):
         cdef vector[c_Sort] v
 
-        # encode string as bytes
-        name = name.encode()
-
         # argument cases
         if sorts_or_bool is None and isCoDatatype is None:
-            self.cdd = new c_DatatypeDecl(name)
+            self.cdd = new c_DatatypeDecl(name.encode())
         elif sorts_or_bool is not None and isCoDatatype is None:
             if isinstance(sorts_or_bool, bool):
-                self.cdd = new c_DatatypeDecl(<const string &> name,
+                self.cdd = new c_DatatypeDecl(<const string &> name.encode(),
                                               <bint> sorts_or_bool)
             elif isinstance(sorts_or_bool, Sort):
-                self.cdd = new c_DatatypeDecl(<const string &> name,
+                self.cdd = new c_DatatypeDecl(<const string &> name.encode(),
                                               (<Sort> sorts_or_bool).csort)
             elif isinstance(sorts_or_bool, list):
                 for s in sorts_or_bool:
                     v.push_back((<Sort?> s).csort)
-                self.cdd = new c_DatatypeDecl(<const string &> name,
+                self.cdd = new c_DatatypeDecl(<const string &> name.encode(),
                                               <const vector[c_Sort]&> v)
             else:
                 raise ValueError("Unhandled second argument type {}"
                                  .format(type(sorts_or_bool)))
         elif sorts_or_bool is not None and isCoDatatype is not None:
             if isinstance(sorts_or_bool, Sort):
-                self.cdd = new c_DatatypeDecl(<const string &> name,
+                self.cdd = new c_DatatypeDecl(<const string &> name.encode(),
                                               (<Sort> sorts_or_bool).csort,
                                               <bint> isCoDatatype)
             elif isinstance(sorts_or_bool, list):
                 for s in sorts_or_bool:
                     v.push_back((<Sort?> s).csort)
-                self.cdd = new c_DatatypeDecl(<const string &> name,
+                self.cdd = new c_DatatypeDecl(<const string &> name.encode(),
                                               <const vector[c_Sort]&> v,
                                               <bint> isCoDatatype)
             else:
