@@ -60,6 +60,7 @@ def expand_list_arg(num_req_args=0):
 ### can omit spaces between unrelated oneliners
 ### always use c++ default arguments
 #### only use default args of None at python level
+#### Result class can have default because it's pure python
 
 
 cdef class Datatype:
@@ -609,17 +610,19 @@ cdef class Solver:
     def mkBitVector(self, size_or_str, val = None):
         cdef Term term = Term()
         if isinstance(size_or_str, int):
-            # handle default value
             if val is None:
-                val = 0
-            term.cterm = self.csolver.mkBitVector(<int> size_or_str,
-                                                  <int> val)
+                term.cterm = self.csolver.mkBitVector(<int> size_or_str)
+            else:
+                term.cterm = self.csolver.mkBitVector(<int> size_or_str,
+                                                      <int> val)
         elif isinstance(size_or_str, str):
             # handle default value
             if val is None:
-                val = 2
-            term.cterm = self.csolver.mkBitVector(
-                <const string &> size_or_str.encode(), <int> val)
+                term.cterm = self.csolver.mkBitVector(
+                    <const string &> size_or_str.encode())
+            else:
+                term.cterm = self.csolver.mkBitVector(
+                    <const string &> size_or_str.encode(), <int> val)
         else:
             raise ValueError("Unexpected inputs {} to"
                              " mkBitVector".format((size_or_str, val)))

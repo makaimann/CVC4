@@ -158,6 +158,7 @@ cdef extern from "cvc4cpp.h" namespace "CVC4::api":
         Term mkUniverseSet(Sort sort) except +
         Term mkBitVector(uint32_t size) except +
         Term mkBitVector(uint32_t size, uint64_t val) except +
+        Term mkBitVector(const string& s) except +
         Term mkBitVector(const string& s, uint32_t base) except +
         Term mkPosInf(uint32_t exp, uint32_t sig) except +
         Term mkNegInf(uint32_t exp, uint32_t sig) except +
