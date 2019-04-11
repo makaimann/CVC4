@@ -1014,6 +1014,8 @@ Term::Term(const CVC4::Expr& e) : d_expr(new CVC4::Expr(e)) {}
 
 Term::~Term() {}
 
+std::size_t Term::hash() const { return ExprHashFunction()(*d_expr); }
+
 bool Term::operator==(const Term& t) const { return *d_expr == *t.d_expr; }
 
 bool Term::operator!=(const Term& t) const { return *d_expr != *t.d_expr; }

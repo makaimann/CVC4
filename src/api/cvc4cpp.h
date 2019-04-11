@@ -14,6 +14,9 @@
  ** The CVC4 C++ API.
  **/
 
+// For Generic API
+#include "api/term.h"
+
 #include "cvc4_public.h"
 
 #ifndef __CVC4__API__CVC4CPP_H
@@ -530,7 +533,7 @@ struct CVC4_PUBLIC SortHashFunction
 /**
  * A CVC4 Term.
  */
-class CVC4_PUBLIC Term
+class CVC4_PUBLIC Term : public ::smt::TermAbs
 {
   friend class Datatype;
   friend class DatatypeConstructor;
@@ -556,6 +559,9 @@ class CVC4_PUBLIC Term
    * Destructor.
    */
   ~Term();
+
+  // for generic
+  std::size_t hash() const;
 
   /**
    * Syntactic equality operator.

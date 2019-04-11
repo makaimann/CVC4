@@ -2,6 +2,7 @@
 # Collect libcvc4 source files
 
 libcvc4_add_sources(
+  api/term.h
   api/cvc4cpp.cpp
   api/cvc4cpp.h
   api/cvc4cppkind.h
