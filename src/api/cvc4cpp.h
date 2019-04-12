@@ -561,7 +561,7 @@ class CVC4_PUBLIC Term : public ::smt::TermAbs
   ~Term();
 
   // for generic
-  std::size_t hash() const;
+  std::size_t hash() const override;
 
   /**
    * Syntactic equality operator.
@@ -741,6 +741,13 @@ class CVC4_PUBLIC Term : public ::smt::TermAbs
    * a unique_ptr instead).
    */
   std::shared_ptr<CVC4::Expr> d_expr;
+
+  // for generic api
+  bool equal(::smt::TermAbs& absterm) const override
+  {
+    Term* tp = static_cast<Term*>(&absterm);
+    return *this == *tp;
+  }
 };
 
 /**
