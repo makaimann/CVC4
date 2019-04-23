@@ -733,6 +733,13 @@ class CVC4_PUBLIC Term : public ::smt::TermAbs
   // to the new API. !!!
   CVC4::Expr getExpr(void) const;
 
+  // for generic api
+  bool term_equal(::smt::TermAbs* absterm) const override
+  {
+    Term* tp = static_cast<Term*>(absterm);
+    return *this == *tp;
+  }
+
  private:
   /**
    * The internal expression wrapped by this term.
@@ -741,13 +748,6 @@ class CVC4_PUBLIC Term : public ::smt::TermAbs
    * a unique_ptr instead).
    */
   std::shared_ptr<CVC4::Expr> d_expr;
-
-  // for generic api
-  bool equal(::smt::TermAbs& absterm) const override
-  {
-    Term* tp = static_cast<Term*>(&absterm);
-    return *this == *tp;
-  }
 };
 
 /**
