@@ -2,7 +2,7 @@
 /*! \file clausal_bitvector_proof.h
  ** \verbatim
  ** Top contributors (to current version):
- **   Alex Ozdemir
+ **   Alex Ozdemir, Mathias Preiner
  ** This file is part of the CVC4 project.
  ** Copyright (c) 2009-2019 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
@@ -18,8 +18,8 @@
 
 #include "cvc4_private.h"
 
-#ifndef __CVC4__PROOF__CLAUSAL_BITVECTOR_PROOF_H
-#define __CVC4__PROOF__CLAUSAL_BITVECTOR_PROOF_H
+#ifndef CVC4__PROOF__CLAUSAL_BITVECTOR_PROOF_H
+#define CVC4__PROOF__CLAUSAL_BITVECTOR_PROOF_H
 
 #include <iostream>
 #include <sstream>
@@ -135,4 +135,4 @@ class LfscErBitVectorProof : public LfscClausalBitVectorProof
 
 }  // namespace CVC4
 
-#endif /* __CVC4__PROOF__CLAUSAL_BITVECTOR_PROOF_H */
+#endif /* CVC4__PROOF__CLAUSAL_BITVECTOR_PROOF_H */

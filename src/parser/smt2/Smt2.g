@@ -4,7 +4,7 @@
  ** Top contributors (to current version):
  **   Morgan Deters, Andrew Reynolds, Tim King
  ** This file is part of the CVC4 project.
- ** Copyright (c) 2009-2018 by the authors listed in the file AUTHORS
+ ** Copyright (c) 2009-2019 by the authors listed in the file AUTHORS
  ** in the top-level source directory) and their institutional affiliations.
  ** All rights reserved.  See the file COPYING in the top-level source
  ** directory for licensing information.\endverbatim
@@ -1886,7 +1886,8 @@ termNonVariable[CVC4::Expr& expr, CVC4::Expr& expr2]
       Kind lassocKind = CVC4::kind::UNDEFINED_KIND;
       if (args.size() >= 2)
       {
-        if (kind == CVC4::kind::INTS_DIVISION)
+        if (kind == CVC4::kind::INTS_DIVISION
+            || (kind == CVC4::kind::BITVECTOR_XNOR && PARSER_STATE->v2_6()))
         {
           // Builtin operators that are not tokenized, are left associative,
           // but not internally variadic must set this.
@@ -2306,8 +2307,8 @@ termAtomic[CVC4::api::Term& atomTerm]
       sortSymbol[type,CHECK_DECLARED]
       sortSymbol[type2,CHECK_DECLARED]
       {
-        api::Term v1 = SOLVER->mkVar(api::Sort(type), "_emp1");
-        api::Term v2 = SOLVER->mkVar(api::Sort(type2), "_emp2");
+        api::Term v1 = SOLVER->mkConst(api::Sort(type), "_emp1");
+        api::Term v2 = SOLVER->mkConst(api::Sort(type2), "_emp2");
         atomTerm = SOLVER->mkTerm(api::SEP_EMP, v1, v2);
       }
 
