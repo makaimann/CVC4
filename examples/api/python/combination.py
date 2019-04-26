@@ -38,12 +38,12 @@ if __name__ == "__main__":
     intPred = slv.mkFunctionSort(integer, boolean)
 
     # Variables
-    x = slv.mkVar(u, "x")
-    y = slv.mkVar(u, "y")
+    x = slv.mkConst(u, "x")
+    y = slv.mkConst(u, "y")
 
     # Functions
-    f = slv.mkVar(uToInt, "f")
-    p = slv.mkVar(intPred, "p")
+    f = slv.mkConst(uToInt, "f")
+    p = slv.mkConst(intPred, "p")
 
     # Constants
     zero = slv.mkReal(0)
