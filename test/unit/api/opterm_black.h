@@ -171,6 +171,6 @@ void OpTermBlack::testGetIndicesExceptions()
   OpTerm floatingpoint_to_fp_generic_ot = d_solver.mkOpTerm(FLOATINGPOINT_TO_FP_GENERIC_OP, 4, 25);
   TS_ASSERT_THROWS(floatingpoint_to_fp_generic_ot.getIndices<std::string>(), CVC4ApiException&);
 
-  uint32_t bitvector_repeat_idx = bitvector_repeat_ot.getIndices<uint32_t>();
-  TS_ASSERT_THROWS(bitvector_repeat_ot.getIndices<std::pair<uint32_t, uint32_t>>(), CVC4ApiException&);
+  OpTerm bitvector_repeat_ot = d_solver.mkOpTerm(BITVECTOR_REPEAT_OP, 5);
+  TS_ASSERT_THROWS((bitvector_repeat_ot.getIndices<std::pair<uint32_t, uint32_t>>()), CVC4ApiException&);
 }
