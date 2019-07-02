@@ -572,7 +572,8 @@ void TermBlack::testOpTermOperator()
   TS_ASSERT(ext40x.hasOperator());
   TS_ASSERT(ext40x.hasOpTermOperator());
   TS_ASSERT(!ext40x.hasBuiltinOperator());
-  std::pair<uint32_t, uint32_t> indices = ext40x.getOpTerm().getIndices<std::pair<uint32_t, uint32_t>>();
+  std::pair<uint32_t, uint32_t> indices =
+      ext40x.getOpTerm().getIndices<std::pair<uint32_t, uint32_t>>();
   TS_ASSERT_EQUALS(indices.first, 4);
   TS_ASSERT_EQUALS(indices.second, 0);
 }
@@ -591,4 +592,3 @@ void TermBlack::testUFOperator()
   TS_ASSERT(!fx.hasOpTermOperator());
   TS_ASSERT_EQUALS(fx.getUF(), f);
 }
-
