@@ -24,6 +24,7 @@ addons:
   - libgmp-dev
   - libhamcrest-java
   - openjdk-8-jdk
+  - python3
   - swig3.0
 before_install:
  - eval "${MATRIX_EVAL}"
