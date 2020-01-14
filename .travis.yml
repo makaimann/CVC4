@@ -46,7 +46,6 @@ script:
  - ${CC} --version
  - ${CXX} --version
  - python -m pip install Cython
- - python3 -m pip install Cython
  - |
    echo "travis_fold:start:load_script"
    normal="$(echo -e '\033[0m')" red="$normal$(echo -e '\033[01;31m')" green="$normal$(echo -e '\033[01;32m')"
@@ -114,9 +113,6 @@ matrix:
     - compiler: gcc
       env:
         - TRAVIS_CVC4=yes TRAVIS_WITH_LFSC=yes TRAVIS_CVC4_CONFIG="debug --python-bindings --python2"
-    - compiler: gcc
-      env:
-        - TRAVIS_CVC4=yes TRAVIS_WITH_LFSC=yes TRAVIS_CVC4_CONFIG="debug --python-bindings --python3"
 
     #
     # Test with Clang
