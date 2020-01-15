@@ -237,9 +237,9 @@ cdef class OpTerm:
 
     def __richcmp__(self, OpTerm other, int op):
         if op == Py_EQ:
-            return self.copterm == other.copterm
+            return (<c_OpTerm> self.copterm) == (<c_OpTerm> other.copterm)
         elif op == Py_NE:
-            return self.copterm != other.copterm
+            return (<c_OpTerm> self.copterm) != (<c_OpTerm> other.copterm)
         else:
             raise NotImplementedError('OpTerms can only be compared for '
                                       'equality or disequality')
