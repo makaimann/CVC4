@@ -6,6 +6,8 @@ from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
+from cpython.object cimport Py_EQ, Py_NE
+
 from cvc4 cimport cout
 from cvc4 cimport Datatype as c_Datatype
 from cvc4 cimport DatatypeConstructor as c_DatatypeConstructor
@@ -233,11 +235,14 @@ cdef class OpTerm:
     def __cinit__(self):
         self.copterm = c_OpTerm()
 
-    def __eq__(self, OpTerm other):
-        return self.copterm == other.copterm
-
-    def __ne__(self, OpTerm other):
-        return self.copterm != other.copterm
+    def __richcmp__(self, OpTerm other, int op):
+        if op == Py_EQ:
+            return self.copterm == other.copterm
+        elif op == Py_NE:
+            return self.copterm != other.copterm
+        else:
+            raise NotImplementedError('OpTerms can only be compared for '
+                                      'equality or disequality')
 
     def __str__(self):
         return self.copterm.toString().decode()
@@ -342,11 +347,14 @@ cdef class RoundingMode:
         self.crm = <c_RoundingMode> rm
         self.name = __rounding_modes[rm]
 
-    def __eq__(self, RoundingMode other):
-        return (<int> self.crm) == (<int> other.crm)
-
-    def __ne__(self, RoundingMode other):
-        return not self.__eq__(other)
+    def __richcmp__(self, RoundingMode other, int op):
+        if op == Py_EQ:
+            return (<int> self.crm) == (<int> other.crm)
+        elif op == Py_NE:
+            return (<int> self.crm) != (<int> other.crm)
+        else:
+            raise NotImplementedError('RoundingModes can only be compared for '
+                                      'equality or disequality')
 
     def __hash__(self):
         return hash((<int> self.crm, self.name))
@@ -977,11 +985,14 @@ cdef class Sort:
         # csort always set by Solver
         pass
 
-    def __eq__(self, Sort other):
-        return self.csort == other.csort
-
-    def __ne__(self, Sort other):
-        return self.csort != other.csort
+    def __richcmp__(self, Sort other, int op):
+        if op == Py_EQ:
+            return self.csort == other.csort
+        elif op == Py_NE:
+            return self.csort != other.csort
+        else:
+            raise NotImplementedError('Sorts can only be compared for '
+                                      'equality or disequality')
 
     def __str__(self):
         return self.csort.toString().decode()
@@ -1072,11 +1083,14 @@ cdef class Term:
         # cterm always set in the Solver object
         pass
 
-    def __eq__(self, Term other):
-        return self.cterm == other.cterm
-
-    def __ne__(self, Term other):
-        return self.cterm != other.cterm
+    def __richcmp__(self, Term other, int op):
+        if op == Py_EQ:
+            return self.cterm == other.cterm
+        elif op == Py_NE:
+            return self.cterm != other.cterm
+        else:
+            raise NotImplementedError('Terms can only be compared for '
+                                      'equality or disequality')
 
     def __str__(self):
         return self.cterm.toString().decode()
