@@ -45,7 +45,8 @@ script:
  - ccache -z
  - ${CC} --version
  - ${CXX} --version
- - python -m pip install Cython
+ - python -m pip install Cython==0.27
+ - cython --version
  - |
    echo "travis_fold:start:load_script"
    normal="$(echo -e '\033[0m')" red="$normal$(echo -e '\033[01;31m')" green="$normal$(echo -e '\033[01;32m')"
