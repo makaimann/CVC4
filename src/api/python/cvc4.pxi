@@ -987,9 +987,9 @@ cdef class Sort:
 
     def __richcmp__(self, Sort other, int op):
         if op == Py_EQ:
-            return self.csort == other.csort
+            return (<c_Sort> self.csort) == (<c_Sort> other.csort)
         elif op == Py_NE:
-            return self.csort != other.csort
+            return (<c_Sort> self.csort) != (<c_Sort> other.csort)
         else:
             raise NotImplementedError('Sorts can only be compared for '
                                       'equality or disequality')
@@ -1085,9 +1085,9 @@ cdef class Term:
 
     def __richcmp__(self, Term other, int op):
         if op == Py_EQ:
-            return self.cterm == other.cterm
+            return (<c_Term> self.cterm) == (<c_Term> other.cterm)
         elif op == Py_NE:
-            return self.cterm != other.cterm
+            return (<c_Term> self.cterm) != (<c_Term> other.cterm)
         else:
             raise NotImplementedError('Terms can only be compared for '
                                       'equality or disequality')
