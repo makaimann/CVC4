@@ -17,7 +17,6 @@ addons:
   - antlr3
   - cmake
   - cxxtest
-  - cython
   - junit4
   - libantlr3c-dev
   - libcln-dev
