@@ -75,14 +75,11 @@ cdef class kind:
     def __cinit__(self, str name):
         self.name = name
 
-    def __richcmp__(self, kind other, int op):
-        if op == Py_EQ:
-            return (<int> self.k) == (<int> other.k)
-        elif op == Py_NE:
-            return (<int> self.k) != (<int> other.k)
-        else:
-            raise NotImplementedError('Kinds can only be compared for '
-                                      'equality or disequality')
+    def __eq__(self, kind other):
+        return (<int> self.k) == (<int> other.k)
+
+    def __ne__(self, kind other):
+        return (<int> self.k) != (<int> other.k)
 
     def __hash__(self):
         return hash((<int> self.k, self.name))
