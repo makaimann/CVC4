@@ -24,6 +24,7 @@ addons:
   - libhamcrest-java
   - openjdk-8-jdk
   - python3
+  - python3-pip
   - swig3.0
 before_install:
  - eval "${MATRIX_EVAL}"
@@ -44,8 +45,8 @@ script:
  - ccache -z
  - ${CC} --version
  - ${CXX} --version
- - sudo python -m pip install Cython==0.29
- - cython --version
+ - sudo python -m pip install Cython==0.29 --install-option="--no-cython-compile"
+ - sudo python3 -m pip install Cython==0.29 --install-option="--no-cython-compile"
  - |
    echo "travis_fold:start:load_script"
    normal="$(echo -e '\033[0m')" red="$normal$(echo -e '\033[01;31m')" green="$normal$(echo -e '\033[01;32m')"
@@ -113,7 +114,9 @@ matrix:
     - compiler: gcc
       env:
         - TRAVIS_CVC4=yes TRAVIS_WITH_LFSC=yes TRAVIS_CVC4_CONFIG="debug --python-bindings --python2"
-
+    - compiler: gcc
+      env:
+        - TRAVIS_CVC4=yes TRAVIS_WITH_LFSC=yes TRAVIS_CVC4_CONFIG="debug --python-bindings --python3"
     #
     # Test with Clang
     - compiler: clang
