@@ -114,10 +114,10 @@ matrix:
     # Test python bindings
     - compiler: gcc
       env:
-        - TRAVIS_CVC4=yes TRAVIS_WITH_LFSC=yes TRAVIS_CVC4_CONFIG="debug --python-bindings --python2"
+        - TRAVIS_CVC4=yes TRAVIS_WITH_LFSC=yes TRAVIS_CVC4_CONFIG="production --python-bindings --python2"
     - compiler: gcc
       env:
-        - TRAVIS_CVC4=yes TRAVIS_WITH_LFSC=yes TRAVIS_CVC4_CONFIG="debug --python-bindings --python3"
+        - TRAVIS_CVC4=yes TRAVIS_WITH_LFSC=yes TRAVIS_CVC4_CONFIG="production --python-bindings --python3"
     #
     # Test with Clang
     - compiler: clang
