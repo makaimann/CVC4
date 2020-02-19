@@ -40,7 +40,7 @@ PreprocessingPassResult BoolToBV::applyInternal(
 
   unsigned size = assertionsToPreprocess->size();
 
-  if (options::boolToBitvector() == BOOL_TO_BV_ALL)
+  if (options::boolToBitvector() == options::BoolToBVMode::ALL)
   {
     for (unsigned i = 0; i < size; ++i)
     {
@@ -48,7 +48,7 @@ PreprocessingPassResult BoolToBV::applyInternal(
       assertionsToPreprocess->replace(i, Rewriter::rewrite(newAssertion));
     }
   }
-  else if (options::boolToBitvector() == BOOL_TO_BV_ITE)
+  else if (options::boolToBitvector() == options::BoolToBVMode::ITE)
   {
     for (unsigned i = 0; i < size; ++i)
     {
@@ -366,7 +366,7 @@ void BoolToBV::rebuildNode(const TNode& n, Kind new_kind)
                       << " and new_kind = " << kindToString(new_kind)
                       << std::endl;
 
-  if ((options::boolToBitvector() == BOOL_TO_BV_ALL) && (new_kind != k))
+  if ((options::boolToBitvector() == options::BoolToBVMode::ALL) && (new_kind != k))
   {
     ++(d_statistics.d_numTermsLowered);
   }
