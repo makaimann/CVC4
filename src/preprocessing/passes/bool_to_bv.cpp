@@ -403,7 +403,7 @@ BoolToBV::Statistics::Statistics()
           "preprocessing::passes::BoolToBV::NumTermsForcedLowered", 0)
 {
   smtStatisticsRegistry()->registerStat(&d_numIteToBvite);
-  if (options::boolToBitvector() == BOOL_TO_BV_ALL)
+  if (options::boolToBitvector() == options::BoolToBVMode::ALL)
   {
     // these statistics wouldn't be correct in the ITE mode,
     // because it might discard rebuilt nodes if it fails to
@@ -416,7 +416,7 @@ BoolToBV::Statistics::Statistics()
 BoolToBV::Statistics::~Statistics()
 {
   smtStatisticsRegistry()->unregisterStat(&d_numIteToBvite);
-  if (options::boolToBitvector() == BOOL_TO_BV_ALL)
+  if (options::boolToBitvector() == options::BoolToBVMode::ALL)
   {
     smtStatisticsRegistry()->unregisterStat(&d_numTermsLowered);
     smtStatisticsRegistry()->unregisterStat(&d_numTermsForcedLowered);
