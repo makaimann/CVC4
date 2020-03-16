@@ -41,8 +41,8 @@ before_install:
 before_script:
   export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 script:
- - ccache -M 1G
- - ccache -z
+ # - ccache -M 1G
+ # - ccache -z
  - ${CC} --version
  - ${CXX} --version
  - sudo ${TRAVIS_PYTHON} -m pip install toml
