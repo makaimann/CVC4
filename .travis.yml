@@ -47,6 +47,7 @@ script:
  - ${CXX} --version
  - sudo ${TRAVIS_PYTHON} -m pip install toml
  - sudo ${TRAVIS_PYTHON} -m pip install Cython==0.29 --install-option="--no-cython-compile"
+ - ./contrib/get-antlr-3.4
  - |
    echo "travis_fold:start:load_script"
    normal="$(echo -e '\033[0m')" red="$normal$(echo -e '\033[01;31m')" green="$normal$(echo -e '\033[01;32m')"
