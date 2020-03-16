@@ -108,45 +108,53 @@ script:
 matrix:
   fast_finish: true
   include:
-    # Test with GCC
-    - compiler: gcc
+    # Test Mac
+    - os: osx
+      osx_image: xcode10.2
       env:
         - TRAVIS_CVC4=yes
-        - TRAVIS_WITH_LFSC=yes
-        - TRAVIS_CVC4_PYTHON_BINDINGS=no
-        - TRAVIS_CVC4_CONFIG="production --language-bindings=java --lfsc"
-        - TRAVIS_PYTHON=python
-    - compiler: gcc
-      env:
-        - TRAVIS_CVC4=yes
-        - TRAVIS_WITH_LFSC=yes
-        - TRAVIS_CVC4_PYTHON_BINDINGS=no
-        - TRAVIS_CVC4_CONFIG="debug --symfpu --lfsc --no-debug-symbols"
-        - TRAVIS_PYTHON=python
-    # Test python bindings
-    - compiler: gcc
-      env:
-        - TRAVIS_CVC4=yes
-        - TRAVIS_WITH_LFSC=yes
         - TRAVIS_CVC4_PYTHON_BINDINGS=yes
-        - TRAVIS_CVC4_CONFIG="production --python-bindings --python2"
-        - TRAVIS_PYTHON=python
-    - compiler: gcc
-      env:
-        - TRAVIS_CVC4=yes
-        - TRAVIS_WITH_LFSC=yes
-        - TRAVIS_CVC4_PYTHON_BINDINGS=yes
-        - TRAVIS_CVC4_CONFIG="production --python-bindings --python3"
         - TRAVIS_PYTHON=python3
-    #
-    # Test with Clang
-    - compiler: clang
-      env:
-        - TRAVIS_CVC4=yes
-        - TRAVIS_WITH_LFSC=yes
-        - TRAVIS_CVC4_PYTHON_BINDINGS=no
-        - TRAVIS_CVC4_CONFIG="debug --symfpu --cln --gpl --no-debug-symbols --no-proofs"
-        - TRAVIS_PYTHON=python
+        - TRAVIS_CVC4_CONFIG="production --python-bindings --python3"
+    # # Test with GCC
+    # - compiler: gcc
+    #   env:
+    #     - TRAVIS_CVC4=yes
+    #     - TRAVIS_WITH_LFSC=yes
+    #     - TRAVIS_CVC4_PYTHON_BINDINGS=no
+    #     - TRAVIS_CVC4_CONFIG="production --language-bindings=java --lfsc"
+    #     - TRAVIS_PYTHON=python
+    # - compiler: gcc
+    #   env:
+    #     - TRAVIS_CVC4=yes
+    #     - TRAVIS_WITH_LFSC=yes
+    #     - TRAVIS_CVC4_PYTHON_BINDINGS=no
+    #     - TRAVIS_CVC4_CONFIG="debug --symfpu --lfsc --no-debug-symbols"
+    #     - TRAVIS_PYTHON=python
+    # # Test python bindings
+    # - compiler: gcc
+    #   env:
+    #     - TRAVIS_CVC4=yes
+    #     - TRAVIS_WITH_LFSC=yes
+    #     - TRAVIS_CVC4_PYTHON_BINDINGS=yes
+    #     - TRAVIS_CVC4_CONFIG="production --python-bindings --python2"
+    #     - TRAVIS_PYTHON=python
+    # - compiler: gcc
+    #   env:
+    #     - TRAVIS_CVC4=yes
+    #     - TRAVIS_WITH_LFSC=yes
+    #     - TRAVIS_CVC4_PYTHON_BINDINGS=yes
+    #     - TRAVIS_CVC4_CONFIG="production --python-bindings --python3"
+    #     - TRAVIS_PYTHON=python3
+    # #
+    # # Test with Clang
+    # - compiler: clang
+    #   env:
+    #     - TRAVIS_CVC4=yes
+    #     - TRAVIS_WITH_LFSC=yes
+    #     - TRAVIS_CVC4_PYTHON_BINDINGS=no
+    #     - TRAVIS_CVC4_CONFIG="debug --symfpu --cln --gpl --no-debug-symbols --no-proofs"
+    #     - TRAVIS_PYTHON=python
 notifications:
   email:
     on_success: change
