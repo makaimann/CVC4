@@ -868,6 +868,9 @@ target_include_directories(cvc4 PUBLIC $<BUILD_INTERFACE:${GMP_INCLUDE_DIR}>)
 #       RT_LIBRARIES should be empty for glibc >= 2.17
 target_link_libraries(cvc4 ${RT_LIBRARIES})
 
+# add -Wshadow warning check
+target_compile_options(cvc4 PRIVATE -Wshadow -Wimplicit-fallthrough)
+
 #-----------------------------------------------------------------------------#
 # Visit main subdirectory after creating target cvc4. For target main, we have
 # to manually add library dependencies since we can't use
