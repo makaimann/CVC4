@@ -13,6 +13,7 @@ jobs:
         os: [ubuntu-18.04]
     env:
       # only build for cpython3
+      CIBW_ENVIRONMENT: "PIP_NO_CLEAN=1"
       CIBW_BUILD: cp3*
       CIBW_SKIP: cp35*
       CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64
