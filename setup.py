@@ -29,8 +29,5 @@ setup(
     packages=['pycvc4'],
     package_dir={
         'pycvc4': 'src/api/pycvc4'},
-    # want the install directory to be outside of the _skbuild dir
-    # which might get automatically removed by pip wheel
-    cmake_install_dir='../../../skbuild-cvc4-install',
     cmake_args=['-DBUILD_BINDINGS_PYTHON=ON', '-DBUILD_LIB_ONLY=ON']
 )
