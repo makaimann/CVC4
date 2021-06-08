@@ -125,20 +125,29 @@ execute_process(OUTPUT_VARIABLE IN_VIRTUALENV
   "from __future__ import print_function; import os;
 print('YES' if 'VIRTUAL_ENV' in os.environ else 'NO', end='')")
 
-set(INSTALL_CMD
+if (SKBUILD)
+  # if building a wheel with scikit-build, then just put the
+  # files in the right place
+  install(TARGETS pycvc5 LIBRARY DESTINATION src/api/pycvc5)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pycvc5/__init__.py
+          DESTINATION src/api/pycvc5)
+else()
+  # otherwise, installation depends on whether in virtualenv or not
+  set(INSTALL_CMD
     "${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install")
-# if we're in a virtualenv, we install it in the virtualenv lib location
-# otherwise install in site-packages
-# option --single-version-externally-managed prevents it from being
-# an .egg distribution and --record records the list of installed files
-if ("${IN_VIRTUALENV}" STREQUAL "NO")
-  set(INSTALL_CMD "${INSTALL_CMD}
+
+  # if we're in a virtualenv, we install it in the virtualenv lib location
+  # otherwise install in site-packages
+  # option --single-version-externally-managed prevents it from being
+  # an .egg distribution and --record records the list of installed files
+  if ("${IN_VIRTUALENV}" STREQUAL "NO")
+    set(INSTALL_CMD "${INSTALL_CMD}
           --prefix=${CMAKE_INSTALL_PREFIX}
           --single-version-externally-managed
           --record=pycvc5-installed-files.txt")
+  endif()
+
+  message("Python bindings install command: ${INSTALL_CMD}")
+  install(CODE "execute_process(COMMAND ${INSTALL_CMD})"
+    FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 endif()
-
-message("Python bindings install command: ${INSTALL_CMD}")
-
-install(CODE "execute_process(COMMAND ${INSTALL_CMD})"
-        FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
